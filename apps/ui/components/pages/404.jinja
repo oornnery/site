@@ -1,0 +1,23 @@
+{#def title="Page not found", brand="oornnery", message=None, home_href="/", home_label="Back to home", request=None #}
+
+{#import "@ui/layouts/site.jinja" as Site #}
+{#import "@ui/ui/card.jinja" as Card #}
+{#import "@ui/ui/button.jinja" as Button #}
+
+<Site title={{ title }} brand={{ brand }}>
+  <Card
+    title="404"
+    description={{ message or "We couldn't find the page you were looking for." }}
+  >
+    {% if request %}
+      <p class="text-sm text-muted-foreground">
+        Requested URL: <code>{{ request.url.path }}</code>
+      </p>
+    {% endif %}
+
+    <div class="mt-4 flex gap-2">
+      <Button href={{ home_href }} variant="primary">{{ home_label }}</Button>
+      <Button href="/api/healthz" variant="outline">healthz</Button>
+    </div>
+  </Card>
+</Site>

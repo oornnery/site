@@ -1,0 +1,3 @@
+web:   uv run --package web   -- uvicorn web.main:app   --reload --port 8000 --host 0.0.0.0
+blog:  uv run --package blog  -- uvicorn blog.main:app  --reload --port 8001 --host 0.0.0.0
+admin: uv run --package admin -- uvicorn admin.main:app --reload --port 8002 --host 0.0.0.0

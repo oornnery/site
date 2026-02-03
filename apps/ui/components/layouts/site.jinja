@@ -1,0 +1,28 @@
+{#css https://cdn.jsdelivr.net/npm/basecoat-css@0.3.10/dist/basecoat.cdn.min.css #}
+{#js https://cdn.jsdelivr.net/npm/basecoat-css@0.3.10/dist/js/all.min.js #}
+{#def title="Site", lang="pt-BR", description=None, navbar_links=None, brand=None #}
+
+{#import "@ui/ui/navbar.jinja" as Navbar #}
+{#import "@ui/ui/footer.jinja" as Footer #}
+
+<!doctype html>
+<html lang="{{ lang }}" class="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title }}</title>
+    {% if description %}<meta name="description" content="{{ description }}" />{% endif %}
+
+    {{ assets.render_css() }}
+  </head>
+  <body class="min-h-screen">
+    <Navbar brand={{ brand or title }} links={{ navbar_links or [] }} />
+
+    <main class="container mx-auto max-w-5xl p-6">
+      {{ content }}
+    </main>
+
+    <Footer />
+    {{ assets.render_js(module=False) }}
+  </body>
+</html>

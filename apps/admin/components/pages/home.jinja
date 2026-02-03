@@ -1,0 +1,25 @@
+{#import "layouts/admin.jinja" as AdminLayout #}
+{#import "@ui/ui/card.jinja" as Card #}
+{#import "@ui/ui/button.jinja" as Button #}
+
+<AdminLayout
+  title="Admin"
+  brand="admin.oornnery.com.br"
+  sidebar_items=[
+    {"href": "/", "label": "Dashboard"},
+    {"href": "/coming-soon", "label": "Posts"},
+    {"href": "/coming-soon", "label": "Páginas"},
+    {"href": "/coming-soon", "label": "Configurações"},
+  ]
+>
+  <Card title="Dashboard" description="Status geral do sistema">
+    <p style="margin: 0 0 12px 0; opacity:.8;">
+      Esse é o esqueleto do Admin usando layout com sidebar + UI compartilhada via <code>@ui/</code>.
+    </p>
+
+    <div style="display:flex; gap: 8px; align-items:center;">
+      <Button href="/coming-soon" variant="outline" size="sm">Gerenciar posts</Button>
+      <Button href="/coming-soon" variant="ghost" size="sm">Configurações</Button>
+    </div>
+  </Card>
+</AdminLayout>

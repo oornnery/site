@@ -1,0 +1,18 @@
+{#def title=None, description=None, footer=None #}
+
+<div class="card">
+  {% if title or description %}
+    <header>
+      {% if title %}<h2>{{ title }}</h2>{% endif %}
+      {% if description %}<p>{{ description }}</p>{% endif %}
+    </header>
+  {% endif %}
+
+  <section>
+    {{ content }}
+  </section>
+
+  {% if footer %}
+    <footer>{{ footer }}</footer>
+  {% endif %}
+</div>

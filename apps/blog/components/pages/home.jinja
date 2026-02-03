@@ -1,0 +1,23 @@
+{#import "@ui/layouts/site.jinja" as Site #}
+{#import "@ui/ui/card.jinja" as Card #}
+{#import "@ui/ui/button.jinja" as Button #}
+
+<Site
+  title="Blog Home"
+  brand="blog.oornnery.com.br"
+  navbar_links=[
+    {"href": request.url_for("blog.home"), "label": "Home"},
+    {"href": "/api/healthz", "label": "API"},
+  ]
+>
+  <Card title="Bem-vindo" description="JX + FastAPI + Basecoat">
+    <p class="text-sm text-muted-foreground">
+      Minimal example with UI shared via <code>@ui/</code>.
+    </p>
+
+    <div class="mt-4 flex gap-2">
+      <Button href="/api/healthz" variant="outline">healthz</Button>
+      <Button href="/coming-soon" variant="primary">view posts</Button>
+    </div>
+  </Card>
+</Site>

@@ -1,0 +1,15 @@
+{#def brand="App", links=None #}
+{% set links = links or [] %}
+
+<header class="border-b">
+  <div class="container mx-auto max-w-5xl flex items-center justify-between p-4">
+    <a class="font-semibold" href="/">{{ brand }}</a>
+    <nav class="flex items-center gap-2">
+      {% for item in links %}
+        <a class="btn-ghost btn-sm" href="{{ item.href if item.href is defined else item['href'] }}">
+          {{ item.label if item.label is defined else item['label'] }}
+        </a>
+      {% endfor %}
+    </nav>
+  </div>
+</header>

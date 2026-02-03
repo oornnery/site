@@ -1,0 +1,11 @@
+{#def type="text", value=None, placeholder=None, invalid=False #}
+{% do attrs.prepend_class("input") %}
+
+<input {{
+  attrs.render(
+    type=type,
+    value=value if value is not none else False,
+    placeholder=placeholder if placeholder is not none else False,
+    aria_invalid="true" if invalid else False
+  )
+}} />

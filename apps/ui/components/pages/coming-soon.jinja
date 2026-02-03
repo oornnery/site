@@ -1,0 +1,23 @@
+{#def title="Page under construction", brand="oornnery", message=None, home_href="/", home_label="Back to home", request=None #}
+
+{#import "@ui/layouts/site.jinja" as Site #}
+{#import "@ui/ui/card.jinja" as Card #}
+{#import "@ui/ui/button.jinja" as Button #}
+
+<Site title={{ title }} brand={{ brand }}>
+  <Card
+    title="Coming soon"
+    description={{ message or "This page is not implemented yet." }}
+  >
+    {% if request %}
+      <p class="text-sm text-muted-foreground">
+        Requested URL: <code>{{ request.url.path }}</code>
+      </p>
+    {% endif %}
+
+    <div class="mt-4 flex gap-2">
+      <Button href={{ home_href }} variant="primary">{{ home_label }}</Button>
+      <Button href="/api/healthz" variant="outline">healthz</Button>
+    </div>
+  </Card>
+</Site>

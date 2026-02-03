@@ -848,7 +848,11 @@ name = "site"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "fastapi", extra = ["standard"] },
+    { name = "jinja2" },
     { name = "jx" },
+    { name = "python-multipart" },
+    { name = "uvicorn", extra = ["standard"] },
 ]
 
 [package.dev-dependencies]
@@ -863,7 +867,13 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "jx", specifier = ">=0.5.1" }]
+requires-dist = [
+    { name = "fastapi", extras = ["standard"], specifier = ">=0.128.0" },
+    { name = "jinja2", specifier = ">=3.1.6" },
+    { name = "jx", specifier = ">=0.5.1" },
+    { name = "python-multipart", specifier = ">=0.0.22" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.40.0" },
+]
 
 [package.metadata.requires-dev]
 dev = [

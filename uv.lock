@@ -847,6 +847,9 @@ wheels = [
 name = "site"
 version = "0.1.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "jx" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -860,6 +863,7 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "jx", specifier = ">=0.5.1" }]
 
 [package.metadata.requires-dev]
 dev = [

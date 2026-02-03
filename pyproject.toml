@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "My personal site"
 readme = "README.md"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "jx>=0.5.1",
+]
 
 [tool.uv.workspace]
 members = [

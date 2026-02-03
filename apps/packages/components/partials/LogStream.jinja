@@ -1,0 +1,16 @@
+{#def service_id=None #}
+
+<div
+  x-data="{ log: '', es: null }"
+  x-init="
+    es = new EventSource(`/healthz/logs/stream?service_id=${service_id}`);
+    es.onmessage = (e) => { log = (e.data + '\n') + log; };
+  "
+  x-on:beforeunload.window="if (es) es.close()"
+>
+  <textarea
+    class="mt-2 h-40 w-full resize-none rounded-lg border border-zinc-200 bg-white p-3 font-mono text-xs text-zinc-800 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
+    readonly
+    x-text="log || 'Loading logs...'"
+  ></textarea>
+</div>

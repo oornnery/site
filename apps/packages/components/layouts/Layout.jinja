@@ -1,0 +1,78 @@
+{#import "@ui/layouts/Content.jinja" as Content #}
+{#import "@ui/layouts/Footer.jinja" as Footer #}
+{#import "@ui/layouts/Navbar.jinja" as Navbar #}
+{#import "@ui/partials/Breadcrumb.jinja" as Breadcrumb #}
+{#def 
+  title="Fabio Souza",
+  lang="en",
+  description="My personal website",
+  navbar_links=None,
+  brand=None,
+  breadcrumb=None
+#}
+
+<!doctype html>
+<html lang="{{ lang }}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  {# SEO meta description #}
+  {% if description %}
+    <meta name="description" content="{{ description }}" />
+  {% endif %}
+  <title>{{ title }}</title>
+  
+  {# CDN for tailwindcss + HTMX + Alpine #}
+  <script>
+    tailwind = { config: { darkMode: 'class' } };
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  <script src="https://unpkg.com/idiomorph@0.3.0/dist/idiomorph-ext.min.js"></script>
+  <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+  <style>[x-cloak]{ display:none !important; }</style>
+</head>
+
+<body
+  class="flex min-h-screen flex-col bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
+  hx-ext="morph"
+  x-data="{ dark: false }"
+  x-init="
+    const saved = localStorage.getItem('theme');
+    dark = saved ? saved === 'dark' : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const root = document.documentElement;
+    if (dark) root.classList.add('dark');
+    $watch('dark', v => {
+      if (v) root.classList.add('dark'); else root.classList.remove('dark');
+      localStorage.setItem('theme', v ? 'dark' : 'light');
+    });
+  "
+>
+  <Navbar brand={{ brand or title }} links={{ navbar_links }} />
+
+  <Content>
+    <div class="mx-auto w-full max-w-6xl px-4 py-4">
+      {# “flash” atualizado via hx-swap-oob no /actions/confirm #}
+      <div id="flash" class="mb-6"></div>
+      {% if breadcrumb %}
+        <Breadcrumb items={{ breadcrumb }} />
+      {% endif %}
+      {{ content }}
+    </div>
+  </Content>
+
+  <Footer brand={{ brand or title }} />
+
+  {# Portal onde o HTMX injeta modais #}
+  <div id="modal-portal"></div>
+
+  <script>
+    // Alpine não inicializa automaticamente em HTML injetado por HTMX:
+    // então re-inicializamos a árvore após swaps.
+    document.body.addEventListener('htmx:afterSwap', (e) => {
+      if (window.Alpine) window.Alpine.initTree(e.target);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{#import "@ui/layouts/Layout.jinja" as Layout #}
+{#import "@ui/partials/ConfirmCard.jinja" as ConfirmCard #}
+{#def title="Home" #}
+
+<Layout
+  title={{ title }}
+  breadcrumb={{ [
+    {'label': 'Home', 'href': '/'}
+  ] }}
+>
+  <section class="grid gap-6" aria-labelledby="home-title">
+    <h1 id="home-title" class="text-xl font-semibold tracking-tight">
+      Home
+    </h1>
+
+    <ConfirmCard />
+  </section>
+</Layout>

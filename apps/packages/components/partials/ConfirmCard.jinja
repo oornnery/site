@@ -1,0 +1,35 @@
+{#import "@ui/ui/Card.jinja" as Card #}
+{#import "@ui/ui/Button.jinja" as Button #}
+{#def
+  title="Confirmação",
+  subtitle="Card com botão que abre um Modal (HTMX + Alpine)",
+  modal_href="/partials/confirm-modal",
+  error_href="/error"
+#}
+
+<Card title={{ title }} subtitle={{ subtitle }}>
+  <p class="text-sm text-zinc-700 dark:text-zinc-300">
+    Clique no botão para carregar o modal via HTMX e controlar abrir/fechar via Alpine.
+  </p>
+
+  <div class="mt-4 flex flex-wrap items-center gap-2">
+    <Button
+      variant="primary"
+      hx-get={{ modal_href }}
+      hx-target="#modal-portal"
+      hx-swap="innerHTML"
+      aria_controls="modal-portal"
+    >
+      Abrir modal
+    </Button>
+
+    <Button variant="secondary" href={{ error_href }}>
+      Ver página de erro
+    </Button>
+  </div>
+
+  <div class="mt-4 text-sm text-zinc-600 dark:text-zinc-400">
+    Resultado:
+    <span class="font-medium" id="result">(nada ainda)</span>
+  </div>
+</Card>

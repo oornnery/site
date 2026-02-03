@@ -7,8 +7,9 @@ from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from apps.ui.catalog import UI_STATIC_DIR, build_catalog
-from apps.ui.api.router import register_not_found_handler
+from apps.packages.catalog import UI_STATIC_DIR, build_catalog
+from apps.packages.api.router import register_not_found_handler
+from apps.packages.api.router import router as pkgs_api_router
 from .api.router import router as api_router
 from .web.router import router as web_router
 
@@ -41,6 +42,7 @@ def create_app() -> FastAPI:
     # Routers
     app.include_router(api_router)
     app.include_router(web_router)
+    app.include_router(pkgs_api_router)
     register_not_found_handler(
         app,
         title="Admin - Page not found",

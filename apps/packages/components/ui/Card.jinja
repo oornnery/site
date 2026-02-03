@@ -1,0 +1,20 @@
+{#def title="", subtitle="" #}
+
+<article {{ attrs.render(class="rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-950") }}>
+  {% if title or subtitle %}
+    <header class="border-b border-zinc-200 px-5 py-4 dark:border-zinc-800">
+      {% if title %}
+        <h2 class="text-base font-semibold">{{ title }}</h2>
+      {% endif %}
+      {% if subtitle %}
+        <p class="mt-1 text-sm text-slate-600">{{ subtitle }}</p>
+      {% endif %}
+    </header>
+  {% endif %}
+
+  <section class="px-5 py-4">
+    {{ content }}
+  </section>
+
+  {% slot footer %}{% endslot %}
+</article>

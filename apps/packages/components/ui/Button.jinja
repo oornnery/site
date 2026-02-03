@@ -1,0 +1,32 @@
+{#def variant="primary", size="md", href="", type="button" #}
+
+{% set base =
+  "inline-flex items-center justify-center gap-2 rounded-md font-medium transition " ~
+  "focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 " ~
+  "disabled:opacity-50 disabled:pointer-events-none"
+%}
+
+{% set variants = {
+  "primary": "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-white",
+  "secondary": "bg-zinc-100 text-zinc-900 hover:bg-zinc-200 dark:bg-zinc-900 dark:text-zinc-100 dark:hover:bg-zinc-800",
+  "ghost": "bg-transparent text-zinc-700 hover:bg-zinc-100 dark:text-zinc-200 dark:hover:bg-zinc-900",
+  "danger": "bg-rose-600 text-white hover:bg-rose-500 dark:bg-rose-500 dark:hover:bg-rose-400"
+} %}
+
+{% set sizes = {
+  "sm": "h-9 px-3 text-sm",
+  "md": "h-10 px-4 text-sm",
+  "lg": "h-11 px-5 text-base"
+} %}
+
+{% set cls = base ~ " " ~ variants.get(variant, variants["primary"]) ~ " " ~ sizes.get(size, sizes["md"]) %}
+
+{% if href %}
+  <a {{ attrs.render(class=cls, href=href) }}>
+    {{ content }}
+  </a>
+{% else %}
+  <button {{ attrs.render(class=cls, type=type) }}>
+    {{ content }}
+  </button>
+{% endif %}

@@ -1,0 +1,32 @@
+{#import "@ui/layouts/Layout.jinja" as Layout #}
+{#import "@ui/ui/Card.jinja" as Card #}
+{#import "@ui/ui/Button.jinja" as Button #}
+{#def
+  title="Erro",
+  error_title="Erro",
+  message=None,
+  back_href="/",
+  home_href="/",
+  home_label="Go to Home"
+#}
+
+<Layout title={{ title }}>
+  <section class="grid place-items-center" aria-labelledby="error-title">
+    <div class="w-full max-w-2xl">
+      <h1 id="error-title" class="sr-only">{{ error_title }}</h1>
+
+      <Card title={{ error_title }} subtitle="Página de erro padrão">
+        <p class="text-sm text-slate-700">{{ message or "An error has occurred." }}</p>
+
+        <div class="mt-6 flex flex-wrap gap-2">
+          <Button variant="primary" href={{ back_href }}>
+            Voltar
+          </Button>
+          <Button variant="ghost" href={{ home_href }}>
+            {{ home_label }}
+          </Button>
+        </div>
+      </Card>
+    </div>
+  </section>
+</Layout>

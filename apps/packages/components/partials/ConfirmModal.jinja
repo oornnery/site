@@ -1,0 +1,28 @@
+{#import "@ui/ui/Modal.jinja" as Modal #}
+{#import "@ui/ui/Button.jinja" as Button #}
+
+<Modal title="Confirm Action" open=true>
+  <div class="space-y-3">
+    <p class="text-sm text-slate-700 dark:text-slate-200">
+      Are you sure you want to proceed with this action?
+    </p>
+    <p class="text-xs text-slate-500 dark:text-slate-400">
+      OK does a POST via HTMX; Cancel just closes (Alpine).
+    </p>
+  </div>
+
+  {% slot actions %}
+    <Button variant="secondary" x_on:click="open = false">
+      Cancel
+    </Button>
+
+    <Button
+      variant="primary"
+      hx-post="/actions/confirm"
+      hx-target="#modal-portal"
+      hx-swap="innerHTML"
+    >
+      OK
+    </Button>
+  {% endslot %}
+</Modal>

@@ -1,4 +1,11 @@
-{#def title="Page under construction", brand="oornnery", message=None, home_href="/", home_label="Back to home", request=None #}
+{#def
+  title="Page not found",
+  brand="oornnery",
+  message="We couldn't find the page you were looking for.",
+  home_href="/",
+  home_label="Back to home",
+  request=None
+#}
 
 {#import "@ui/layouts/site.jinja" as Site #}
 {#import "@ui/ui/card.jinja" as Card #}
@@ -6,16 +13,16 @@
 
 <Site title={{ title }} brand={{ brand }}>
   <Card
-    title="Coming soon"
-    description={{ message or "This page is not implemented yet." }}
+    title="404"
+    description={{ message }}
   >
     {% if request %}
-      <p class="text-sm text-muted-foreground">
+      <p class="ui-muted">
         Requested URL: <code>{{ request.url.path }}</code>
       </p>
     {% endif %}
 
-    <div class="mt-4 flex gap-2">
+    <div class="ui-actions">
       <Button href={{ home_href }} variant="primary">{{ home_label }}</Button>
       <Button href="/api/healthz" variant="outline">healthz</Button>
     </div>

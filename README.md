@@ -170,7 +170,7 @@ Defined in `apps/packages/api/router.py`, available to all apps:
 
 ## TODO
 
-### Portfolio (port 8000)
+### Portfolio
 
 - [ ] "About" page with bio and photo
 - [ ] Project list with cards
@@ -178,8 +178,9 @@ Defined in `apps/packages/api/router.py`, available to all apps:
 - [ ] Skills/technologies section
 - [ ] Social links and contact info
 - [ ] Per-page SEO meta tags
+- [ ] "Contact" page with form to contact
 
-### Blog (port 8001)
+### Blog
 
 - [ ] Post model (title, slug, content, date, tags)
 - [ ] Post list with pagination
@@ -188,9 +189,9 @@ Defined in `apps/packages/api/router.py`, available to all apps:
 - [ ] Tag filtering
 - [ ] RSS/Atom feed
 
-### Admin (port 8002)
+### Admin
 
-- [ ] Authentication (login/logout)
+- [ ] Authentication (login/logout) with github and user/pass
 - [ ] Blog post CRUD
 - [ ] Content editor (Markdown)
 - [ ] Image upload
@@ -199,7 +200,7 @@ Defined in `apps/packages/api/router.py`, available to all apps:
 
 ### Infrastructure
 
-- [ ] Database (SQLModel + aiosqlite or PostgreSQL)
+- [ ] Database (SQLModel + aiosqlite)
 - [ ] Migrations (Alembic)
 - [ ] Environment variables (.env)
 - [ ] Docker / docker-compose

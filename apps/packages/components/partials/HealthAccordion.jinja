@@ -1,7 +1,7 @@
 {#import "@ui/partials/HealthAccordionItem.jinja" as HealthAccordionItem #}
 {#def services=[] #}
 
-<div class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+<div id="healthz-accordion" class="overflow-hidden rounded-xl border border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
   <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
     {% for s in services %}
       <HealthAccordionItem service={{ s }} />

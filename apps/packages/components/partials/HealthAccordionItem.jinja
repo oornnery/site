@@ -3,6 +3,7 @@
 {#def service=None #}
 
 <div
+  id="healthz-item-{{ service.id }}"
   class="px-4 py-3"
   x-data="{
     open: false,
@@ -23,7 +24,10 @@
       else { this.disconnect(); this.logs = ''; }
     }
   }"
-  @htmx:before-swap.window="disconnect()"
+  @htmx:before-swap.window="
+    var t = $event.detail.target;
+    if (t && t.id !== 'healthz-summary' && !t.closest('#healthz-summary')) disconnect();
+  "
 >
   <button
     type="button"

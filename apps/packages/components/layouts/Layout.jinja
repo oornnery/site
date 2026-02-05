@@ -21,10 +21,10 @@
   {% endif %}
   <title>{{ title }}</title>
 
-  <script>
-    tailwind = { config: { darkMode: 'class' } };
-  </script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   <script src="https://unpkg.com/idiomorph@0.3.0/dist/idiomorph-ext.min.js"></script>
   <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
@@ -66,7 +66,14 @@
 
   <script>
     document.body.addEventListener('htmx:afterSwap', (e) => {
-      if (window.Alpine) window.Alpine.initTree(e.target);
+      if (!window.Alpine) return;
+      // Skip Alpine re-init for morph swaps (Idiomorph preserves Alpine state)
+      var elt = e.detail.requestConfig && e.detail.requestConfig.elt;
+      if (elt) {
+        var swap = elt.getAttribute('hx-swap') || '';
+        if (swap.indexOf('morph') === 0) return;
+      }
+      window.Alpine.initTree(e.target);
     });
   </script>
 </body>

@@ -36,7 +36,7 @@ Three independent FastAPI apps under `apps/` share code via `apps/packages/`:
 
 Every app follows the same layout:
 
-```
+```bash
 apps/<app>/
 ├── app.py           # create_app() factory
 ├── api/router.py    # REST endpoints under /api
@@ -53,6 +53,7 @@ Built in `apps/packages/catalog.py`. Shared components live in `apps/packages/co
 Render from Python: `catalog.render("@ui/pages/Home.jinja", title="My Title")`
 
 Shared component tree:
+
 - `layouts/` — Layout (base HTML), Navbar (sticky header), Footer, Content
 - `pages/` — Home (hello world), Error (404 centered), Health (live status dashboard)
 - `partials/` — Breadcrumb, ThemeToggle, Toast (OOB), HealthSummary, HealthAccordion, HealthAccordionItem
@@ -61,6 +62,7 @@ Shared component tree:
 ### Shared API Routes (`apps/packages/api/router.py`)
 
 Endpoints available to all apps:
+
 - `/api/healthz` — per-app health check (each app's own `api/router.py`)
 - `/healthz/summary` — aggregated health across all 3 apps (HTMX partial, polls every 10s)
 - `/healthz/logs?service_id=X` — single health check for a service

@@ -1,18 +1,38 @@
 {#import "@ui/layouts/Layout.jinja" as Layout #}
-{#import "@ui/partials/ConfirmCard.jinja" as ConfirmCard #}
-{#def title="Home" #}
+{#import "@ui/ui/Card.jinja" as Card #}
+{#import "@ui/ui/Button.jinja" as Button #}
+{#import "@ui/ui/Badge.jinja" as Badge #}
+{#def
+  title="Home",
+  brand=None,
+  heading="Hello, World!",
+  description="Your app is running and ready to go."
+#}
 
 <Layout
   title={{ title }}
-  breadcrumb={{ [
-    {'label': 'Home', 'href': '/'}
-  ] }}
+  brand={{ brand or title }}
+  breadcrumb={{ [{'label': 'Home', 'href': '/'}] }}
 >
   <section class="grid gap-6" aria-labelledby="home-title">
-    <h1 id="home-title" class="text-xl font-semibold tracking-tight">
-      Home
-    </h1>
+    <div class="flex items-center gap-3">
+      <h1 id="home-title" class="text-2xl font-bold tracking-tight">
+        {{ heading }}
+      </h1>
+      <Badge tone="success">Online</Badge>
+    </div>
 
-    <ConfirmCard />
+    <Card>
+      <div class="space-y-4">
+        <p class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">
+          {{ description }}
+        </p>
+        <div class="flex gap-2">
+          <Button variant="secondary" size="sm" href="/status">
+            View status
+          </Button>
+        </div>
+      </div>
+    </Card>
   </section>
 </Layout>

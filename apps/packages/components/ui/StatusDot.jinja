@@ -1,7 +1,6 @@
 {#def ok=false #}
 
 <span
-  class="inline-flex h-2.5 w-2.5 rounded-full"
-  class={{ "bg-emerald-500 dark:bg-emerald-400" if ok else "bg-rose-500 dark:bg-rose-400" }}
+  class="inline-flex h-2.5 w-2.5 rounded-full {{ 'bg-emerald-500 dark:bg-emerald-400' if ok else 'bg-rose-500 dark:bg-rose-400' }}"
   aria-hidden="true"
 ></span>

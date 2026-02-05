@@ -2,10 +2,10 @@
 {#import "@ui/layouts/Footer.jinja" as Footer #}
 {#import "@ui/layouts/Navbar.jinja" as Navbar #}
 {#import "@ui/partials/Breadcrumb.jinja" as Breadcrumb #}
-{#def 
+{#def
   title="Fabio Souza",
   lang="en",
-  description="My personal website",
+  description="",
   navbar_links=None,
   brand=None,
   breadcrumb=None
@@ -16,13 +16,11 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  {# SEO meta description #}
   {% if description %}
     <meta name="description" content="{{ description }}" />
   {% endif %}
   <title>{{ title }}</title>
-  
-  {# CDN for tailwindcss + HTMX + Alpine #}
+
   <script>
     tailwind = { config: { darkMode: 'class' } };
   </script>
@@ -35,7 +33,7 @@
 </head>
 
 <body
-  class="flex min-h-screen flex-col bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
+  class="flex min-h-screen flex-col bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50"
   hx-ext="morph"
   x-data="{ dark: false }"
   x-init="
@@ -52,9 +50,7 @@
   <Navbar brand={{ brand or title }} links={{ navbar_links }} />
 
   <Content>
-    <div class="mx-auto w-full max-w-6xl px-4 py-4">
-      {# “flash” atualizado via hx-swap-oob no /actions/confirm #}
-      <div id="flash" class="mb-6"></div>
+    <div class="mx-auto w-full max-w-6xl px-4 py-6">
       {% if breadcrumb %}
         <Breadcrumb items={{ breadcrumb }} />
       {% endif %}
@@ -64,12 +60,11 @@
 
   <Footer brand={{ brand or title }} />
 
-  {# Portal onde o HTMX injeta modais #}
+  {# Portals for HTMX-injected content #}
   <div id="modal-portal"></div>
+  <div id="toast-portal"></div>
 
   <script>
-    // Alpine não inicializa automaticamente em HTML injetado por HTMX:
-    // então re-inicializamos a árvore após swaps.
     document.body.addEventListener('htmx:afterSwap', (e) => {
       if (window.Alpine) window.Alpine.initTree(e.target);
     });

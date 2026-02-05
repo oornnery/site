@@ -3,11 +3,10 @@
 {#import "@ui/ui/Button.jinja" as Button #}
 {#def
   title="Service health",
-  brand="oornnery",
+  brand=None,
   summary_url="/healthz/summary",
   request=None
 #}
-
 
 <Layout
   title={{ title }}
@@ -17,33 +16,35 @@
     {'label': 'Status'}
   ] }}
 >
-  <Card title="Health checks" description="Live status (aggregated) from services">
-    <div class="flex items-center justify-between gap-3">
-      <p class="text-sm text-slate-600 dark:text-slate-300">
-        Updates automatically. Click on “Logs” for details.
-      </p>
-
+  <section class="grid gap-6" aria-labelledby="health-title">
+    <div class="flex items-center justify-between">
+      <h1 id="health-title" class="text-2xl font-bold tracking-tight">Status</h1>
       <Button
         variant="secondary"
+        size="sm"
         hx-get={{ summary_url }}
         hx-target="#healthz-summary"
         hx-swap="innerHTML"
       >
-        Update now
+        Refresh
       </Button>
     </div>
 
-    <div
-      id="healthz-summary"
-      class="mt-4"
-      hx-get={{ summary_url }}
-      hx-trigger="load, every 10s"
-      hx-swap="morph:innerHTML"
-    >
-      <div class="text-sm text-slate-500">Loading status...</div>
-    </div>
-  </Card>
-
-  {# Portal de modal #}
-  <div id="modal-portal"></div>
+    <Card>
+      <div
+        id="healthz-summary"
+        hx-get={{ summary_url }}
+        hx-trigger="load, every 10s"
+        hx-swap="morph:innerHTML"
+      >
+        <div class="flex items-center gap-2 py-8 text-sm text-zinc-500">
+          <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+          </svg>
+          Loading status...
+        </div>
+      </div>
+    </Card>
+  </section>
 </Layout>

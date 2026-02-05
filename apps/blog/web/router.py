@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 
-
 router = APIRouter()
 
 
@@ -11,5 +10,8 @@ async def home(request: Request):
     return catalog.render(
         "@ui/pages/Home.jinja",
         globals={"request": request},
-        title="Blog Home",
+        title="Blog",
+        brand="Blog",
+        heading="Blog",
+        description="Welcome to the blog. Start writing your posts here.",
     )

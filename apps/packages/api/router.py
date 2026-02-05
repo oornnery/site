@@ -17,10 +17,10 @@ SERVICES = [
     {"id": "admin", "name": "Admin", "url": "http://localhost:8002"},
 ]
 
+
 async def fetch_health(client: httpx.AsyncClient, svc: dict) -> dict:
     try:
         r = await client.get(svc["url"] + "/api/healthz", timeout=2.5)
-        data = {}
         try:
             data = r.json()
         except Exception:
@@ -45,50 +45,57 @@ async def fetch_health(client: httpx.AsyncClient, svc: dict) -> dict:
 
 
 @router.get("/healthz/summary", response_class=HTMLResponse)
-async def health_summary(_: Request) -> HTMLResponse:
+async def health_summary(request: Request) -> HTMLResponse:
     async with httpx.AsyncClient(headers={"user-agent": "healthz-aggregator"}) as client:
         services = await asyncio.gather(*[fetch_health(client, s) for s in SERVICES])
 
-    catalog = _.app.state.catalog
-    html = catalog.render("@ui/partials/HealthSummary.jinja", services=services)
-    return HTMLResponse(html)
-
-
-@router.get("/healthz/modal", response_class=HTMLResponse)
-async def health_modal(service_id: str) -> HTMLResponse:
-    svc = next((s for s in SERVICES if s["id"] == service_id), None)
-    if not svc:
-        return HTMLResponse("Service not found", status_code=404)
-
-    # reaproveita o fetch para renderizar status atual no modal
-    async with httpx.AsyncClient() as client:
-        service = await fetch_health(client, svc)
-
     catalog = request.app.state.catalog
-    html = catalog.render("@ui/partials/HealthModal.jinja", service=service)
+    html = catalog.render("@ui/partials/HealthSummary.jinja", services=services)
     return HTMLResponse(html)
 
 
 @router.get("/healthz/logs", response_class=PlainTextResponse)
 async def health_logs(service_id: str) -> PlainTextResponse:
-    # aqui você decide de onde vem log:
-    # - arquivo / tail / redis / api do serviço / etc
-    # Vou simular:
+    svc = next((s for s in SERVICES if s["id"] == service_id), None)
+    if not svc:
+        return PlainTextResponse(f"Service '{service_id}' not found\n", status_code=404)
+
+    async with httpx.AsyncClient() as client:
+        result = await fetch_health(client, svc)
+
     now = datetime.now().isoformat(timespec="seconds")
-    text = f"[{now}] {service_id}: sample log line...\n"
+    status = "OK" if result["ok"] else result["status_text"]
+    text = f"[{now}] {service_id}: status={status} code={result['code']}\n"
     return PlainTextResponse(text)
 
 
 @router.get("/healthz/logs/stream")
 async def health_logs_stream(service_id: str) -> StreamingResponse:
+    svc = next((s for s in SERVICES if s["id"] == service_id), None)
+
     async def event_stream():
         while True:
-            now = datetime.now().isoformat(timespec="seconds")
-            line = f"[{now}] {service_id}: sample log line..."
+            if svc:
+                async with httpx.AsyncClient() as client:
+                    result = await fetch_health(client, svc)
+                now = datetime.now().isoformat(timespec="seconds")
+                status = "OK" if result["ok"] else result["status_text"]
+                line = f'[{now}] {service_id}: {{"status": "{status}", "code": {result["code"]}, "datetime": "{result["datetime"] or now}"}}'
+            else:
+                now = datetime.now().isoformat(timespec="seconds")
+                line = f"[{now}] {service_id}: service not found"
             yield f"data: {line}\n\n"
-            await asyncio.sleep(2)
+            await asyncio.sleep(3)
 
-    return StreamingResponse(event_stream(), media_type="text/event-stream")
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
 
 
 @router.get("/status", response_class=HTMLResponse)
@@ -101,39 +108,6 @@ async def status_page(request: Request) -> HTMLResponse:
         summary_url="/healthz/summary",
     )
     return HTMLResponse(html)
-
-
-@router.get("/partials/confirm-modal", response_class=HTMLResponse)
-async def confirm_modal(_: Request) -> HTMLResponse:
-    catalog = _.app.state.catalog
-    html = catalog.render("@ui/partials/ConfirmModal.jinja")
-    return HTMLResponse(html)
-
-
-@router.post("/actions/confirm", response_class=HTMLResponse)
-async def confirm_action(_: Request) -> HTMLResponse:
-    catalog = _.app.state.catalog
-    toast = catalog.render("@ui/partials/Toast.jinja", message="Ação confirmada com sucesso.")
-    html = (
-        "<div id=\"modal-portal\" hx-swap-oob=\"true\"></div>"
-        + toast
-        + "<span id=\"result\" hx-swap-oob=\"true\" class=\"font-medium\">confirmado</span>"
-    )
-    return HTMLResponse(html)
-
-
-@router.get("/error", response_class=HTMLResponse)
-async def error_page(request: Request) -> HTMLResponse:
-    catalog = request.app.state.catalog
-    html = catalog.render(
-        "@ui/pages/Error.jinja",
-        globals={"request": request},
-        title="Erro",
-        error_title="Erro",
-        error_message="Página de erro padrão",
-        back_href="/",
-    )
-    return HTMLResponse(html, status_code=400)
 
 
 def register_not_found_handler(

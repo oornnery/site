@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from apps.packages.catalog import UI_STATIC_DIR, build_catalog
+from apps.packages.catalog import build_catalog
 from apps.packages.api.router import register_not_found_handler
 from apps.packages.api.router import router as pkgs_api_router
 from .api.router import router as api_router
@@ -23,23 +23,17 @@ def create_app() -> FastAPI:
 
     app = FastAPI(title="portfolio", debug=debug)
 
-    # Static: ui + app (mount ui first so /static/ui resolves correctly)
-    if UI_STATIC_DIR.exists():
-        app.mount("/static/ui", StaticFiles(directory=str(UI_STATIC_DIR)), name="static-ui")
     if STATIC_DIR.exists():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-    # JX catalog no app.state
     app.state.catalog = build_catalog(
         app_components_dir=COMPONENTS_DIR,
         debug=debug,
         site_name="portfolio",
     )
 
-    # Middlewares
     app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-    # Routers
     app.include_router(api_router)
     app.include_router(web_router)
     app.include_router(pkgs_api_router)
@@ -47,7 +41,6 @@ def create_app() -> FastAPI:
         app,
         title="Portfolio - Page not found",
         brand="Portfolio",
-        message="Sorry, the page you are looking for does not exist.",
         home_route_name="portfolio.home",
     )
 
@@ -55,8 +48,3 @@ def create_app() -> FastAPI:
 
 
 app = create_app()
-
-if __name__ == "__main__":
-    import uvicorn
-
-    uvicorn.run("apps.portfolio.app:app", host="localhost", port=8000, reload=True)

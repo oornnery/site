@@ -8,7 +8,6 @@ from jx import Catalog
 
 UI_DIR = Path(__file__).resolve().parent
 UI_COMPONENTS_DIR = UI_DIR / "components"
-UI_STATIC_DIR = UI_DIR / "static"
 
 
 def build_catalog(*, app_components_dir: Path | None = None, debug: bool = False, **globals: Any) -> Catalog:

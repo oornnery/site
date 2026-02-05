@@ -2,29 +2,35 @@
 {#import "@ui/ui/Card.jinja" as Card #}
 {#import "@ui/ui/Button.jinja" as Button #}
 {#def
-  title="Erro",
-  error_title="Erro",
-  message=None,
+  title="Error",
+  brand=None,
+  error_title="Page not found",
+  message="The page you are looking for does not exist.",
   back_href="/",
   home_href="/",
   home_label="Go to Home"
 #}
 
-<Layout title={{ title }}>
-  <section class="grid place-items-center" aria-labelledby="error-title">
-    <div class="w-full max-w-2xl">
-      <h1 id="error-title" class="sr-only">{{ error_title }}</h1>
+<Layout title={{ title }} brand={{ brand }}>
+  <section class="flex min-h-[50vh] items-center justify-center">
+    <div class="w-full max-w-md text-center">
+      <div class="mb-6">
+        <span class="text-6xl font-bold text-zinc-200 dark:text-zinc-800">404</span>
+      </div>
 
-      <Card title={{ error_title }} subtitle="Página de erro padrão">
-        <p class="text-sm text-slate-700">{{ message or "An error has occurred." }}</p>
+      <Card>
+        <div class="space-y-4">
+          <h1 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ error_title }}</h1>
+          <p class="text-sm text-zinc-600 dark:text-zinc-400">{{ message }}</p>
 
-        <div class="mt-6 flex flex-wrap gap-2">
-          <Button variant="primary" href={{ back_href }}>
-            Voltar
-          </Button>
-          <Button variant="ghost" href={{ home_href }}>
-            {{ home_label }}
-          </Button>
+          <div class="flex flex-wrap justify-center gap-2 pt-2">
+            <Button variant="primary" href={{ home_href }} size="sm">
+              {{ home_label }}
+            </Button>
+            <Button variant="ghost" href={{ back_href }} size="sm">
+              Go back
+            </Button>
+          </div>
         </div>
       </Card>
     </div>

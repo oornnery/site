@@ -120,7 +120,7 @@ All spacing values are multiples of 4px via Tailwind's default scale.
 
 ### Container Pattern
 
-```
+```txt
 max-w-{size} mx-auto w-full px-4
 ```
 
@@ -171,7 +171,7 @@ max-w-{size} mx-auto w-full px-4
 
 ### Decision Tree
 
-```
+```txt
 Interactive element? → rounded-md
 Inner container?     → rounded-lg
 Card / panel?        → rounded-xl
@@ -190,7 +190,7 @@ Pill / circle?       → rounded-full
 | `shadow-lg` | Dropdowns, popovers    | Raised     |
 | `shadow-xl` | Modals, overlays       | Overlay    |
 
-```
+```txt
 Ground → Surface (sm) → Floating (md) → Raised (lg) → Overlay (xl)
 ```
 
@@ -213,7 +213,7 @@ Ground → Surface (sm) → Floating (md) → Raised (lg) → Overlay (xl)
 
 ### Rings (Badges, focus)
 
-```
+```txt
 ring-1 ring-inset ring-{color}-200 dark:ring-{color}-700
 ```
 
@@ -247,7 +247,7 @@ ring-1 ring-inset ring-{color}-200 dark:ring-{color}-700
 **Enter** (appearing): `ease-out`, 150-200ms
 **Leave** (disappearing): `ease-in`, 100-150ms
 
-```
+```txt
 Slide up:   translate-y-2 → translate-y-0  (toast, dropdown)
 Slide down: -translate-y-1 → translate-y-0 (accordion, panel)
 Fade:       opacity-0 → opacity-100
@@ -429,7 +429,7 @@ Size:      text-sm
 
 ### ThemeToggle
 
-```
+```txt
 Icons:     Sun (dark mode visible) / Moon (light mode visible)
 Size:      h-9 w-9 button, h-5 w-5 icon
 Visibility: dark:block / dark:hidden CSS toggle
@@ -441,7 +441,7 @@ Visibility: dark:block / dark:hidden CSS toggle
 
 ### Page Grid
 
-```
+```bash
 ┌──────────────────────────────────────┐
 │ Navbar (sticky, z-40, backdrop-blur) │
 ├──────────────────────────────────────┤

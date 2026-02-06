@@ -5,6 +5,9 @@ My personal site
 ## Internal
 
 - [Design System](design-system.md) — Colors, spacing, components, tokens, flow diagrams
+- [UI References](ui-references.md) — Screenshot mapping and target routes for the current refactor
+- [Migration From portfolio-old](migration-from-portfolio-old.md) — Mapping from old monolith to the new multi-app architecture
+- [Implementation Plan (100%)](implementation-100-plan.md) — Full backend/frontend roadmap to complete the project
 
 ## Backend
 

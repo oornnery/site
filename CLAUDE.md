@@ -153,24 +153,46 @@ Adding new settings:
 
 Use these as domain-specific playbooks:
 
-- `jx.md` -> JX fundamentals.
-- `jx-components.md` -> project-specific component catalog and conventions.
-- `jx-htmx.md` -> HTMX interaction patterns.
-- `jx-alpine.md` -> Alpine state and interaction patterns.
-- `jx-sse.md` -> SSE implementation patterns.
-- `jx-init-project.md` -> JX project scaffolding reference.
-- `fastapi.md` -> FastAPI best practices.
-- `fastapi-security.md` -> FastAPI security patterns.
-- `design-system.md` -> design tokens and UI consistency conventions.
+- `.claude/skills/SKILL.md` -> Python baseline conventions, uv toolchain, and validation flow.
+- `.claude/skills/jx/SKILL.md` -> JX fundamentals, bootstrap, and route/page documentation standard.
+- `.claude/skills/fastapi/SKILL.md` -> FastAPI implementation and endpoint-contract standards.
+- `.claude/skills/pytest/SKILL.md` -> pytest workflow, gates, coverage, and failure triage.
+- `.claude/skills/httpx/SKILL.md` -> outbound HTTP client patterns.
+- `.claude/skills/typer/SKILL.md` -> Typer CLI patterns.
+
+JX companions:
+
+- `.claude/skills/jx/components.md`
+- `.claude/skills/jx/htmx.md`
+- `.claude/skills/jx/alpine.md`
+- `.claude/skills/jx/sse.md`
+- `.claude/skills/jx/formidable.md`
+- `.claude/skills/jx/pydantic-forms.md`
+- `.claude/skills/jx/bff.md`
+
+FastAPI companions:
+
+- `.claude/skills/fastapi/security.md`
+- `.claude/skills/fastapi/rate-limiting.md`
+- `.claude/skills/fastapi/sqlmodel.md`
+- `.claude/skills/fastapi/pydantic.md`
+- `.claude/skills/fastapi/faststream.md`
 
 How to pick skills by task:
 
-- Layout/component work -> `jx-components.md` + `design-system.md`
-- Dynamic UI flows without heavy custom JS -> `jx-htmx.md` + `jx-alpine.md`
-- Real-time updates/log streams -> `jx-sse.md`
-- New API/backend work -> `fastapi.md`
-- Auth/security hardening -> `fastapi-security.md`
-- Core component syntax/usage -> `jx.md`
+- Any Python task -> `.claude/skills/SKILL.md` first.
+- Layout/component work -> `.claude/skills/jx/SKILL.md` + `.claude/skills/jx/components.md`
+- Dynamic UI flows without heavy custom JS -> `.claude/skills/jx/htmx.md` + `.claude/skills/jx/alpine.md`
+- Real-time updates/log streams -> `.claude/skills/jx/sse.md`
+- Forms with server validation -> `.claude/skills/jx/formidable.md` or `.claude/skills/jx/pydantic-forms.md`
+- UI-oriented backend aggregation -> `.claude/skills/jx/bff.md`
+- New API/backend work -> `.claude/skills/fastapi/SKILL.md`
+- Auth/security hardening -> `.claude/skills/fastapi/security.md`
+- Data modeling and validation deep dive -> `.claude/skills/fastapi/sqlmodel.md` + `.claude/skills/fastapi/pydantic.md`
+- Event-driven messaging -> `.claude/skills/fastapi/faststream.md`
+- Outbound service integrations -> `.claude/skills/httpx/SKILL.md`
+- CLI development -> `.claude/skills/typer/SKILL.md`
+- Test and quality gate runs -> `.claude/skills/pytest/SKILL.md`
 
 ## Project Conventions
 

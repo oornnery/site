@@ -1,0 +1,12 @@
+{#import "./Base.jinja" as Base #}
+{#import "ui/Navbar.jinja" as Navbar #}
+{#def title="Portfolio", user=None, request=None, settings=None #}
+
+<Base title={{ title }} current_page="home">
+    <Navbar user={{ user }} current_page="home" request={{ request }} />
+
+    <main class="scroll-snap-container">
+        {{ content }}
+    </main>
+</Base>
+

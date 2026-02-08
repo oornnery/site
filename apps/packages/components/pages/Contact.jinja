@@ -1,0 +1,26 @@
+{#def request, user=None, profile=None #}
+{#import "../layouts/Public.jinja" as PublicLayout #}
+{#import "../partials/ContactForm.jinja" as ContactForm #}
+{#import "../profile/SocialLinks.jinja" as SocialLinks #}
+
+<PublicLayout request={{ request }} user={{ user }} title="Contact" current_page="contact">
+    <div class="space-y-6 sm:space-y-8">
+        <header>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white mb-2">Contact</h1>
+            <p class="text-sm sm:text-base text-gray-400">Get in touch with me.</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 sm:gap-12">
+            <section>
+                <h2 class="text-lg font-medium text-white mb-4">Connect</h2>
+                <div class="flex flex-col gap-4">
+                    <SocialLinks profile={{ profile }} variant="list" />
+                </div>
+            </section>
+
+            <section>
+                <ContactForm />
+            </section>
+        </div>
+    </div>
+</PublicLayout>

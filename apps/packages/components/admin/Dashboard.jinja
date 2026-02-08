@@ -1,0 +1,30 @@
+{#def request, user, stats={}, title="Dashboard" #}
+{#import "../layouts/Admin.jinja" as AdminLayout #}
+{#import "../ui/PageHeader.jinja" as PageHeader #}
+{#import "../ui/StatCard.jinja" as StatCard #}
+{#import "../ui/ActionCard.jinja" as ActionCard #}
+
+<AdminLayout request={{ request }} user={{ user }} title={{ title }} current_page="dashboard">
+    <div class="space-y-8">
+        <PageHeader title="Dashboard" description="Welcome back, {{ user.name or user.email }}!" show_actions=False />
+
+        {# Quick Stats #}
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard value={{ stats.total_posts or 0 }} label="Total Posts" />
+            <StatCard value={{ stats.total_projects or 0 }} label="Total Projects" />
+            <StatCard value={{ stats.recent_visitors or 0 }} label="Visitors (7d)" color="green" />
+            <StatCard value={{ stats.recent_pageviews or 0 }} label="Page Views (7d)" color="blue" />
+        </section>
+
+        {# Quick Actions #}
+        <section>
+            <h2 class="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <ActionCard href="/admin/analytics" title="Analytics" description="View statistics" icon="chart" />
+                <ActionCard href="/admin/profile" title="Profile" description="Manage your profile" icon="user" />
+                <ActionCard href="/admin/projects" title="Projects" description="Manage projects" icon="folder" />
+                <ActionCard href="/admin/blog" title="Blog" description="Manage posts" icon="blog" />
+            </div>
+        </section>
+    </div>
+</AdminLayout>

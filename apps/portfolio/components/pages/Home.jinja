@@ -1,0 +1,96 @@
+{#def request, user=None, profile=None, projects=[], posts=[], settings=None #}
+{#import "../layouts/Home.jinja" as HomeLayout #}
+{#import "../profile/Header.jinja" as ProfileHeader #}
+{#import "../ui/Card.jinja" as Card #}
+{#import "../ui/Tag.jinja" as Tag #}
+{#import "../ui/Input.jinja" as Input #}
+{#import "../ui/Button.jinja" as Button #}
+{#import "../profile/SocialLinks.jinja" as SocialLinks #}
+
+<HomeLayout request={{ request }} user={{ user }} title="Home" settings={{ settings }}>
+  {% set bg_url_raw = settings.home_background_url if settings and settings.home_background_url else '' %}
+  {% set bg_url = '' if bg_url_raw in ['None', 'none', 'null'] else bg_url_raw %}
+  <section class="snap-section" style="padding-top: var(--header-height); padding-left: 0; padding-right: 0; padding-bottom: 4.5rem; justify-content: flex-start;">
+    <div class="w-full">
+      <div
+        class="relative w-full flex items-center"
+        style="
+          min-height: calc(100dvh - var(--header-height) - 8.5rem);
+          {% if bg_url %}
+          background-image: linear-gradient(to bottom, rgba(0,0,0,0.72), rgba(0,0,0,0.92)), url('{{ bg_url }}');
+          background-size: cover;
+          background-position: center;
+          {% endif %}
+        "
+      >
+        <div class="snap-section-content py-10 sm:py-14 relative z-10 flex justify-center">
+          <ProfileHeader profile={{ profile }} centered=True />
+        </div>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <span class="text-xs uppercase tracking-wider">Scroll</span>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </div>
+  </section>
+
+  <section class="snap-section">
+    <div class="snap-section-content">
+      <section class="flex flex-col min-h-0">
+        <a href="/projects" class="group block mb-3">
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2 group-hover:text-blue-400 transition-colors">Projects</h2>
+        </a>
+        <div class="space-y-3 flex-1 overflow-hidden">
+          {% for project in projects[:6] %}
+          <Card href={{ "/projects/" ~ project.slug }} padding="sm">
+            <div class="flex flex-col gap-1">
+              <h3 class="text-sm text-white font-medium group-hover:text-blue-400 transition-colors line-clamp-1">{{ project.title }}</h3>
+              <p class="text-xs text-gray-500 line-clamp-1">{{ project.description }}</p>
+              <div class="flex flex-wrap gap-1.5 mt-1">
+                {% for tech in project.tech_stack[:3] %}
+                <Tag text={{ tech }} />
+                {% endfor %}
+              </div>
+            </div>
+          </Card>
+          {% else %}
+          <p class="text-sm text-gray-500">No projects yet.</p>
+          {% endfor %}
+        </div>
+        <a href="/projects" class="inline-block text-xs text-gray-500 hover:text-white transition-colors mt-3">View more projects &rarr;</a>
+      </section>
+    </div>
+    <div class="scroll-indicator">
+      <span class="text-xs uppercase tracking-wider">Scroll</span>
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+      </svg>
+    </div>
+  </section>
+
+  <section class="snap-section">
+    <div class="snap-section-content">
+      <h2 class="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">Contact</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12">
+        <div>
+          <h3 class="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">Connect</h3>
+          <div class="flex flex-col gap-3 sm:gap-4">
+            <SocialLinks profile={{ profile }} variant="list" />
+          </div>
+        </div>
+
+        <div id="contact-form-wrapper">
+          <h3 class="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">Send a Message</h3>
+          <form class="space-y-3 sm:space-y-4" hx-post="/partials/contact/form" hx-target="#contact-form-wrapper" hx-swap="outerHTML">
+            <Input name="name" label="Name" placeholder="Your Name" required />
+            <Input name="email" type="email" label="Email" placeholder="your@email.com" required />
+            <Input name="message" type="textarea" label="Message" placeholder="Your message..." rows="4" required />
+            <Button type="submit" variant="primary">Send Message</Button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</HomeLayout>

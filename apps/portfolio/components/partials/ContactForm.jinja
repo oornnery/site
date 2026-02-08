@@ -1,0 +1,24 @@
+{#import "../ui/Button.jinja" as Button #}
+{#import "../ui/Input.jinja" as Input #}
+{#def form_data=None, errors=None, success_message="" #}
+
+<div id="contact-form-wrapper">
+  <h3 class="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">Send a Message</h3>
+
+  {% if success_message %}
+  <div class="mb-4 rounded-lg border border-emerald-700 bg-emerald-900/30 px-4 py-3 text-sm text-emerald-200">{{ success_message }}</div>
+  {% endif %}
+
+  <form class="space-y-3 sm:space-y-4" hx-post="/partials/contact/form" hx-target="#contact-form-wrapper" hx-swap="outerHTML">
+    <Input name="name" label="Name" placeholder="Your Name" value={{ form_data.get('name', '') if form_data else '' }} required />
+    {% if errors and errors.get('name') %}<p class="text-xs text-red-400">{{ errors.get('name') }}</p>{% endif %}
+
+    <Input name="email" type="email" label="Email" placeholder="your@email.com" value={{ form_data.get('email', '') if form_data else '' }} required />
+    {% if errors and errors.get('email') %}<p class="text-xs text-red-400">{{ errors.get('email') }}</p>{% endif %}
+
+    <Input name="message" type="textarea" label="Message" placeholder="Your message..." rows="4" value={{ form_data.get('message', '') if form_data else '' }} required />
+    {% if errors and errors.get('message') %}<p class="text-xs text-red-400">{{ errors.get('message') }}</p>{% endif %}
+
+    <Button type="submit" variant="primary">Send Message</Button>
+  </form>
+</div>

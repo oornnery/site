@@ -1,0 +1,435 @@
+{#def request, user, profile, title="Edit Profile" #}
+{#import "../layouts/Admin.jinja" as AdminLayout #}
+{#import "../ui/Input.jinja" as Input #}
+{#import "../ui/Button.jinja" as Button #}
+
+<AdminLayout request={{ request }} user={{ user }} title={{ title }} current_page="profile">
+    <div class="space-y-8">
+        <header class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Edit Profile</h1>
+                <p class="text-gray-400">Update your public profile information.</p>
+            </div>
+        </header>
+
+        <form method="post" action="/admin/profile" class="space-y-8" enctype="multipart/form-data">
+            {# Basic Info #}
+            <section class="space-y-4">
+                <h2 class="text-xl font-semibold text-white">Basic Information</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input name="name" label="Name" value={{ profile.name or '' }} required />
+                    <Input name="location" label="Location" value={{ profile.location or '' }} />
+                </div>
+                <Input name="short_bio" type="textarea" label="Short Bio" value={{ profile.short_bio or '' }}
+                    rows="2" />
+            </section>
+
+            {# Contact Info #}
+            <section class="space-y-4">
+                <h2 class="text-xl font-semibold text-white">Contact</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input name="email" type="email" label="Email" value={{ profile.email or '' }} />
+                    <Input name="phone" label="Phone" value={{ profile.phone if profile.phone and profile.phone not in ['None', 'none', 'null', 'undefined'] else '' }} />
+                    <Input name="website" type="url" label="Website" value={{ profile.website if profile.website and profile.website not in ['None', 'none', 'null', 'undefined'] else '' }} />
+                </div>
+            </section>
+
+            {# Social Links #}
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-white">Social Links</h2>
+                    <button type="button" onclick="addSocialLink()"
+                        class="text-sm px-3 py-1.5 rounded-md border border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                        + Add Link
+                    </button>
+                </div>
+
+                <div id="social-links-container" class="space-y-4">
+                    {% for link in profile.social_links or [] %}
+                    <div class="social-link-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-sm font-medium text-gray-400">Social Link #{{ loop.index }}</span>
+                            <button type="button" onclick="removeItem(this, 'social-link-item')"
+                                class="text-red-400 hover:text-red-300 text-sm">
+                                Remove
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input name="social_title[]" label="Title" value={{ link.get('title') or link.get('label') or '' }} placeholder="GitHub" />
+                            <Input name="social_url[]" label="URL or username" value={{ link.get('url') or '' }} placeholder="https://github.com/you" />
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input name="social_icon[]" label="Icon key" value={{ link.get('icon') or '' }} placeholder="github, linkedin, x, email, phone, website" />
+                            <Input name="social_icon_url[]" label="Custom Icon URL" value={{ link.get('icon_url') or link.get('custom_icon') or '' }} placeholder="/static/uploads/social/icon.svg" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Upload Custom Icon (optional)</label>
+                            <input type="file" name="social_icon_upload[]" accept="image/*"
+                                class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent file:mr-3 file:rounded file:border-0 file:bg-gray-800 file:text-gray-300 file:px-3 file:py-1.5 hover:file:bg-gray-700" />
+                            <p class="text-xs text-gray-500">Use icon key for built-ins. Upload overrides icon URL.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    {# Empty state - will be filled by JS when adding #}
+                    {% endfor %}
+                </div>
+            </section>
+
+            {# About (Markdown) #}
+            <section class="space-y-4">
+                <h2 class="text-xl font-semibold text-white">About</h2>
+                <Input name="about_summary" type="textarea" label="About (Summary - Home)" value={{ profile.about_summary
+                    or '' }} rows="3" />
+                <Input name="about_markdown" type="textarea" label="About (Full Markdown - About page)" value={{ profile.about_markdown
+                    or '' }} rows="8" />
+                <p class="text-xs text-gray-500">
+                    The summary appears on Home. Full markdown appears on the About page.
+                </p>
+            </section>
+
+            {# Work Experience - Structured Form #}
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-white">Work Experience</h2>
+                    <button type="button" onclick="addWorkExperience()"
+                        class="text-sm px-3 py-1.5 rounded-md border border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                        + Add Experience
+                    </button>
+                </div>
+
+                <div id="work-experience-container" class="space-y-4">
+                    {% for work in profile.work_experience or [] %}
+                    <div class="work-experience-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-sm font-medium text-gray-400">Experience #{{ loop.index }}</span>
+                            <button type="button" onclick="removeItem(this, 'work-experience-item')"
+                                class="text-red-400 hover:text-red-300 text-sm">
+                                Remove
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input name="work_title[]" label="Job Title" value={{ work.get('title') if work else '' }} />
+                            <Input name="work_company[]" label="Company" value={{ work.get('company') if work else '' }} />
+                            <Input name="work_location[]" label="Location" value={{ work.get('location') if work else '' }} />
+                            <div class="grid grid-cols-2 gap-2">
+                                <Input name="work_start_date[]" label="Start Date" value={{ work.get('start_date') if work else '' }}
+                                    placeholder="2020" />
+                                <Input name="work_end_date[]" label="End Date" value={{ work.get('end_date') if work else '' }}
+                                    placeholder="Present" />
+                            </div>
+                        </div>
+                        <Input name="work_description[]" type="textarea" label="Description" value={{ work.get('description')
+                            if work else '' }} rows="2" />
+                    </div>
+                    {% else %}
+                    {# Empty state - will be filled by JS when adding #}
+                    {% endfor %}
+                </div>
+            </section>
+
+            {# Education - Structured Form #}
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-white">Education</h2>
+                    <button type="button" onclick="addEducation()"
+                        class="text-sm px-3 py-1.5 rounded-md border border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                        + Add Education
+                    </button>
+                </div>
+
+                <div id="education-container" class="space-y-4">
+                    {% for edu in profile.education or [] %}
+                    <div class="education-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-sm font-medium text-gray-400">Education #{{ loop.index }}</span>
+                            <button type="button" onclick="removeItem(this, 'education-item')"
+                                class="text-red-400 hover:text-red-300 text-sm">
+                                Remove
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input name="edu_school[]" label="School/University" value={{ edu.get('school') if edu else '' }} />
+                            <Input name="edu_degree[]" label="Degree" value={{ edu.get('degree') if edu else '' }} />
+                            <Input name="edu_start_date[]" label="Start Date" value={{ edu.get('start_date') if edu else '' }}
+                                placeholder="2014" />
+                            <Input name="edu_end_date[]" label="End Date" value={{ edu.get('end_date') if edu else '' }}
+                                placeholder="2018" />
+                        </div>
+                    </div>
+                    {% else %}
+                    {# Empty state - will be filled by JS when adding #}
+                    {% endfor %}
+                </div>
+            </section>
+
+            {# Certificates - Structured Form #}
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-white">Certificates</h2>
+                    <button type="button" onclick="addCertificate()"
+                        class="text-sm px-3 py-1.5 rounded-md border border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                        + Add Certificate
+                    </button>
+                </div>
+
+                <div id="certificates-container" class="space-y-4">
+                    {% for cert in profile.certificates or [] %}
+                    <div class="certificate-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-sm font-medium text-gray-400">Certificate #{{ loop.index }}</span>
+                            <button type="button" onclick="removeItem(this, 'certificate-item')"
+                                class="text-red-400 hover:text-red-300 text-sm">
+                                Remove
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input name="cert_name[]" label="Certificate Name" value={{ cert.get('name') if cert else '' }} />
+                            <Input name="cert_issuer[]" label="Issuer" value={{ cert.get('issuer') if cert else '' }} />
+                            <Input name="cert_date[]" label="Date" value={{ cert.get('date') if cert else '' }} placeholder="2023" />
+                            <Input name="cert_credential_id[]" label="Credential ID" value={{ cert.get('credential_id') if cert else ''
+                                }} placeholder="Optional" />
+                        </div>
+                        <Input name="cert_url[]" type="url" label="Certificate URL" value={{ cert.get('url') if cert else '' }}
+                            placeholder="https://..." />
+                    </div>
+                    {% else %}
+                    {# Empty state - will be filled by JS when adding #}
+                    {% endfor %}
+                </div>
+            </section>
+
+            {# Skills - Tag Input Style #}
+            <section class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold text-white">Skills</h2>
+                    <button type="button" onclick="addSkill()"
+                        class="text-sm px-3 py-1.5 rounded-md border border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                        + Add Skill
+                    </button>
+                </div>
+
+                <div id="skills-container" class="flex flex-wrap gap-2">
+                    {% for skill in profile.skills or [] %}
+                    <div
+                        class="skill-item flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700 bg-gray-800">
+                        <input type="text" name="skills[]" value="{{ skill }}"
+                            class="bg-transparent border-none text-sm text-white focus:outline-none w-24 min-w-0"
+                            placeholder="Skill" />
+                        <button type="button" onclick="this.parentElement.remove()"
+                            class="text-gray-500 hover:text-red-400 text-xs">
+                            &times;
+                        </button>
+                    </div>
+                    {% else %}
+                    {# Empty state - will be filled by JS when adding #}
+                    {% endfor %}
+                </div>
+                <p class="text-xs text-gray-500">Click on a skill to edit it. Press the X to remove.</p>
+            </section>
+
+            <div class="flex justify-end">
+                <Button type="submit" variant="primary">Save Changes</Button>
+            </div>
+        </form>
+    </div>
+
+    {# JavaScript for dynamic form management #}
+    <script>
+        // Counter for unique IDs
+        let workCounter = {{ (profile.work_experience or[]) | length }};
+        let eduCounter = {{ (profile.education or[]) | length }};
+        let certCounter = {{ (profile.certificates or[]) | length }};
+        let socialCounter = {{ (profile.social_links or []) | length }};
+
+        function addWorkExperience() {
+            workCounter++;
+            const container = document.getElementById('work-experience-container');
+            const html = `
+                <div class="work-experience-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm font-medium text-gray-400">Experience #${workCounter}</span>
+                        <button type="button" onclick="removeItem(this, 'work-experience-item')" class="text-red-400 hover:text-red-300 text-sm">Remove</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Job Title</label>
+                            <input type="text" name="work_title[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Company</label>
+                            <input type="text" name="work_company[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Location</label>
+                            <input type="text" name="work_location[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-medium text-gray-300">Start Date</label>
+                                <input type="text" name="work_start_date[]" placeholder="2020" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="block text-sm font-medium text-gray-300">End Date</label>
+                                <input type="text" name="work_end_date[]" placeholder="Present" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-gray-300">Description</label>
+                        <textarea name="work_description[]" rows="2" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent"></textarea>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addEducation() {
+            eduCounter++;
+            const container = document.getElementById('education-container');
+            const html = `
+                <div class="education-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm font-medium text-gray-400">Education #${eduCounter}</span>
+                        <button type="button" onclick="removeItem(this, 'education-item')" class="text-red-400 hover:text-red-300 text-sm">Remove</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">School/University</label>
+                            <input type="text" name="edu_school[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Degree</label>
+                            <input type="text" name="edu_degree[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Start Date</label>
+                            <input type="text" name="edu_start_date[]" placeholder="2014" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">End Date</label>
+                            <input type="text" name="edu_end_date[]" placeholder="2018" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function addSkill() {
+            const container = document.getElementById('skills-container');
+            const html = `
+                <div class="skill-item flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-700 bg-gray-800">
+                    <input type="text" name="skills[]" class="bg-transparent border-none text-sm text-white focus:outline-none w-24 min-w-0" placeholder="Skill" />
+                    <button type="button" onclick="this.parentElement.remove()" class="text-gray-500 hover:text-red-400 text-xs">✕</button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+            // Focus the new input
+            container.lastElementChild.querySelector('input').focus();
+        }
+
+        function addCertificate() {
+            certCounter++;
+            const container = document.getElementById('certificates-container');
+            const html = `
+                <div class="certificate-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm font-medium text-gray-400">Certificate #${certCounter}</span>
+                        <button type="button" onclick="removeItem(this, 'certificate-item')" class="text-red-400 hover:text-red-300 text-sm">Remove</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Certificate Name</label>
+                            <input type="text" name="cert_name[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Issuer</label>
+                            <input type="text" name="cert_issuer[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Date</label>
+                            <input type="text" name="cert_date[]" placeholder="2023" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Credential ID</label>
+                            <input type="text" name="cert_credential_id[]" placeholder="Optional" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-gray-300">Certificate URL</label>
+                        <input type="url" name="cert_url[]" placeholder="https://..." class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" />
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeItem(button, itemClass) {
+            button.closest('.' + itemClass).remove();
+            // Renumber items
+            renumberItems();
+        }
+
+        function addSocialLink() {
+            socialCounter++;
+            const container = document.getElementById('social-links-container');
+            const html = `
+                <div class="social-link-item p-4 rounded-lg border border-gray-700 bg-gray-900/50 space-y-3">
+                    <div class="flex justify-between items-start">
+                        <span class="text-sm font-medium text-gray-400">Social Link #${socialCounter}</span>
+                        <button type="button" onclick="removeItem(this, 'social-link-item')" class="text-red-400 hover:text-red-300 text-sm">Remove</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Title</label>
+                            <input type="text" name="social_title[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" placeholder="GitHub" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">URL or username</label>
+                            <input type="text" name="social_url[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" placeholder="https://github.com/you" />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Icon key</label>
+                            <input type="text" name="social_icon[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" placeholder="github, linkedin, x, email, phone, website" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-sm font-medium text-gray-300">Custom Icon URL</label>
+                            <input type="text" name="social_icon_url[]" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent" placeholder="/static/uploads/social/icon.svg" />
+                        </div>
+                    </div>
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-gray-300">Upload Custom Icon (optional)</label>
+                        <input type="file" name="social_icon_upload[]" accept="image/*" class="w-full rounded-md bg-gray-900 border border-gray-700 text-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent file:mr-3 file:rounded file:border-0 file:bg-gray-800 file:text-gray-300 file:px-3 file:py-1.5 hover:file:bg-gray-700" />
+                        <p class="text-xs text-gray-500">Use icon key for built-ins. Upload overrides icon URL.</p>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        function renumberItems() {
+            // Renumber work experiences
+            document.querySelectorAll('.work-experience-item').forEach((item, index) => {
+                const label = item.querySelector('.text-gray-400');
+                if (label) label.textContent = `Experience #${index + 1}`;
+            });
+            // Renumber education
+            document.querySelectorAll('.education-item').forEach((item, index) => {
+                const label = item.querySelector('.text-gray-400');
+                if (label) label.textContent = `Education #${index + 1}`;
+            });
+            // Renumber certificates
+            document.querySelectorAll('.certificate-item').forEach((item, index) => {
+                const label = item.querySelector('.text-gray-400');
+                if (label) label.textContent = `Certificate #${index + 1}`;
+            });
+            // Renumber social links
+            document.querySelectorAll('.social-link-item').forEach((item, index) => {
+                const label = item.querySelector('.text-gray-400');
+                if (label) label.textContent = `Social #${index + 1}`;
+            });
+        }
+    </script>
+</AdminLayout>

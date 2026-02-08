@@ -1,0 +1,20 @@
+{#import "./Base.jinja" as Base #}
+{#import "ui/Navbar.jinja" as Navbar #}
+{#def title="Portfolio", user=None, request=None, settings=None #}
+
+{% set bg_url = settings.home_background_url if settings and settings.home_background_url else None %}
+
+<Base title={{ title }} current_page="home">
+    <Navbar user={{ user }} current_page="home" request={{ request }} />
+    
+    {# Scroll snap container - preenche toda a viewport #}
+    <main 
+        class="scroll-snap-container"
+        {% if bg_url %}
+        style="background-image: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('{{ bg_url }}'); background-size: cover; background-position: center; background-attachment: fixed;"
+        {% endif %}
+    >
+        {{ content }}
+    </main>
+</Base>
+

@@ -1,0 +1,56 @@
+{#def request, user, messages=[] #}
+{#import "../layouts/Admin.jinja" as AdminLayout #}
+{#import "../ui/Badge.jinja" as Badge #}
+{#import "../ui/EmptyState.jinja" as EmptyState #}
+
+<AdminLayout request={{ request }} user={{ user }} title="Messages" current_page="messages">
+  <div class="space-y-6">
+    <header>
+      <h1 class="text-2xl font-bold text-white mb-1">Messages</h1>
+      <p class="text-sm text-gray-400">Messages received from the contact form.</p>
+    </header>
+
+    {% if messages %}
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm text-left">
+        <thead class="text-xs text-gray-400 uppercase border-b border-gray-800">
+          <tr>
+            <th class="py-3 px-4">Name</th>
+            <th class="py-3 px-4">Email</th>
+            <th class="py-3 px-4">Subject</th>
+            <th class="py-3 px-4">Message</th>
+            <th class="py-3 px-4">Date</th>
+            <th class="py-3 px-4">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in messages %}
+          <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+            <td class="py-3 px-4 text-white">{{ item.name }}</td>
+            <td class="py-3 px-4">
+              <a href={{ "mailto:" ~ item.email }} class="text-accent hover:underline">{{ item.email }}</a>
+            </td>
+            <td class="py-3 px-4 text-gray-400">{{ item.subject or "-" }}</td>
+            <td class="py-3 px-4 text-gray-300 max-w-md">
+              <div class="line-clamp-2">{{ item.message }}</div>
+            </td>
+            <td class="py-3 px-4 text-gray-500 text-xs">
+              {{ item.created_at.strftime('%d/%m/%Y %H:%M') if item.created_at else '-' }}
+            </td>
+            <td class="py-3 px-4">
+              {% if item.is_read %}
+              <Badge text="Read" color="gray" size="sm" />
+              {% else %}
+              <Badge text="New" color="green" size="sm" />
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <EmptyState message="No messages received yet." />
+    {% endif %}
+  </div>
+</AdminLayout>

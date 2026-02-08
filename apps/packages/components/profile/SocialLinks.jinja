@@ -1,0 +1,121 @@
+{#def profile=None, variant="compact" #}
+{#import "../ui/SocialButton.jinja" as SocialButton #}
+{#import "../ui/Icon.jinja" as Icon #}
+
+{% macro render_item(raw_url, label_text, icon_text, custom_icon_text='') %}
+    {% set raw_url = (raw_url or '') | trim %}
+    {% set link_label = (label_text or '') | trim %}
+    {% set icon_key = (icon_text or '') | lower | trim %}
+    {% set hint = (icon_key ~ ' ' ~ link_label ~ ' ' ~ raw_url) | lower %}
+    {% set valid_icons = ['github', 'linkedin', 'twitter', 'email', 'phone', 'globe'] %}
+    {% set aliases = {
+        'x': 'twitter',
+        'website': 'globe',
+        'site': 'globe',
+        'web': 'globe',
+        'mail': 'email',
+        'envelope': 'email',
+        'phone-call': 'phone',
+        'telephone': 'phone'
+    } %}
+
+    {% if icon_key in aliases %}
+        {% set icon_key = aliases[icon_key] %}
+    {% endif %}
+
+    {% if icon_key not in valid_icons %}
+        {% set icon_key = '' %}
+    {% endif %}
+
+    {% if icon_key in ['', 'none', 'null', 'undefined'] %}
+        {% if 'github' in hint %}
+            {% set icon_key = 'github' %}
+        {% elif 'linkedin' in hint %}
+            {% set icon_key = 'linkedin' %}
+        {% elif 'twitter' in hint or ' x ' in hint or 'x.com' in hint %}
+            {% set icon_key = 'twitter' %}
+        {% elif raw_url.startswith('mailto:') or '@' in raw_url or 'email' in hint %}
+            {% set icon_key = 'email' %}
+        {% elif raw_url.startswith('tel:') or 'phone' in hint %}
+            {% set icon_key = 'phone' %}
+        {% elif raw_url.startswith('http') %}
+            {% set icon_key = 'globe' %}
+        {% endif %}
+    {% endif %}
+
+    {% if icon_key in ['', 'none', 'null', 'undefined'] %}
+        {% set icon_key = 'globe' %}
+    {% endif %}
+
+    {% set href = raw_url %}
+    {% if icon_key in ['github', 'linkedin', 'twitter'] and raw_url and not raw_url.startswith('http') %}
+        {% if icon_key == 'github' %}{% set href = 'https://github.com/' ~ raw_url %}{% endif %}
+        {% if icon_key == 'linkedin' %}{% set href = 'https://linkedin.com/in/' ~ raw_url %}{% endif %}
+        {% if icon_key == 'twitter' %}{% set href = 'https://x.com/' ~ raw_url %}{% endif %}
+    {% endif %}
+    {% if icon_key == 'email' and raw_url and not raw_url.startswith('mailto:') %}
+        {% set href = 'mailto:' ~ raw_url %}
+    {% endif %}
+    {% if icon_key == 'phone' and raw_url and not raw_url.startswith('tel:') %}
+        {% set href = 'tel:' ~ raw_url %}
+    {% endif %}
+    {% if icon_key == 'globe' and raw_url and not raw_url.startswith('http') and not raw_url.startswith('mailto:') and not raw_url.startswith('tel:') %}
+        {% set href = 'https://' ~ raw_url %}
+    {% endif %}
+
+    {% if href %}
+        {% set custom_icon = (custom_icon_text or '') | trim %}
+        {% set custom_icon = '' if custom_icon in ['None', 'none', 'null', 'undefined'] else custom_icon %}
+        {% set custom_icon_is_valid = custom_icon.startswith('/') or custom_icon.startswith('http://') or custom_icon.startswith('https://') or custom_icon.startswith('data:image/') %}
+        {% set custom_icon = custom_icon if custom_icon_is_valid else '' %}
+        {% if variant == 'list' %}
+            <a href="{{ href }}" target="_blank" rel="noopener noreferrer"
+               class="text-sm sm:text-base text-gray-400 hover:text-white transition-colors flex items-center gap-2">
+                {% if custom_icon %}
+                    <img
+                        src="{{ custom_icon }}"
+                        alt=""
+                        class="w-4 h-4 rounded-sm"
+                        onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');"
+                    />
+                    <span class="hidden">
+                        <Icon name={{ icon_key }} size="sm" />
+                    </span>
+                {% else %}
+                    <Icon name={{ icon_key }} size="sm" />
+                {% endif %}
+                {{ link_label or 'Link' }}
+            </a>
+        {% else %}
+            <SocialButton href={{ href }} label={{ link_label or 'Social' }} icon={{ icon_key }} custom_icon={{ custom_icon }} />
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
+{% if profile and profile.social_links and profile.social_links | length > 0 %}
+    {% for link in profile.social_links %}
+        {{ render_item(
+            link.get('url'),
+            link.get('title') or link.get('label'),
+            link.get('icon'),
+            link.get('icon_url') or link.get('custom_icon')
+        ) }}
+    {% endfor %}
+{% elif profile %}
+    {% if profile.email %}
+        {{ render_item(profile.email, 'Email', 'email') }}
+    {% endif %}
+    {% if profile.github %}
+        {{ render_item(profile.github, 'GitHub', 'github') }}
+    {% endif %}
+    {% if profile.linkedin %}
+        {{ render_item(profile.linkedin, 'LinkedIn', 'linkedin') }}
+    {% endif %}
+    {% if profile.twitter %}
+        {{ render_item(profile.twitter, 'X', 'twitter') }}
+    {% endif %}
+{% else %}
+    {{ render_item('fabiohcsouza@outlook.com.br', 'Email', 'email') }}
+    {{ render_item('oornnery', 'GitHub', 'github') }}
+    {{ render_item('fabiohcsouza', 'LinkedIn', 'linkedin') }}
+{% endif %}

@@ -9,6 +9,7 @@ wheels/
 # Virtual environments
 .venv
 .ruff_cache
+.rumdl_cache
 .pytest_cache
 .env
 
@@ -16,4 +17,8 @@ wheels/
 *.sqlite3
 *.log
 
+apps/packages/static/uploads/
+
 portfolio-old/
+
+.coverage

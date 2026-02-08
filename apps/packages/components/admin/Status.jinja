@@ -1,0 +1,32 @@
+{#def request, user, title="System Status" #}
+{#import "../layouts/Admin.jinja" as AdminLayout #}
+
+<AdminLayout request={{ request }} user={{ user }} title={{ title }} current_page="status">
+  <div class="space-y-6">
+    <header class="flex items-center justify-between gap-3">
+      <div>
+        <h1 class="text-2xl font-bold text-white mb-1">System Status</h1>
+        <p class="text-sm text-gray-400">Live health checks for portfolio, blog, and admin services.</p>
+      </div>
+      <a
+        href="/status"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="inline-flex items-center rounded-md border border-gray-700 px-3 py-2 text-xs text-gray-300 hover:bg-gray-800 hover:text-white transition-colors"
+      >
+        Open public status
+      </a>
+    </header>
+
+    <section class="rounded-lg border border-gray-800 bg-gray-900/50 p-4">
+      <div
+        id="healthz-summary"
+        hx-get="/healthz/summary"
+        hx-trigger="load, every 10s"
+        hx-swap="morph:innerHTML"
+      >
+        <div class="text-sm text-gray-400">Loading health summary...</div>
+      </div>
+    </section>
+  </div>
+</AdminLayout>

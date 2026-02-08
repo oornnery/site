@@ -1,0 +1,12 @@
+{#def overview={} #}
+{# Partial component for analytics overview stats - used for SSE updates #}
+{#import "../ui/StatCard.jinja" as StatCard #}
+
+<section id="analytics-overview" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+    <StatCard value={{ overview.total_visitors or 0 }} label="Total Visitors" />
+    <StatCard value={{ overview.new_visitors or 0 }} label="New Visitors" color="green" />
+    <StatCard value={{ overview.unique_visitors or 0 }} label="Unique Visitors" color="blue" />
+    <StatCard value={{ overview.total_pageviews or 0 }} label="Page Views" color="purple" />
+    <StatCard value={{ overview.total_events or 0 }} label="Events" color="yellow" />
+    <StatCard value={{ overview.active_sessions or 0 }} label="Active Now" color="cyan" />
+</section>

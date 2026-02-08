@@ -1,0 +1,10 @@
+{#import "../projects/ProjectCard.jinja" as ProjectCard #}
+{#def projects=[] #}
+
+{% for project in projects %}
+<ProjectCard project={{ project }} />
+{% else %}
+<div class="text-center py-8 sm:py-12">
+  <p class="text-sm sm:text-base text-gray-500">No projects found.</p>
+</div>
+{% endfor %}

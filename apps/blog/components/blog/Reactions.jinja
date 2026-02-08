@@ -1,0 +1,12 @@
+{#import "../ui/Button.jinja" as Button #}
+{#def post_slug, counts={} #}
+
+<div id="reactions" class="flex flex-wrap items-center gap-2">
+  {% for reaction_type in ["like", "love", "fire", "clap", "rocket"] %}
+  <form hx-post="/partials/reactions?post_slug={{ post_slug }}&reaction_type={{ reaction_type }}" hx-target="#reactions" hx-swap="outerHTML" class="inline">
+    <Button type="submit" variant="ghost" size="sm">
+      {{ reaction_type }} ({{ counts.get(reaction_type, 0) }})
+    </Button>
+  </form>
+  {% endfor %}
+</div>

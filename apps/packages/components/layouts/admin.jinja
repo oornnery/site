@@ -1,0 +1,57 @@
+{#import "./Base.jinja" as Base #}
+{#import "ui/Navbar.jinja" as Navbar #}
+{#import "ui/ToastContainer.jinja" as ToastContainer #}
+{#def title="Admin", current_page="dashboard", user=None, request=None #}
+
+<Base title={{ title }} current_page="admin">
+    <Navbar user={{ user }} current_page="admin" request={{ request }} />
+    <ToastContainer />
+
+    <div x-data="{ sidebarOpen: true }" class="max-w-5xl mx-auto px-4 sm:px-6 pt-20 pb-12">
+        <div class="mb-4 flex items-center justify-between">
+            <h2 class="text-sm font-medium text-gray-400">Administration</h2>
+            <button
+                type="button"
+                @click="sidebarOpen = !sidebarOpen"
+                class="inline-flex items-center gap-2 rounded-md border border-gray-700 px-3 py-2 text-sm text-gray-200 hover:bg-gray-900"
+            >
+                <span x-text="sidebarOpen ? 'Hide menu' : 'Show menu'"></span>
+            </button>
+        </div>
+
+        <div class="flex flex-col gap-6 md:flex-row md:gap-8">
+            <aside x-show="sidebarOpen" x-transition class="md:w-48 shrink-0" x-cloak>
+                <nav class="space-y-1 md:sticky md:top-24">
+                    <a href="/admin" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'dashboard' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Dashboard
+                    </a>
+                    <a href="/admin/analytics" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'analytics' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Analytics
+                    </a>
+                    <a href="/admin/profile" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'profile' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Profile
+                    </a>
+                    <a href="/admin/projects" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'projects' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Projects
+                    </a>
+                    <a href="/admin/blog" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'blog' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Blog
+                    </a>
+                    <a href="/admin/comments" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'comments' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Comments
+                    </a>
+                    <a href="/admin/messages" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'messages' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Messages
+                    </a>
+                    <a href="/admin/settings" class="block px-3 py-2 text-sm {{ 'text-white bg-gray-800' if current_page == 'settings' else 'text-gray-400 hover:text-white hover:bg-gray-800' }} rounded transition-colors">
+                        Settings
+                    </a>
+                </nav>
+            </aside>
+
+            <main class="flex-1 min-w-0">
+                {{ content }}
+            </main>
+        </div>
+    </div>
+</Base>

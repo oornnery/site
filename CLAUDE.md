@@ -12,6 +12,8 @@ uv run task fmt          # Format with Ruff
 uv run task lint         # Lint with Ruff
 uv run task lint-fix     # Lint with autofix
 uv run task test         # Run pytest with coverage (currently 43 tests across all apps)
+uv run rumdl check .     # Lint Markdown files
+uv run rumdl fmt .       # Format Markdown files
 ```
 
 Single test example:
@@ -159,6 +161,7 @@ Use these as domain-specific playbooks:
 - `.claude/skills/pytest/SKILL.md` -> pytest workflow, gates, coverage, and failure triage.
 - `.claude/skills/httpx/SKILL.md` -> outbound HTTP client patterns.
 - `.claude/skills/typer/SKILL.md` -> Typer CLI patterns.
+- `.claude/skills/design-system/SKILL.md` -> design tokens and UI consistency conventions.
 
 JX companions:
 
@@ -206,6 +209,7 @@ How to pick skills by task:
 ## Pre-Delivery Checklist
 
 - Run lint and tests relevant to your scope.
+- Run `uv run rumdl check .` when changing Markdown docs.
 - Confirm JX rendering still works via `app.state.catalog`.
 - Validate cross-app impact when editing `apps/packages/`.
 - Update docs if public behavior changes.

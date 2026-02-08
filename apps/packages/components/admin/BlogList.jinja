@@ -1,0 +1,60 @@
+{#def request, user, posts, title="Manage Blog" #}
+{#import "../layouts/Admin.jinja" as AdminLayout #}
+{#import "../ui/PageHeader.jinja" as PageHeader #}
+{#import "../ui/Button.jinja" as Button #}
+{#import "../ui/Badge.jinja" as Badge #}
+{#import "../ui/EmptyState.jinja" as EmptyState #}
+
+<AdminLayout request={{ request }} user={{ user }} title={{ title }} current_page="blog">
+    <div class="space-y-6">
+        <PageHeader title="Blog Posts" description="Manage your blog posts.">
+            <Button href="/admin/blog/new" variant="primary">New Post</Button>
+        </PageHeader>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm text-left">
+                <thead class="text-xs text-gray-400 uppercase border-b border-gray-800">
+                    <tr>
+                        <th class="py-3 px-4">Title</th>
+                        <th class="py-3 px-4">Category</th>
+                        <th class="py-3 px-4">Status</th>
+                        <th class="py-3 px-4">Published</th>
+                        <th class="py-3 px-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                    <tr class="border-b border-gray-800 hover:bg-gray-900/50">
+                        <td class="py-3 px-4 text-white">{{ post.title }}</td>
+                        <td class="py-3 px-4 text-gray-400">{{ post.category or '-' }}</td>
+                        <td class="py-3 px-4">
+                            {% if post.draft %}
+                            <Badge text="Draft" color="yellow" />
+                            {% else %}
+                            <Badge text="Published" color="green" />
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-gray-400">
+                            {{ post.published_at.strftime('%Y-%m-%d') if post.published_at else '-' }}
+                        </td>
+                        <td class="py-3 px-4">
+                            <div class="flex gap-2">
+                                <Button href={{ "/admin/blog/" ~ post.id }} size="sm">Edit</Button>
+                                <form method="post" action={{ "/admin/blog/" ~ post.id ~ "/delete" }} class="inline" data-confirm="Delete this post?">
+                                    <Button type="submit" size="sm" variant="ghost">Delete</Button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">
+                            <EmptyState message="No posts yet." />
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</AdminLayout>

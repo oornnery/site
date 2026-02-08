@@ -1,0 +1,38 @@
+{#def user=None, current_page="", request=None #}
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-black/90 backdrop-blur-md border-b border-gray-800/50 transition-all duration-300">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between">
+    <a href="/" class="group leading-tight hover:text-gray-300 transition-colors">
+      <span class="block text-base sm:text-lg font-semibold text-white tracking-tight">Blog</span>
+      <span class="block text-[10px] sm:text-xs text-gray-400 group-hover:text-gray-300 transition-colors">by Fabio Souza</span>
+    </a>
+
+    <div class="hidden md:flex items-center gap-1 lg:gap-4 text-sm text-gray-400">
+      <a href="/" class="px-3 py-2 rounded-lg {{ 'text-white bg-gray-800/50' if current_page == 'home' else 'hover:text-white hover:bg-gray-800/30' }} transition-all">Home</a>
+      <a href="/posts" class="px-3 py-2 rounded-lg {{ 'text-white bg-gray-800/50' if current_page == 'blog' else 'hover:text-white hover:bg-gray-800/30' }} transition-all">Posts</a>
+      <a href="/feed.xml" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg hover:text-white hover:bg-gray-800/30 transition-all">RSS</a>
+      <a href="{{ PUBLIC_PORTFOLIO_URL }}" class="px-3 py-2 rounded-lg hover:text-white hover:bg-gray-800/30 transition-all">Portfolio</a>
+    </div>
+
+    <button type="button" data-menu-toggle class="md:hidden p-2 -mr-2 text-gray-400 hover:text-white transition-colors" aria-label="Toggle menu" aria-expanded="false">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="menu-icon">
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="18" x2="20" y2="18"></line>
+      </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="close-icon hidden">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <div data-mobile-menu class="hidden md:hidden border-t border-gray-800/50 bg-black/95 backdrop-blur-md">
+    <div class="px-4 py-4 space-y-1">
+      <a href="/" class="block px-4 py-3 rounded-lg text-base {{ 'text-white bg-gray-800/50' if current_page == 'home' else 'text-gray-400 hover:text-white hover:bg-gray-800/30' }} transition-all">Home</a>
+      <a href="/posts" class="block px-4 py-3 rounded-lg text-base {{ 'text-white bg-gray-800/50' if current_page == 'blog' else 'text-gray-400 hover:text-white hover:bg-gray-800/30' }} transition-all">Posts</a>
+      <a href="/feed.xml" target="_blank" rel="noopener" class="block px-4 py-3 rounded-lg text-base text-gray-400 hover:text-white hover:bg-gray-800/30 transition-all">RSS</a>
+      <a href="{{ PUBLIC_PORTFOLIO_URL }}" class="block px-4 py-3 rounded-lg text-base text-gray-400 hover:text-white hover:bg-gray-800/30 transition-all">Portfolio</a>
+    </div>
+  </div>
+</nav>

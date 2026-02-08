@@ -1,12 +1,33 @@
-{#def tone="neutral" #}
+{#def 
+    text,
+    color="gray",
+    size="default"
+#}
+{#-
+Badge Component
 
-{% set base = "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset" %}
-{% set tones = {
-  "neutral": "bg-zinc-50 text-zinc-700 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-200 dark:ring-zinc-700",
-  "success": "bg-emerald-50 text-emerald-800 ring-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-200 dark:ring-emerald-800",
-  "danger": "bg-rose-50 text-rose-800 ring-rose-200 dark:bg-rose-900/30 dark:text-rose-200 dark:ring-rose-800"
+Status indicator / label badge.
+Colors: gray, green, yellow, red, blue, purple, pink, cyan, accent
+Sizes: sm, default
+-#}
+
+{% set color_classes = {
+    "gray": "bg-gray-800 text-gray-400",
+    "green": "bg-green-900/50 text-green-400",
+    "yellow": "bg-yellow-900/50 text-yellow-400",
+    "red": "bg-red-900/50 text-red-400",
+    "blue": "bg-blue-900/50 text-blue-400",
+    "purple": "bg-purple-900/50 text-purple-400",
+    "pink": "bg-pink-900/50 text-pink-400",
+    "cyan": "bg-cyan-900/50 text-cyan-400",
+    "accent": "bg-accent/20 text-accent"
 } %}
 
-<span {{ attrs.render(class=base ~ " " ~ tones.get(tone, tones["neutral"])) }}>
-  {{ content }}
+{% set size_classes = {
+    "sm": "px-1.5 py-0.5 text-[10px]",
+    "default": "px-2 py-0.5 text-xs"
+} %}
+
+<span class="inline-flex items-center rounded font-medium {{ color_classes.get(color, color_classes.gray) }} {{ size_classes.get(size, size_classes.default) }}">
+    {{ text }}
 </span>

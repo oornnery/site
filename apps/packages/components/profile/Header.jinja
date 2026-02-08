@@ -1,0 +1,48 @@
+{#def profile, show_resume_link=True, centered=False #}
+{#import "./SocialLinks.jinja" as SocialLinks #}
+
+<header class="{{ 'inline-flex flex-col items-center gap-6 sm:gap-7' if centered else 'flex flex-col sm:flex-row items-center gap-6 sm:gap-8' }}">
+    {# Avatar #}
+    <span class="relative flex shrink-0 overflow-hidden rounded-full size-24 sm:size-28" aria-hidden="true">
+        <img class="aspect-square h-full w-full"
+            alt="{{ profile.name if profile else 'Fabio Souza' }}'s profile picture"
+            src="https://ui-avatars.com/api/?name={{ (profile.name if profile else 'Fabio Souza') | urlencode }}&background=1a1a1a&color=fff&size=128">
+    </span>
+
+    {# Info #}
+    <div class="{{ 'text-center max-w-xl' if centered else 'flex-1 text-center sm:text-left' }}">
+        <h1 class="text-2xl sm:text-3xl font-bold text-white mb-1">{{ profile.name if profile else 'Fabio Souza' }}</h1>
+        <p class="text-sm sm:text-base text-gray-400 font-mono mb-1">
+            {{ profile.short_bio if profile else 'Full-stack Developer' }}
+        </p>
+        {% set short_about = ((profile.about_summary | default('', true)) if profile else '') | trim %}
+        {% set markdown_about = (profile.about_markdown | default('', true)) if profile else '' %}
+        {% set summary = short_about if short_about else (markdown_about.split('\n')[0].strip() if markdown_about else '') %}
+        {% if summary %}
+        <p class="text-xs sm:text-sm text-gray-500 mb-2 max-w-xl">
+            {{ summary }}
+        </p>
+        {% endif %}
+        <p class="text-xs sm:text-sm text-gray-500 font-mono mb-4">
+            <a class="hover:underline"
+                href="https://www.google.com/maps/search/{{ profile.location if profile else 'S&#227;o Paulo, Brazil' }}"
+                target="_blank" rel="noopener noreferrer">
+                {{ profile.location if profile else 'S&#227;o Paulo, Brazil' }}
+            </a>
+        </p>
+
+        {# Social links #}
+        <div class="{{ 'flex flex-wrap justify-center gap-2 mb-4' if centered else 'flex flex-wrap justify-center sm:justify-start gap-2 mb-4' }}" role="list" aria-label="Contact links">
+            <SocialLinks profile={{ profile }} variant="compact" />
+        </div>
+
+        {# Resume link #}
+        {% set _hide_values = [False, 0, None, 'false', 'False', '0', 'none', 'None', 'null', 'Null'] %}
+        {% set _show_resume_link = show_resume_link not in _hide_values %}
+        {% if _show_resume_link %}
+        <a href="/about" class="inline-flex items-center text-sm text-gray-400 hover:text-white transition-colors">
+            View full resume &rarr;
+        </a>
+        {% endif %}
+    </div>
+</header>

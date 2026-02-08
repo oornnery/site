@@ -1,3 +1,3 @@
-portfolio: env WATCHFILES_FORCE_POLLING=1 uv run --package portfolio -- uvicorn --app-dir . apps.portfolio.app:app --reload --port 8000 --host 0.0.0.0
-blog: env WATCHFILES_FORCE_POLLING=1 uv run --package blog -- uvicorn --app-dir . apps.blog.app:app --reload --port 8001 --host 0.0.0.0
-admin: env WATCHFILES_FORCE_POLLING=1 uv run --package admin -- uvicorn --app-dir . apps.admin.app:app --reload --port 8002 --host 0.0.0.0
+portfolio: env WATCHFILES_FORCE_POLLING=1 uv run --package portfolio -- uvicorn --app-dir . apps.portfolio.app:app --reload --reload-include '*.jinja' --port 8000 --host 0.0.0.0
+blog: env WATCHFILES_FORCE_POLLING=1 uv run --package blog -- uvicorn --app-dir . apps.blog.app:app --reload --reload-include '*.jinja' --port 8001 --host 0.0.0.0
+admin: env WATCHFILES_FORCE_POLLING=1 uv run --package admin -- uvicorn --app-dir . apps.admin.app:app --reload --reload-include '*.jinja' --port 8002 --host 0.0.0.0

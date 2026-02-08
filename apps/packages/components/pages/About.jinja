@@ -1,0 +1,105 @@
+{#def request, user=None, profile=None, about_html="" #}
+{#import "../layouts/Public.jinja" as PublicLayout #}
+{#import "../profile/Header.jinja" as ProfileHeader #}
+{#import "../profile/WorkExperience.jinja" as WorkExperience #}
+{#import "../profile/Education.jinja" as Education #}
+{#import "../profile/Certificates.jinja" as Certificates #}
+{#import "../profile/Skills.jinja" as Skills #}
+{#import "../ui/ShareButton.jinja" as ShareButton #}
+
+<PublicLayout request={{ request }} user={{ user }} title="About" current_page="about">
+    <div class="space-y-6 print:space-y-4" aria-label="Resume Content" id="resume-content">
+        {# Header with Profile Info #}
+        <header class="flex items-start gap-4">
+            {# Avatar #}
+            <span class="relative flex shrink-0 overflow-hidden rounded-full size-16 sm:size-20 print:size-16"
+                aria-hidden="true">
+                <img class="aspect-square h-full w-full"
+                    alt="{{ profile.name if profile else 'Fabio Souza' }}'s profile picture"
+                    src="https://ui-avatars.com/api/?name={{ (profile.name if profile else 'Fabio Souza') | urlencode }}&background=1a1a1a&color=fff&size=128">
+            </span>
+
+            {# Info #}
+            <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4">
+                    <div>
+                        <h1 class="text-xl sm:text-2xl font-bold text-white print:text-black" id="resume-name">{{
+                            profile.name if profile else 'Fabio Souza' }}</h1>
+                        <p class="font-mono text-xs sm:text-sm text-gray-400 print:text-gray-600"
+                            aria-labelledby="resume-name">
+                            {{ profile.short_bio if profile else 'Full-stack Developer' }}
+                        </p>
+                        <p class="font-mono text-xs text-gray-500 print:text-gray-600">
+                            <a class="hover:underline"
+                                href="https://www.google.com/maps/search/{{ profile.location if profile else 'S&#227;o Paulo, Brazil' }}"
+                                target="_blank" rel="noopener noreferrer">
+                                {{ profile.location if profile else 'S&#227;o Paulo, Brazil' }}
+                            </a>
+                        </p>
+                    </div>
+
+                    {# Share Button - Same line #}
+                    <div class="print:hidden shrink-0">
+                        <ShareButton url="{{ request.url }}"
+                            title="{{ profile.name if profile else 'Resume' }} - Resume"
+                            description="{{ profile.short_bio if profile else '' }}" variant="default" show_pdf=True
+                            pdf_url="/resume.pdf" />
+                    </div>
+                </div>
+
+                {# Contact info for print #}
+                {% if profile %}
+                <div class="hidden print:block text-xs text-gray-600 mt-1 space-y-0.5">
+                    {% if profile.email %}<p>{{ profile.email }}</p>{% endif %}
+                    {% if profile.phone %}<p>{{ profile.phone }}</p>{% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        {# About Section - Rendered Markdown #}
+        <section class="flex min-h-0 flex-col gap-y-3 print:gap-y-1">
+            <h2 class="text-xl font-bold text-white print:text-black" id="about-section">About</h2>
+            <div class="prose prose-sm prose-invert max-w-none print:prose-gray print:text-[12px] 
+                        prose-headings:text-white prose-headings:font-semibold prose-headings:mt-4 prose-headings:mb-2
+                        prose-h1:text-xl prose-h2:text-lg prose-h3:text-base
+                        prose-p:text-gray-400 prose-p:my-2
+                        prose-ul:text-gray-400 prose-ul:my-2 prose-ul:list-disc prose-ul:pl-4
+                        prose-ol:text-gray-400 prose-ol:my-2 prose-ol:list-decimal prose-ol:pl-4
+                        prose-li:my-0.5
+                        prose-strong:text-white prose-strong:font-semibold
+                        prose-code:text-blue-400 prose-code:bg-gray-900 prose-code:px-1 prose-code:rounded
+                        prose-a:text-blue-400 prose-a:no-underline hover:prose-a:underline
+                        print:prose-headings:text-black print:prose-p:text-gray-700 print:prose-ul:text-gray-700 print:prose-strong:text-black"
+                aria-labelledby="about-section">
+                {% if about_html %}
+                {{ about_html | safe }}
+                {% elif profile and profile.about_markdown %}
+                {{ profile.about_markdown | safe }}
+                {% else %}
+                <p>Experienced telecommunications engineer with a strong focus on voice and data services.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        {# Work Experience #}
+        {% if profile and profile.work_experience %}
+        <WorkExperience work_experience={{ profile.work_experience }} />
+        {% endif %}
+
+        {# Education #}
+        {% if profile and profile.education %}
+        <Education education={{ profile.education }} />
+        {% endif %}
+
+        {# Certificates #}
+        {% if profile and profile.certificates %}
+        <Certificates certificates={{ profile.certificates }} />
+        {% endif %}
+
+        {# Skills #}
+        {% if profile and profile.skills %}
+        <Skills skills={{ profile.skills }} />
+        {% endif %}
+    </div>
+</PublicLayout>

@@ -1,0 +1,109 @@
+{#def request, user=None, featured_post=None, recent_posts=[], categories=[], tags=[] #}
+{#import "../layouts/Public.jinja" as PublicLayout #}
+{#import "../blog/PostCard.jinja" as PostCard #}
+
+<PublicLayout request={{ request }} user={{ user }} title="Blog" current_page="home">
+    <div class="space-y-10 sm:space-y-12">
+        <header class="space-y-4 sm:space-y-5">
+            <div class="space-y-0.5">
+                <p class="text-2xl sm:text-3xl font-semibold text-white leading-tight">Blog</p>
+                <p class="text-xs sm:text-sm text-gray-500">by Fabio Souza</p>
+            </div>
+            <h1 class="text-3xl sm:text-4xl font-bold text-white leading-tight max-w-3xl">
+                Notes on backend architecture, product engineering, and SSR-first interfaces.
+            </h1>
+            <p class="text-sm sm:text-base text-gray-400 max-w-2xl">
+                New articles, tutorials, and build notes. Use this page for highlights and open
+                <a href="/posts" class="text-gray-200 hover:text-white underline underline-offset-4">all posts</a>
+                for the full searchable archive.
+            </p>
+            <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+                <a
+                    href="/posts"
+                    class="inline-flex items-center rounded-lg border border-gray-700 bg-gray-900/80 px-3 sm:px-4 py-2 text-sm text-gray-100 hover:bg-gray-800 transition-colors"
+                >
+                    Explore posts
+                </a>
+                <a
+                    href="/feed.xml"
+                    target="_blank"
+                    rel="noopener"
+                    class="inline-flex items-center rounded-lg border border-gray-800 px-3 sm:px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-gray-900/70 transition-colors"
+                >
+                    RSS feed
+                </a>
+            </div>
+        </header>
+
+        {% if featured_post %}
+        <section class="space-y-4 sm:space-y-5">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-lg sm:text-xl font-semibold text-white">Featured post</h2>
+                <a href={{ "/posts/" ~ featured_post.slug }} class="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors">
+                    Read now ->
+                </a>
+            </div>
+            <PostCard post={{ featured_post }} />
+        </section>
+        {% endif %}
+
+        <section class="space-y-4 sm:space-y-5">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-lg sm:text-xl font-semibold text-white">Latest posts</h2>
+                <a href="/posts" class="text-xs sm:text-sm text-gray-400 hover:text-white transition-colors">
+                    View full archive ->
+                </a>
+            </div>
+
+            <div class="space-y-3 sm:space-y-4">
+                {% for post in recent_posts %}
+                <PostCard post={{ post }} />
+                {% else %}
+                <div class="rounded-xl border border-gray-800/80 bg-gray-900/40 p-5">
+                    <p class="text-sm sm:text-base text-gray-400">No published posts yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if categories or tags %}
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            {% if categories %}
+            <div class="rounded-xl border border-gray-800/80 bg-gray-900/35 p-4 sm:p-5 space-y-3">
+                <h3 class="text-base sm:text-lg font-semibold text-white">Categories</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for item in categories %}
+                    {% set category_name = item["category"] %}
+                    {% set category_count = item["count"] %}
+                    <a
+                        href={{ "/categories/" ~ category_name }}
+                        class="inline-flex items-center gap-2 rounded-lg border border-gray-800 px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800/60 transition-colors"
+                    >
+                        <span>{{ category_name }}</span>
+                        <span class="text-xs text-gray-500">{{ category_count }}</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if tags %}
+            <div class="rounded-xl border border-gray-800/80 bg-gray-900/35 p-4 sm:p-5 space-y-3">
+                <h3 class="text-base sm:text-lg font-semibold text-white">Popular tags</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for item in tags %}
+                    {% set tag_name = item["tag"] %}
+                    <a
+                        href={{ "/tags/" ~ tag_name }}
+                        class="inline-flex items-center rounded-lg border border-gray-800 px-3 py-1.5 text-sm text-gray-300 hover:text-white hover:bg-gray-800/60 transition-colors"
+                    >
+                        #{{ tag_name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </section>
+        {% endif %}
+    </div>
+</PublicLayout>

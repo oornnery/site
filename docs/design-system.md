@@ -69,7 +69,7 @@ Zinc is the **sole neutral** used across all surfaces, text, and borders. No gra
 
 ### Font Stack
 
-```
+```text
 System default (Tailwind's sans) — no custom fonts loaded.
 ```
 
@@ -111,7 +111,7 @@ System default (Tailwind's sans) — no custom fonts loaded.
 
 ### Page Grid
 
-```
+```text
 ┌──────────────────────────────────────────────────────┐
 │ Navbar: full-width, inner max-w-6xl px-4             │
 ├──────────────────────────────────────────────────────┤
@@ -192,7 +192,7 @@ System default (Tailwind's sans) — no custom fonts loaded.
 
 ### Radius Decision Tree
 
-```
+```text
 Is it a pill/dot?  → rounded-full
 Is it a card/panel? → rounded-xl
 Is it a container?  → rounded-lg
@@ -211,7 +211,7 @@ Is it interactive?  → rounded-md
 
 ### Shadow Hierarchy
 
-```
+```text
 Flat (no shadow)  →  Cards (shadow-sm)  →  Toasts (shadow-md)  →  Modals (shadow-xl)
      ground              surface              floating              overlay
 ```
@@ -248,7 +248,7 @@ All borders use the default `border` (1px). No `border-2` or thicker is used any
 
 ### Ring (Badges only)
 
-```
+```text
 ring-1 ring-inset ring-{semantic}-200 dark:ring-{semantic}-700/800
 ```
 
@@ -263,7 +263,7 @@ ring-1 ring-inset ring-{semantic}-200 dark:ring-{semantic}-700/800
 | Modal   | `z-50`  | Modal overlay + dialog   |
 | Toast   | `z-50`  | Toast notifications      |
 
-```
+```text
 z-50  ┌─────────┐ ┌──────┐
       │  Modal  │ │Toast │
 z-40  ├─────────┴─┴──────┤
@@ -288,21 +288,21 @@ auto  ├───────────────────┤
 
 #### Toast (enter/leave)
 
-```
+```text
 enter:  ease-out 200ms  →  opacity-0 translate-y-2  →  opacity-100 translate-y-0
 leave:  ease-in  150ms  →  opacity-100              →  opacity-0 translate-y-2
 ```
 
 #### Accordion Panel (enter/leave)
 
-```
+```text
 enter:  ease-out 150ms  →  opacity-0 -translate-y-1  →  opacity-100 translate-y-0
 leave:  ease-in  100ms  →  opacity-100               →  opacity-0
 ```
 
 #### Modal
 
-```
+```text
 backdrop:  x-transition.opacity (default 150ms)
 dialog:    x-transition (default scale + opacity, 150ms)
 ```
@@ -330,7 +330,7 @@ dialog:    x-transition (default scale + opacity, 150ms)
 
 ### Implementation
 
-```
+```text
 Mode:     class-based (Tailwind `darkMode: 'class'`)
 Storage:  localStorage key "theme" ("dark" | "light")
 Default:  prefers-color-scheme media query fallback
@@ -379,7 +379,7 @@ Sync:     $watch('dark', ...) adds/removes .dark on <html>
 
 #### Button
 
-```
+```text
 File:     ui/Button.jinja
 Props:    variant, size, href, type
 Renders:  <a> if href, <button> otherwise
@@ -402,7 +402,7 @@ States: `focus:ring-2 ring-slate-400 ring-offset-2` | `disabled:opacity-50 point
 
 #### Badge
 
-```
+```text
 File:     ui/Badge.jinja
 Props:    tone ("neutral" | "success" | "danger")
 Shape:    rounded-full (pill)
@@ -412,7 +412,7 @@ Size:     px-2 py-0.5 text-xs font-medium
 
 #### Card
 
-```
+```text
 File:     ui/Card.jinja
 Props:    title, subtitle
 Slots:    content (body), footer
@@ -422,7 +422,7 @@ Shadow:   shadow-sm
 Padding:  header px-5 py-4, body px-5 py-4
 ```
 
-```
+```text
 ┌─────────────────────────────────────┐
 │ Header: title + subtitle  (px-5 py-4)│  ← border-b (only if title/subtitle)
 ├─────────────────────────────────────┤
@@ -434,7 +434,7 @@ Padding:  header px-5 py-4, body px-5 py-4
 
 #### Modal
 
-```
+```text
 File:     ui/Modal.jinja
 Props:    title, open
 Slots:    content (body), actions (footer)
@@ -445,7 +445,7 @@ Overlay:  zinc-950/60
 Close:    Escape key, backdrop click, close button
 ```
 
-```
+```text
 ┌──────────────────── z-50 ─────────────────────┐
 │ ░░░░░░░░░░░░ Backdrop (zinc-950/60) ░░░░░░░░░│
 │ ░░░ ┌───────────────────────────────┐ ░░░░░░░│
@@ -460,7 +460,7 @@ Close:    Escape key, backdrop click, close button
 
 #### StatusDot
 
-```
+```text
 File:     ui/StatusDot.jinja
 Props:    ok (boolean)
 Shape:    rounded-full (circle)
@@ -472,7 +472,7 @@ Color:    emerald-500/400 (ok) | rose-500/400 (down)
 
 #### Breadcrumb
 
-```
+```text
 File:     partials/Breadcrumb.jinja
 Props:    items (list of {label, href?})
 Sep:      "/" in text-zinc-400
@@ -481,7 +481,7 @@ Active:   last item, no href, text-zinc-700/200
 
 #### ThemeToggle
 
-```
+```text
 File:     partials/ThemeToggle.jinja
 Props:    (none)
 Icons:    Sun (dark:block) / Moon (dark:hidden)
@@ -491,7 +491,7 @@ Stroke:   stroke-width="1.8"
 
 #### Toast
 
-```
+```text
 File:     partials/Toast.jinja
 Props:    message, tone ("success" | "danger" | "neutral")
 Position: fixed right-4 top-4 z-50
@@ -501,7 +501,7 @@ Delivery: hx-swap-oob="true" targeting #toast-portal
 
 #### HealthAccordion / HealthAccordionItem
 
-```
+```text
 Files:    partials/HealthAccordion.jinja, HealthAccordionItem.jinja
 Props:    services (list), service (single)
 Features: SSE streaming, Alpine toggle, chevron rotation
@@ -510,7 +510,7 @@ Log view: <pre> with font-mono, h-40 overflow-auto
 
 #### HealthSummary
 
-```
+```text
 File:     partials/HealthSummary.jinja
 Props:    services (list)
 Refresh:  hx-get every 10s with morph:innerHTML
@@ -522,7 +522,7 @@ Refresh:  hx-get every 10s with morph:innerHTML
 
 ### Home Page
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ Navbar [Brand] [Home] [Status] [Theme]  │
 ├─────────────────────────────────────────┤
@@ -545,7 +545,7 @@ Refresh:  hx-get every 10s with morph:innerHTML
 
 ### Status Page
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ Navbar                                  │
 ├─────────────────────────────────────────┤
@@ -576,7 +576,7 @@ Refresh:  hx-get every 10s with morph:innerHTML
 
 ### Error Page (404)
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │ Navbar                                  │
 ├─────────────────────────────────────────┤
@@ -619,7 +619,7 @@ Refresh:  hx-get every 10s with morph:innerHTML
 
 ### SSE Lifecycle (Accordion)
 
-```
+```text
 User clicks item
   → toggle()
     → open = true
@@ -665,7 +665,7 @@ disabled:opacity-50 disabled:pointer-events-none
 
 ### Navigation Flow
 
-```
+```text
 ┌──────────┐  click "Home"   ┌──────────┐
 │  Status  │ ──────────────→ │   Home   │
 │  /status │ ←────────────── │   /      │
@@ -681,7 +681,7 @@ Any unknown route → 404 Error Page
 
 ### Health Check Data Flow
 
-```
+```text
 Browser                     App Server               Other Apps
   │                            │                         │
   │  GET /status               │                         │
@@ -711,7 +711,7 @@ Browser                     App Server               Other Apps
 
 ### Toast Notification Flow
 
-```
+```text
 Server Action (e.g., form submit)
   │
   ├─ Normal HTML response
@@ -731,7 +731,7 @@ Server Action (e.g., form submit)
 
 ### Dark Mode Toggle Flow
 
-```
+```text
 User clicks ThemeToggle
   │
   └─ Alpine: dark = !dark
@@ -757,7 +757,7 @@ Page Load
 
 ## Appendix: Quick Reference Card
 
-```
+```text
 COLORS:     Zinc (neutral) + Emerald (success) + Rose (danger)
 RADIUS:     md (6px) → lg (8px) → xl (12px) → full (pill/dot)
 SHADOWS:    sm (card) → md (toast) → xl (modal)

@@ -1,0 +1,64 @@
+{#def comment #}
+{# Single comment item - used for SSE live updates #}
+
+<article id="comment-{{ comment.id }}" class="p-3 sm:p-4 bg-gray-900/50 rounded-lg border border-gray-800 animate-fadeIn">
+    <div class="flex items-start gap-3">
+        {# Avatar #}
+        <div class="flex-shrink-0">
+            {% if comment.user_avatar %}
+            <img 
+                src="{{ comment.user_avatar }}" 
+                alt="{{ comment.display_name }}'s avatar"
+                class="w-8 h-8 sm:w-10 sm:h-10 rounded-full"
+            />
+            {% elif comment.guest_email %}
+            <img 
+                src="https://www.gravatar.com/avatar/{{ comment.guest_email | lower | trim }}?d=identicon&amp;s=80" 
+                alt="{{ comment.display_name }}'s avatar"
+                class="w-8 h-8 sm:w-10 sm:h-10 rounded-full"
+            />
+            {% else %}
+            <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gray-800 flex items-center justify-center">
+                <span class="text-xs sm:text-sm text-gray-400">
+                    {{ (comment.display_name or 'A')[0] | upper }}
+                </span>
+            </div>
+            {% endif %}
+        </div>
+        
+        {# Content #}
+        <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1 sm:mb-2">
+                <span class="text-xs sm:text-sm font-medium text-white">
+                    {{ comment.display_name or comment.guest_name or 'Anonymous' }}
+                </span>
+                {% if comment.is_guest %}
+                <span class="text-[10px] sm:text-xs px-1.5 py-0.5 bg-gray-800 text-gray-500 rounded">
+                    Guest
+                </span>
+                {% endif %}
+                <time class="text-[10px] sm:text-xs text-gray-500">
+                    {{ comment.created_at.strftime('%d %b %Y, %H:%M') if comment.created_at else '' }}
+                </time>
+            </div>
+            <p class="text-xs sm:text-sm text-gray-400 break-words">{{ comment.content }}</p>
+        </div>
+    </div>
+</article>
+
+<style>
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out;
+}
+</style>

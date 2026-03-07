@@ -1,0 +1,16 @@
+{#def gap="4", class_name="" #}
+
+{% set gaps = {
+    "1": "space-y-1",
+    "1.5": "space-y-1.5",
+    "2": "space-y-2",
+    "3": "space-y-3",
+    "4": "space-y-4",
+    "6": "space-y-6",
+    "8": "space-y-8"
+} %}
+{% set cls = (gaps.get(gap, "space-y-" ~ gap) ~ " " ~ class_name).strip() %}
+
+<div class="{{ cls }}" {{ attrs.render() }}>
+    {{ content }}
+</div>

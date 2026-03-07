@@ -14,6 +14,8 @@
         og_type={{ seo.og_type }}
         keywords={{ seo.keywords }}
     />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="shortcut icon" href="/static/favicon.svg">
     <meta name="analytics-enabled" content="{{ 'true' if analytics_enabled else 'false' }}">
     <link rel="stylesheet" href="/static/css/tailwind.css">
     <link rel="stylesheet" href="/static/css/style.css">
@@ -23,6 +25,7 @@
 <body class="bg-background text-foreground font-sans antialiased selection:bg-accent/20 selection:text-accent min-h-screen">
     {{ content }}
 
+    <script defer src="/static/js/alpine.min.js"></script>
     <script src="/static/js/main.js"></script>
     {% if analytics_enabled %}
     <script src="/static/js/analytics.js" defer></script>

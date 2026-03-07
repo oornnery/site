@@ -1,12 +1,5 @@
-{#def href, label, with_arrow=True, link_class="inline-flex items-center text-sm text-gray-400 hover:text-blue-400 transition-colors" #}
+{#def href, label, class_name="" #}
 
-<a
-    href="{{ href }}"
-    data-analytics-event="click"
-    data-analytics-id="section-link-{{ label | lower | replace(' ', '-') }}"
-    data-analytics-label="{{ label }}"
-    data-analytics-target="{{ href }}"
-    {{ attrs.render(class=link_class) }}
->
-    {{ label }}{% if with_arrow %} &rarr;{% endif %}
-</a>
+{% set cls = ("inline-flex items-center text-sm text-gray-400 hover:text-blue-400 transition-colors " ~ class_name).strip() %}
+
+<a href="{{ href }}" class="{{ cls }}" {{ attrs.render() }}>{{ label }} &rarr;</a>

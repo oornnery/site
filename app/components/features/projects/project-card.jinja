@@ -1,30 +1,28 @@
 {#import "@ui/tag.jinja" as Tag #}
-{#def project #}
+{#import "@ui/card-heading.jinja" as CardHeading #}
+{#def project, tight=False #}
+
+{% set card_padding = "p-3 sm:p-5" if tight else "p-4 sm:p-6" %}
+{% set heading_class = "text-base sm:text-lg" if tight else "text-lg" %}
+{% set description_class = "text-gray-400 text-sm line-clamp-2 mb-2.5" if tight else "text-gray-400 text-sm line-clamp-2 mb-3" %}
+{% set chips_limit = 3 if tight else 4 %}
+{% set top_margin = "mb-2.5" if tight else "mb-3" %}
 
 <a
     href="/projects/{{ project.slug }}"
-    class="block group rounded-lg transition-all duration-200 bg-gray-900/50 border border-gray-800 hover:border-gray-700 hover:bg-gray-800/50 p-4 sm:p-6"
+    class="block group rounded-lg transition-all duration-200 bg-gray-900/50 border border-gray-800 hover:border-gray-700 hover:bg-gray-800/50 {{ card_padding }}"
 >
     <article>
-        <div class="flex items-center justify-between mb-3">
-            <span class="text-xs text-gray-500">{{ project.date.year if project.date else '' }}</span>
-            {% if project.featured %}
-            <span class="text-xs text-green-500">&#9733; Featured</span>
-            {% endif %}
-        </div>
-
-        <h2 class="text-lg font-medium text-white mb-2 group-hover:text-blue-400 transition-colors">
-            {{ project.title }}
-        </h2>
+        <CardHeading title={{ project.title }} date={{ project.date }} featured={{ project.featured }} title_class="{{ heading_class }} font-medium text-white group-hover:text-blue-400 transition-colors" featured_class="text-green-500" class="{{ top_margin }}" />
 
         {% if project.description %}
-        <p class="text-gray-400 text-sm line-clamp-2 mb-3">{{ project.description }}</p>
+        <p class="{{ description_class }}">{{ project.description }}</p>
         {% endif %}
 
         {% set chips = project.tech_stack if project.tech_stack else project.tags %}
         {% if chips %}
-        <div class="flex flex-wrap gap-2">
-            {% for tech in chips[:4] %}
+        <div class="flex flex-wrap gap-1.5">
+            {% for tech in chips[:chips_limit] %}
             <Tag text={{ tech }} variant="accent" />
             {% endfor %}
         </div>

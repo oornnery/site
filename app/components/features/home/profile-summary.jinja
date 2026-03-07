@@ -4,9 +4,12 @@
 
 <div class="flex-1 text-center lg:text-left">
     <h1 class="text-2xl sm:text-3xl font-bold text-white mb-0">{{ profile_name or site_name }}</h1>
+    {% if profile_role %}
     <p class="text-sm sm:text-base text-gray-400 font-mono mb-1">
         {{ profile_role }}
     </p>
+    {% endif %}
+    {% if profile_location %}
     <p class="text-xs sm:text-sm text-gray-500 font-mono mb-1.5">
         <a
             class="hover:underline hover:text-blue-400 transition-colors"
@@ -21,6 +24,7 @@
             {{ profile_location }}
         </a>
     </p>
+    {% endif %}
     <p class="text-xs sm:text-sm text-gray-500 mb-4 max-w-xl">
         {{ profile_summary }}
     </p>
@@ -31,5 +35,5 @@
         container_class="flex flex-wrap justify-center lg:justify-start gap-2 mb-3"
     />
 
-    <SectionLink href="/about" label="View full resume" />
+    <SectionLink href="/about" label="View full resume" data-analytics-event="click" data-analytics-id="section-link-view-full-resume" data-analytics-label="View full resume" data-analytics-target="/about" />
 </div>

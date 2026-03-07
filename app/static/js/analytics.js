@@ -1,148 +1,97 @@
 (function () {
     "use strict";
 
-    const endpoint = "/api/v1/analytics/track";
-    const queue = [];
-    const maxBatchSize = 20;
-    const flushIntervalMs = 5000;
+    var ENDPOINT = "/api/v1/analytics/track";
+    var MAX_BATCH = 20;
+    var FLUSH_MS = 5000;
 
-    function isEnabled() {
-        const meta = document.querySelector('meta[name="analytics-enabled"]');
-        if (!meta) {
-            return true;
-        }
-        return meta.content !== "false";
-    }
+    var queue = [];
+    var enabled = true;
 
-    function nowIso() {
-        return new Date().toISOString();
-    }
-
-    function createEvent(eventName, fields) {
-        return {
+    function enqueue(eventName, fields) {
+        queue.push({
             event_name: eventName,
             page_path: fields.pagePath || window.location.pathname,
             element_id: fields.elementId || "",
             element_text: (fields.elementText || "").slice(0, 512),
             target_url: fields.targetUrl || "",
             metadata: fields.metadata || {},
-            occurred_at: nowIso(),
-        };
-    }
-
-    function enqueue(eventName, fields) {
-        queue.push(createEvent(eventName, fields));
-        if (queue.length >= maxBatchSize) {
+            occurred_at: new Date().toISOString(),
+        });
+        if (queue.length >= MAX_BATCH) {
             flush();
         }
     }
 
     function flush() {
-        if (!isEnabled() || queue.length === 0) {
+        if (queue.length === 0) {
             return;
         }
-
-        const events = queue.splice(0, maxBatchSize);
-        const payload = JSON.stringify({ events: events });
-
+        var payload = JSON.stringify({ events: queue.splice(0, MAX_BATCH) });
         if (navigator.sendBeacon) {
-            const blob = new Blob([payload], { type: "application/json" });
-            navigator.sendBeacon(endpoint, blob);
-            return;
+            navigator.sendBeacon(ENDPOINT, new Blob([payload], { type: "application/json" }));
+        } else {
+            fetch(ENDPOINT, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: payload,
+                keepalive: true,
+                credentials: "same-origin",
+            }).catch(function () {});
         }
-
-        fetch(endpoint, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: payload,
-            keepalive: true,
-            credentials: "same-origin",
-        }).catch(() => {
-            return;
-        });
-    }
-
-    function trackPageView() {
-        enqueue("page_view", {
-            pagePath: window.location.pathname,
-            metadata: {
-                referrer: document.referrer || "",
-            },
-        });
     }
 
     function trackClicks() {
-        document.addEventListener("click", (event) => {
-            const trackedElement = event.target.closest("[data-analytics-event]");
-            if (!trackedElement) {
+        document.addEventListener("click", function (event) {
+            var el = event.target.closest("[data-analytics-event]");
+            if (!el) {
                 return;
             }
-
-            const eventName = trackedElement.dataset.analyticsEvent || "click";
-            const href = trackedElement.getAttribute("href") || "";
-            const targetUrl = trackedElement.dataset.analyticsTarget || href;
-            const elementText =
-                trackedElement.dataset.analyticsLabel ||
-                (trackedElement.textContent || "").trim();
-            const elementId =
-                trackedElement.dataset.analyticsId || trackedElement.id || "";
-            const pagePath =
-                trackedElement.dataset.analyticsPath || window.location.pathname;
-
-            enqueue(eventName, {
-                pagePath: pagePath,
-                elementId: elementId,
-                elementText: elementText,
-                targetUrl: targetUrl,
-                metadata: {},
+            var href = el.getAttribute("href") || "";
+            enqueue(el.dataset.analyticsEvent || "click", {
+                pagePath: el.dataset.analyticsPath || window.location.pathname,
+                elementId: el.dataset.analyticsId || el.id || "",
+                elementText: el.dataset.analyticsLabel || (el.textContent || "").trim(),
+                targetUrl: el.dataset.analyticsTarget || href,
             });
         });
     }
 
     function trackSectionScroll() {
-        const trackedSections = Array.from(
-            document.querySelectorAll("[data-analytics-section]")
-        );
-        if (trackedSections.length === 0) {
+        var sections = document.querySelectorAll("[data-analytics-section]");
+        if (sections.length === 0) {
             return;
         }
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (!entry.isIntersecting) {
-                        return;
-                    }
-
-                    const sectionId =
-                        entry.target.dataset.analyticsSection ||
-                        entry.target.id ||
-                        "section";
-                    enqueue("section_scroll", {
-                        pagePath: window.location.pathname,
-                        elementId: sectionId,
-                    });
+        var observer = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                if (!entry.isIntersecting) {
+                    return;
+                }
+                observer.unobserve(entry.target);
+                enqueue("section_scroll", {
+                    elementId: entry.target.dataset.analyticsSection || entry.target.id || "section",
                 });
-            },
-            { threshold: 0.6 }
-        );
+            });
+        }, { threshold: 0.6 });
 
-        trackedSections.forEach((section) => {
+        sections.forEach(function (section) {
             observer.observe(section);
         });
     }
 
     function init() {
-        if (!isEnabled()) {
+        var meta = document.querySelector('meta[name="analytics-enabled"]');
+        if (meta && meta.content === "false") {
+            enabled = false;
             return;
         }
 
-        trackPageView();
+        enqueue("page_view", { metadata: { referrer: document.referrer || "" } });
         trackClicks();
         trackSectionScroll();
 
-        window.setInterval(flush, flushIntervalMs);
-        window.addEventListener("visibilitychange", () => {
+        window.setInterval(flush, FLUSH_MS);
+        window.addEventListener("visibilitychange", function () {
             if (document.visibilityState === "hidden") {
                 flush();
             }

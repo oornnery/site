@@ -24,7 +24,7 @@ class ProjectsPageService:
             f"Projects list use-case built with project_count={len(all_projects)}"
         )
         return PageRenderData(
-            template="pages/projects.jinja",
+            template="pages/projects/list.jinja",
             context=ProjectsListPageContext(
                 seo=seo,
                 projects=all_projects,
@@ -37,7 +37,7 @@ class ProjectsPageService:
     def build_detail_page(self, project: Project) -> PageRenderData:
         seo = seo_for_project(project)
         return PageRenderData(
-            template="pages/project-detail.jinja",
+            template="pages/projects/detail.jinja",
             context=ProjectDetailPageContext(
                 seo=seo,
                 project=project,

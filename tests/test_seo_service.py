@@ -2,6 +2,7 @@ from datetime import date
 
 from app.core.config import settings
 from app.domain.models import Project
+from app.infrastructure.markdown import load_about
 from app.services.seo import seo_for_page, seo_for_project
 
 
@@ -14,7 +15,8 @@ def test_seo_for_page_builds_canonical_and_absolute_og_image() -> None:
         keywords=["python", "fastapi"],
     )
 
-    assert seo.title == f"Home | {settings.site_name}"
+    expected_site_name = str(load_about().frontmatter.name or settings.site_name)
+    assert seo.title == f"Home | {expected_site_name}"
     assert len(seo.description) == 160
     assert seo.canonical_url == "http://localhost:8000/about"
     assert seo.og_image == "http://localhost:8000/static/images/custom.png"

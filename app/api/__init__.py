@@ -1,3 +1,3 @@
-from . import about, analytics, contact, home, projects
+from . import about, analytics, blog, contact, home, projects
 
-__all__ = ["home", "about", "projects", "contact", "analytics"]
+__all__ = ["home", "about", "projects", "blog", "contact", "analytics"]

@@ -1,0 +1,34 @@
+{#import "@layouts/public.jinja" as PublicLayout #}
+{#import "@ui/breadcrumb.jinja" as Breadcrumb #}
+{#import "@ui/page-header.jinja" as PageHeader #}
+{#import "@ui/stack.jinja" as Stack #}
+{#import "@ui/empty-state.jinja" as EmptyState #}
+{#import "@features/blog/post-card.jinja" as PostCard #}
+{#def seo, posts=(), current_path="/blog" #}
+
+<PublicLayout seo={{ seo }} current_path={{ current_path }}>
+    {% set breadcrumb_items = (
+        {"label": "Home", "href": "/"},
+        {"label": "Blog", "href": "/blog"},
+        {"label": "Posts", "current": true},
+    ) %}
+
+    <Stack gap="6" class_name="sm:space-y-8">
+        <Stack gap="4" class_name="sm:space-y-6">
+            <Breadcrumb items={{ breadcrumb_items }} />
+
+            <PageHeader
+                title="All Posts"
+                subtitle="Every published article."
+            />
+        </Stack>
+
+        <Stack gap="3" class_name="sm:space-y-4">
+            {% for post in posts %}
+            <PostCard post={{ post }} tight={{ true }} />
+            {% else %}
+            <EmptyState message="No posts published yet." />
+            {% endfor %}
+        </Stack>
+    </Stack>
+</PublicLayout>

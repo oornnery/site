@@ -2,7 +2,7 @@ import logging
 from typing import Callable
 
 from app.core.security import generate_csrf_token
-from app.infrastructure.markdown import load_all_projects
+from app.infrastructure.markdown import load_all_blog_posts, load_all_projects
 from app.services.seo import seo_for_page
 from app.services.types import HomePageContext, PageRenderData
 
@@ -17,11 +17,13 @@ class HomePageService:
 
     def build_page(self, *, user_agent: str = "") -> PageRenderData:
         all_projects = list(load_all_projects())
+        all_posts = list(load_all_blog_posts())
         featured_projects = [project for project in all_projects if project.featured]
         non_featured_projects = [
             project for project in all_projects if not project.featured
         ]
         featured = (featured_projects + non_featured_projects)[:3]
+        latest_posts = all_posts[:3]
         csrf_token = self._csrf_token_factory(user_agent=user_agent)
         seo = seo_for_page(
             title="Home",
@@ -29,13 +31,17 @@ class HomePageService:
             path="/",
         )
         logger.debug(
-            f"Home use-case built with featured_count={len(featured)} total_projects={len(all_projects)}"
+            "Home use-case built with featured_count=%s total_projects=%s latest_posts=%s",
+            len(featured),
+            len(all_projects),
+            len(latest_posts),
         )
         return PageRenderData(
             template="pages/home.jinja",
             context=HomePageContext(
                 seo=seo,
                 featured=tuple(featured),
+                latest_posts=tuple(latest_posts),
                 csrf_token=csrf_token,
             ),
         )

@@ -1,4 +1,5 @@
 from app.services.about import AboutPageService
+from app.services.blog import BlogPageService
 from app.services.contact import (
     ContactOrchestrator,
     ContactPageService,
@@ -12,6 +13,7 @@ from app.services.types import ContactSubmissionResult, PageRenderData
 
 __all__ = [
     "AboutPageService",
+    "BlogPageService",
     "ContactOrchestrator",
     "ContactPageService",
     "ContactSubmissionResult",

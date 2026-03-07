@@ -17,6 +17,7 @@ from app.infrastructure.notifications.email import (
 )
 from app.services import (
     AboutPageService,
+    BlogPageService,
     ContactPageService,
     ContactSubmissionService,
     HomePageService,
@@ -46,6 +47,7 @@ def get_catalog() -> Catalog:
             {"href": "/", "label": "Home"},
             {"href": "/about", "label": "About"},
             {"href": "/projects", "label": "Projects"},
+            {"href": "/blog", "label": "Blog"},
             {"href": "/contact", "label": "Contact"},
         ],
         social_links=profile_globals.social_links,
@@ -117,6 +119,11 @@ def get_about_page_service() -> AboutPageService:
 @lru_cache(maxsize=1)
 def get_projects_page_service() -> ProjectsPageService:
     return ProjectsPageService()
+
+
+@lru_cache(maxsize=1)
+def get_blog_page_service() -> BlogPageService:
+    return BlogPageService()
 
 
 @lru_cache(maxsize=1)

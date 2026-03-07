@@ -1,0 +1,144 @@
+{#import "@layouts/public.jinja" as PublicLayout #}
+{#import "@ui/breadcrumb.jinja" as Breadcrumb #}
+{#import "@ui/page-header.jinja" as PageHeader #}
+{#import "@ui/stack.jinja" as Stack #}
+{#import "@ui/tag.jinja" as Tag #}
+{#import "@ui/section-link.jinja" as SectionLink #}
+{#import "@ui/empty-state.jinja" as EmptyState #}
+{#import "@features/blog/post-card.jinja" as PostCard #}
+{#def seo, featured_posts=(), recent_posts=(), tags=(), current_path="/blog" #}
+
+<PublicLayout seo={{ seo }} current_path={{ current_path }}>
+    {% set breadcrumb_items = (
+        {"label": "Home", "href": "/"},
+        {"label": "Blog", "current": true},
+    ) %}
+
+    <Stack gap="6" class_name="sm:space-y-8">
+        <Stack gap="4" class_name="sm:space-y-6">
+            <Breadcrumb items={{ breadcrumb_items }} />
+
+            <div class="flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <PageHeader
+                    title="Blog"
+                    subtitle="Notes on backend engineering, architecture tradeoffs, and production operations."
+                    class="flex-1 lg:max-w-3xl"
+                />
+            </div>
+        </Stack>
+
+        <Stack gap="4" class_name="sm:space-y-5">
+            {% if featured_posts %}
+            {% set featured_total = featured_posts | length %}
+            <div class="space-y-4" data-featured-carousel data-featured-autoplay-ms="3000">
+                <div class="flex items-center justify-between gap-3">
+                    <h2 class="text-xl sm:text-2xl font-bold text-white">Featured Posts</h2>
+                    {% if featured_total > 1 %}
+                    <div class="flex items-center gap-2">
+                        <button
+                            type="button"
+                            data-featured-prev
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-700 text-gray-300 hover:text-blue-400 hover:border-blue-400/70 transition-colors"
+                            aria-label="Previous featured post"
+                            data-analytics-event="click"
+                            data-analytics-id="blog-home-featured-prev"
+                            data-analytics-label="Previous featured post"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            data-featured-next
+                            class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-700 text-gray-300 hover:text-blue-400 hover:border-blue-400/70 transition-colors"
+                            aria-label="Next featured post"
+                            data-analytics-event="click"
+                            data-analytics-id="blog-home-featured-next"
+                            data-analytics-label="Next featured post"
+                        >
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="featured-carousel-viewport">
+                    <div class="featured-carousel-track" data-featured-track>
+                        {% for post in featured_posts %}
+                        <div
+                            data-featured-slide
+                            class="featured-carousel-slide"
+                            aria-hidden="{{ 'false' if loop.first else 'true' }}"
+                        >
+                            <PostCard post={{ post }} />
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                {% if featured_total > 1 %}
+                <div class="flex items-center justify-between gap-3">
+                    <p class="text-xs text-gray-500">
+                        <span data-featured-current>1</span>/<span data-featured-total>{{ featured_total }}</span>
+                    </p>
+                    <div class="flex items-center gap-2" aria-label="Featured posts slide indicators">
+                        {% for post in featured_posts %}
+                        <button
+                            type="button"
+                            data-featured-dot
+                            data-featured-index="{{ loop.index0 }}"
+                            class="featured-carousel-dot {{ 'is-active' if loop.first else '' }}"
+                            aria-label="Go to featured post {{ loop.index }}"
+                            aria-current="{{ 'true' if loop.first else 'false' }}"
+                        ></button>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <h2 class="text-xl sm:text-2xl font-bold text-white">Featured Posts</h2>
+            <EmptyState message="No featured posts yet." />
+            {% endif %}
+        </Stack>
+
+        <Stack gap="4" class_name="sm:space-y-5">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-xl sm:text-2xl font-bold text-white">Latest Posts</h2>
+                <SectionLink href="/blog/posts" label="View all posts" />
+            </div>
+            {% if recent_posts %}
+            <Stack gap="3" class_name="sm:space-y-4">
+                {% for post in recent_posts %}
+                <PostCard post={{ post }} dense={{ true }} />
+                {% endfor %}
+            </Stack>
+            {% else %}
+            <EmptyState message="No recent posts yet." />
+            {% endif %}
+        </Stack>
+
+        <Stack gap="3">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-xl sm:text-2xl font-bold text-white">Tags</h2>
+                <SectionLink href="/blog/tags" label="View all tags" />
+            </div>
+            {% if tags %}
+            <div class="flex flex-wrap gap-2">
+                {% for tag in tags %}
+                <Tag
+                    href={{ "/blog/tags/" ~ (tag.name | urlencode) }}
+                    text={{ tag.name ~ " (" ~ tag.count ~ ")" }}
+                    variant="outline"
+                />
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-500">No tags available.</p>
+            {% endif %}
+        </Stack>
+    </Stack>
+</PublicLayout>

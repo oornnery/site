@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from fastapi.testclient import TestClient
 
 from app.main import create_app
-from app.infrastructure.markdown import load_all_projects
+from app.infrastructure.markdown import load_all_blog_posts, load_all_projects
 
 
 def _extract_csrf_token(html: str) -> str:
@@ -23,9 +23,28 @@ def _build_client() -> Iterator[TestClient]:
 
 def test_public_routes_return_success_status() -> None:
     for client in _build_client():
-        for path in ("/", "/about", "/projects", "/contact"):
+        for path in (
+            "/",
+            "/about",
+            "/projects",
+            "/contact",
+            "/blog",
+            "/blog/posts",
+            "/blog/tags",
+            "/blog/feed.xml",
+        ):
             response = client.get(path)
             assert response.status_code == 200
+
+
+def test_base_layout_includes_favicon() -> None:
+    for client in _build_client():
+        response = client.get("/")
+        assert response.status_code == 200
+        assert (
+            'rel="icon" type="image/svg+xml" href="/static/favicon.svg"'
+            in response.text
+        )
 
 
 def test_project_detail_existing_and_missing_slug() -> None:
@@ -38,6 +57,37 @@ def test_project_detail_existing_and_missing_slug() -> None:
         missing_response = client.get("/projects/slug-that-does-not-exist")
         assert ok_response.status_code == 200
         assert missing_response.status_code == 404
+
+
+def test_blog_post_detail_existing_and_missing_slug() -> None:
+    posts = load_all_blog_posts()
+    assert posts
+    existing_slug = posts[0].slug
+
+    for client in _build_client():
+        ok_response = client.get(f"/blog/posts/{existing_slug}")
+        missing_response = client.get("/blog/posts/slug-that-does-not-exist")
+        assert ok_response.status_code == 200
+        assert missing_response.status_code == 404
+
+
+def test_blog_tag_detail_route_returns_success() -> None:
+    posts = load_all_blog_posts()
+    assert posts
+    first_tag = posts[0].tags[0]
+
+    for client in _build_client():
+        response = client.get(f"/blog/tags/{first_tag}")
+        assert response.status_code == 200
+
+
+def test_blog_feed_returns_rss_xml() -> None:
+    for client in _build_client():
+        response = client.get("/blog/feed.xml")
+        assert response.status_code == 200
+        assert response.headers["content-type"].startswith("application/rss+xml")
+        assert "<rss" in response.text
+        assert "<channel>" in response.text
 
 
 def test_contact_submission_success_flow() -> None:

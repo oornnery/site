@@ -35,6 +35,12 @@ Detailed technical documentation lives in [docs/README.md](docs/README.md):
 | GET    | `/about`                  | About               |
 | GET    | `/projects`               | Projects list       |
 | GET    | `/projects/{slug}`        | Project detail      |
+| GET    | `/blog`                   | Blog home           |
+| GET    | `/blog/posts`             | Blog posts list     |
+| GET    | `/blog/posts/{slug}`      | Blog post detail    |
+| GET    | `/blog/tags`              | Blog tags           |
+| GET    | `/blog/tags/{tag}`        | Blog tag detail     |
+| GET    | `/blog/feed.xml`          | Blog RSS feed       |
 | GET    | `/contact`                | Contact page        |
 | POST   | `/contact`                | Contact submission  |
 | POST   | `/api/v1/analytics/track` | Analytics ingestion |

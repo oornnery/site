@@ -34,8 +34,20 @@ Core UI components in `app/components/ui`:
 
 - Home uses full-screen snap sections and guided scroll indicator.
 - Public pages share a centered container with fixed top navigation.
+- Public list/index pages use a shared intro rhythm:
+  breadcrumb first, `8px-16px` gap, then title/subtitle.
 - Contact page uses two-column layout on medium+ breakpoints.
+- Detail pages use a shared header rhythm:
+  breadcrumb first, `8px-16px` gap to metadata, `16px-24px` gap to title,
+  then subtitle/tags/actions.
+- Blog and project detail pages use the same right-side `On this page` minimap
+  when rendered markdown includes headings.
+- About uses the same minimap shell, but with authored section headings instead
+  of markdown-generated headings.
 - Project detail uses prose block plus metadata chips/actions.
+- About combines a compact profile hero, highlighted timeline cards for
+  experience, stacked resume entries for education/certificates, and grouped
+  skill chips.
 
 ## Motion Principles
 

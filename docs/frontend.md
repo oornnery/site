@@ -34,21 +34,50 @@ This enables consistent imports and composable templates.
 
 - Full-screen snap sections
 - Profile summary
-- Projects preview
+- Projects preview + latest blog posts preview
 - Contact preview
 
 ### About (`/about`)
 
-- Resume-style sections from frontmatter
-- Work experience, education, certificates, skills
+- Breadcrumb-first intro with the shared compact spacing rhythm
+- Stronger profile hero with summary lines and CTA row
+- Reuses the same right-side `On this page` minimap pattern as blog/project
+  detail pages
+- Frontmatter is limited to profile metadata; authored content comes from
+  markdown sections in `content/about.md`
+- Resume-style sections are parsed from markdown `##` / `###` headings with a
+  highlighted experience timeline
+- Education and certificates render as stacked resume entries with aligned dates
+- Skills are grouped by category in lighter stacked groups
 
 ### Projects (`/projects`, `/projects/{slug}`)
 
-- Project cards list
-- Detail page with tags and action buttons
+- Project cards list with breadcrumb-first intro rhythm:
+  breadcrumb, `8px-16px` gap, then title/subtitle block
+- Detail page with breadcrumb-first header rhythm:
+  breadcrumb, `8px-16px` gap, compact metadata row, `16px-24px` gap to title,
+  then subtitle/tags/actions
+- Detail page reuses the same right-side `On this page` minimap pattern as blog
+  detail pages when markdown includes headings
+
+### Blog (`/blog`, `/blog/posts`, `/blog/posts/{slug}`, `/blog/tags`)
+
+- Blog home with breadcrumb-first intro rhythm, featured posts carousel
+  (up to 3, prev/next, autoplay)
+- Latest posts preview (up to 3) with shortcut to full list
+- Tags preview (up to 10) with shortcut to full tags page
+- Posts listing page with the same breadcrumb-first intro rhythm
+- Post detail page with breadcrumb-first header rhythm:
+  breadcrumb, `8px-16px` gap, compact metadata row, `16px-24px` gap to title,
+  then subtitle/tags
+- Post detail page with reading metadata, improved prose layout, right-side
+  `On this page` minimap, and GitHub/Gist discussion CTA
+- Tags index and filtered tag pages with the same breadcrumb-first intro rhythm
+- RSS feed endpoint at `/blog/feed.xml`
 
 ### Contact (`/contact`)
 
+- Breadcrumb-first intro with the shared compact spacing rhythm
 - Social links
 - Contact form with inline validation messages
 
@@ -80,3 +109,4 @@ Analytics JS tracks:
 - Containerized content widths
 - Scroll-snap tuned for desktop and softened on mobile
 - Small-screen fallback disables hard snap for short viewports
+- Shared navbar now exposes `Home`, `About`, `Projects`, `Blog`, and `Contact`

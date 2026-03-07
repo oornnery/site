@@ -38,7 +38,8 @@ flowchart LR
 ### Domain and Content
 
 - Domain models and schemas are in `app/domain/*`.
-- Content is file-based (`content/about.md` and `content/projects/*.md`).
+- Content is file-based (`content/about.md`, `content/projects/*.md`,
+  and `content/blog/*.md`).
 - Markdown is parsed, sanitized with nh3, and transformed into structured data.
 - Content is cached with a configurable TTL (`MARKDOWN_CACHE_TTL`, default 300s).
 
@@ -83,6 +84,12 @@ sequenceDiagram
 | `GET`  | `/about`                  | About page          |
 | `GET`  | `/projects`               | Projects list       |
 | `GET`  | `/projects/{slug}`        | Project detail      |
+| `GET`  | `/blog`                   | Blog home           |
+| `GET`  | `/blog/posts`             | Blog posts list     |
+| `GET`  | `/blog/posts/{slug}`      | Blog post detail    |
+| `GET`  | `/blog/tags`              | Blog tags           |
+| `GET`  | `/blog/tags/{tag}`        | Blog tag detail     |
+| `GET`  | `/blog/feed.xml`          | RSS feed            |
 | `GET`  | `/contact`                | Contact form page   |
 | `POST` | `/contact`                | Contact submission  |
 | `POST` | `/api/v1/analytics/track` | Analytics ingestion |

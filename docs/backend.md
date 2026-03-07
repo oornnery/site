@@ -36,6 +36,12 @@
 - `GET /about` -> `AboutPageService.build_page()`
 - `GET /projects` -> `ProjectsPageService.build_list_page()`
 - `GET /projects/{slug}` -> detail page or HTTP 404
+- `GET /blog` -> `BlogPageService.build_home_page()`
+- `GET /blog/posts` -> `BlogPageService.build_posts_page()`
+- `GET /blog/posts/{slug}` -> blog post detail or HTTP 404
+- `GET /blog/tags` -> tags overview page
+- `GET /blog/tags/{tag}` -> posts filtered by tag
+- `GET /blog/feed.xml` -> RSS feed (`application/rss+xml`)
 - `GET /contact` -> `ContactPageService.build_page()`
 
 ### Health check
@@ -68,6 +74,7 @@
 | `HomePageService`          | Featured projects + home SEO + CSRF token       |
 | `AboutPageService`         | About markdown/frontmatter to page context      |
 | `ProjectsPageService`      | Projects listing and detail context             |
+| `BlogPageService`          | Blog home, posts, tags, detail, and RSS feed    |
 | `ContactPageService`       | Contact page state and feedback messages        |
 | `ContactSubmissionService` | CSRF + schema validation and status mapping     |
 | `ContactOrchestrator`      | Full contact flow: validation, notify, metrics  |
@@ -80,6 +87,8 @@ Defined in `app/domain/schemas.py`:
 - `ContactForm`: strict form schema (`extra="forbid"`)
 - `AboutFrontmatter` and content models
 - `ProjectFrontmatter` and normalized metadata
+- `BlogPostFrontmatter` and normalized blog metadata
+  - Supports optional `gist_url` and `gist_file`
 - Analytics schemas (`AnalyticsTrackEvent`, request/response)
 
 Typed page contexts in `app/services/types.py` ensure stable template contracts.
@@ -89,12 +98,22 @@ Typed page contexts in `app/services/types.py` ensure stable template contracts.
 `app/infrastructure/markdown.py`:
 
 1. Parse YAML frontmatter
-2. Convert markdown to HTML
-3. Sanitize HTML with nh3 (Rust-based ammonia bindings) using strict allowlists
-4. Cache content with TTLCache (`MARKDOWN_CACHE_TTL`, default 300s, 0 = indefinite)
+2. For `content/about.md`, parse authored body sections from markdown headings
+   (`##` section, `###` entry) into typed resume content
+3. Convert markdown to HTML
+4. Sanitize HTML with nh3 (Rust-based ammonia bindings) using strict allowlists
+5. Cache content with TTLCache (`MARKDOWN_CACHE_TTL`, default 300s, 0 = indefinite)
 
 Thread-safe caching with `threading.Lock` for safety under multi-worker Uvicorn.
 This keeps content authoring simple while reducing XSS risk.
+The pipeline currently ingests `content/about.md`, `content/projects/*.md`,
+and `content/blog/*.md`.
+`content/about.md` now keeps only profile metadata in frontmatter; the resume
+body is authored in markdown sections and parsed into structured page content.
+For blog posts, if body markdown is empty and `gist_url` is provided,
+the loader fetches gist markdown content from GitHub API/raw endpoints.
+When `gist_url` is provided, gist comments are also fetched and rendered
+in the post detail page.
 
 ## Notifications
 

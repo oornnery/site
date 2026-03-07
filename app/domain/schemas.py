@@ -48,7 +48,7 @@ class WorkExperienceItem(BaseModel):
     highlights: list[str] = Field(default_factory=list)
     content_html: str = ""
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def period(self) -> str:
         return _format_period(self.start_date, self.end_date)
@@ -61,7 +61,7 @@ class EducationItem(BaseModel):
     end_date: str = ""
     details_html: str = ""
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def period(self) -> str:
         return _format_period(self.start_date, self.end_date)

@@ -81,6 +81,14 @@ def test_blog_tag_detail_route_returns_success() -> None:
         assert response.status_code == 200
 
 
+def test_resume_download_returns_markdown_file() -> None:
+    for client in _build_client():
+        response = client.get("/about/resume.md")
+        assert response.status_code == 200
+        assert "text/markdown" in response.headers["content-type"]
+        assert response.headers.get("content-disposition", "").startswith("attachment")
+
+
 def test_blog_feed_returns_rss_xml() -> None:
     for client in _build_client():
         response = client.get("/blog/feed.xml")

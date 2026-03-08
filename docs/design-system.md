@@ -66,12 +66,10 @@ From `motion.css`:
 
 ## Notes on Token Consistency
 
-There are two active token layers:
-
-1. Semantic tokens in `tokens.css` (`--bg`, `--surface`, `--accent`, etc.)
-2. Additional palette in `style.css` (`--bg-primary`, `--accent-primary`, etc.)
-
-This works today, but long-term maintenance is easier
-if all components converge to one semantic token source.
+`tokens.css` is the single source of truth for semantic tokens (`--bg`, `--surface`,
+`--accent`, `--border`, `--radius-*`). The legacy palette in `style.css` extends
+(never overrides) this layer with supplementary variables (`--bg-primary`,
+`--accent-primary` which aliases `var(--accent)`, etc.). Tailwind's `accent` color
+in `tailwind.config.cjs` matches the semantic `--accent` value.
 
 For detailed handoff values, see [Figma Tokens and Handoff](figma-tokens.md).

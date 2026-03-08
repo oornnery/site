@@ -18,36 +18,30 @@
    ========================================== */
 
 :root {
-    /* Color Palette */
+    /* Legacy palette — tokens.css is the semantic source of truth.
+       Variables below extend (never override) the semantic layer. */
     --bg-primary: #0a0a0a;
     --bg-secondary: #111111;
     --bg-tertiary: #1a1a1a;
-    --surface: #1e1e1e;
     --surface-hover: #252525;
 
     --text-primary: #fafafa;
     --text-secondary: #a1a1aa;
     --text-muted: #71717a;
 
-    --accent-primary: #64ffda;
+    --accent-primary: var(--accent);
     --accent-secondary: #7c3aed;
     --accent-glow: #a78bfa;
 
-    --border: #27272a;
     --border-hover: #3f3f46;
 
     /* Shadows */
     --shadow: rgba(0, 0, 0, 0.3);
-    --glow: rgba(100, 255, 218, 0.15);
+    --glow: rgba(124, 124, 255, 0.15);
 
     /* Layout */
     --container-width: 896px;
     --header-height: 64px;
-
-    /* Border Radius */
-    --radius-sm: 0.375rem;
-    --radius-md: 0.5rem;
-    --radius-lg: 0.75rem;
 
     /* Transitions */
     --transition-fast: 150ms ease;

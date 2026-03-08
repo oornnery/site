@@ -57,20 +57,20 @@ This file maps current implementation tokens to a Figma-ready structure.
 
 ## Extended Palette (from `style.css` and Tailwind)
 
-| Token              | Value     | Current usage      |
-| ------------------ | --------- | ------------------ |
-| `bg-primary`       | `#0a0a0a` | Page background    |
-| `bg-secondary`     | `#111111` | Surface backdrop   |
-| `bg-tertiary`      | `#1a1a1a` | Secondary sections |
-| `surface`          | `#1e1e1e` | Cards and panels   |
-| `text-primary`     | `#fafafa` | Primary text       |
-| `text-secondary`   | `#a1a1aa` | Secondary text     |
-| `text-muted`       | `#71717a` | Muted captions     |
-| `accent-primary`   | `#64ffda` | Highlight accents  |
-| `accent-secondary` | `#7c3aed` | CTA/brand accent   |
-| `accent-glow`      | `#a78bfa` | Accent hover/glow  |
-| `border`           | `#27272a` | Border default     |
-| `border-hover`     | `#3f3f46` | Border hover       |
+| Token              | Value           | Current usage                              |
+| ------------------ | --------------- | ------------------------------------------ |
+| `bg-primary`       | `#0a0a0a`       | Page background                            |
+| `bg-secondary`     | `#111111`       | Surface backdrop                           |
+| `bg-tertiary`      | `#1a1a1a`       | Secondary sections                         |
+| ~~`surface`~~      | removed         | Use semantic `--surface` from `tokens.css` |
+| `text-primary`     | `#fafafa`       | Primary text                               |
+| `text-secondary`   | `#a1a1aa`       | Secondary text                             |
+| `text-muted`       | `#71717a`       | Muted captions                             |
+| `accent-primary`   | `var(--accent)` | Alias to semantic accent                   |
+| `accent-secondary` | `#7c3aed`       | CTA/brand accent                           |
+| `accent-glow`      | `#a78bfa`       | Accent hover/glow                          |
+| ~~`border`~~       | removed         | Use semantic `--border` from `tokens.css`  |
+| `border-hover`     | `#3f3f46`       | Border hover                               |
 
 ## Typography Tokens
 
@@ -92,12 +92,12 @@ This file maps current implementation tokens to a Figma-ready structure.
 
 ## Radius Tokens
 
-| Token         | Value                                         |
-| ------------- | --------------------------------------------- |
-| `radius-sm`   | `10px` (semantic) / `0.375rem` (legacy layer) |
-| `radius-md`   | `14px` (semantic) / `0.5rem` (legacy layer)   |
-| `radius-lg`   | `18px` (semantic) / `0.75rem` (legacy layer)  |
-| `radius-pill` | `999px`                                       |
+| Token         | Value                                  |
+| ------------- | -------------------------------------- |
+| `radius-sm`   | `10px` (single source in `tokens.css`) |
+| `radius-md`   | `14px` (single source in `tokens.css`) |
+| `radius-lg`   | `18px` (single source in `tokens.css`) |
+| `radius-pill` | `999px`                                |
 
 ## Shadow Tokens
 
@@ -106,7 +106,7 @@ This file maps current implementation tokens to a Figma-ready structure.
 | `shadow-sm` | `0 6px 16px rgba(0, 0, 0, 0.18)`         |
 | `shadow-md` | `0 10px 30px rgba(0, 0, 0, 0.22)`        |
 | `shadow`    | `rgba(0, 0, 0, 0.3)` (legacy raw)        |
-| `glow`      | `rgba(100, 255, 218, 0.15)` (legacy raw) |
+| `glow`      | `rgba(124, 124, 255, 0.15)` (legacy raw) |
 
 ## Motion Tokens
 
@@ -147,4 +147,5 @@ This file maps current implementation tokens to a Figma-ready structure.
 - Create component variants matching Jinja props.
 - Bind interactive states: default, hover, focus, disabled, loading.
 - Add motion specs from `motion.css` for transitions and enter animations.
-- Keep semantic and legacy token groups separate until full token unification.
+- Legacy layer in `style.css` extends (never overrides)
+  the semantic layer in `tokens.css`.

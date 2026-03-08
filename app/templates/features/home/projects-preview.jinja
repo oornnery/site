@@ -1,9 +1,9 @@
-{#import "@ui/card.jinja" as Card #}
+{#import "@ui/card/card.jinja" as Card #}
 {#import "@ui/tag.jinja" as Tag #}
 {#import "@ui/section-link.jinja" as SectionLink #}
-{#import "@ui/row.jinja" as Row #}
+{#import "@ui/layout/row.jinja" as Row #}
 {#import "@ui/empty-state.jinja" as EmptyState #}
-{#import "@ui/card-heading.jinja" as CardHeading #}
+{#import "@ui/card/card-heading.jinja" as CardHeading #}
 {#def featured=() #}
 
 <section class="flex flex-col min-h-0">
@@ -24,11 +24,11 @@
         {% for project in featured %}
         <Card href={{ '/projects/' ~ project.slug }} padding="sm">
             <div class="flex flex-col gap-1">
-                <CardHeading title={{ project.title }} date={{ project.date }} featured={{ project.featured }} title_class="text-sm text-white font-medium group-hover:text-blue-400 transition-colors" featured_class="text-green-500" />
-                <p class="text-xs text-gray-500 line-clamp-1">{{ project.description }}</p>
+                <CardHeading title={{ project.title }} date={{ project.date }} featured={{ project.featured }} title_class="text-sm text-foreground font-medium group-hover:text-accent transition-colors" featured_class="text-accent" />
+                <p class="text-xs text-foreground/50 line-clamp-1">{{ project.description }}</p>
                 <Row wrap={{ true }} gap="1.5" class_name="mt-1">
                     {% for tech in (project.tech_stack if project.tech_stack else project.tags)[:3] %}
-                    <Tag text={{ tech }} />
+                    <Tag text={{ tech }} variant="outline" />
                     {% endfor %}
                 </Row>
             </div>

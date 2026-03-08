@@ -1,18 +1,18 @@
 {#import "@ui/social-links.jinja" as SocialLinks #}
-{#import "@ui/footer.jinja" as Footer #}
-{#import "@ui/grid.jinja" as Grid #}
+{#import "@ui/nav/footer.jinja" as Footer #}
+{#import "@ui/layout/grid.jinja" as Grid #}
 {#import "@features/contact/contact-form.jinja" as ContactForm #}
 {#def social_links, csrf_token #}
 
-<h2 class="text-lg sm:text-xl font-semibold text-white mb-4 sm:mb-6">Contact</h2>
+<h2 class="text-lg sm:text-xl font-semibold text-foreground mb-4 sm:mb-6">Contact</h2>
 <Grid cols="2" gap="6" class_name="md:gap-12">
     <div>
-        <h3 class="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">Connect</h3>
+        <h3 class="text-base sm:text-lg font-medium text-foreground mb-3 sm:mb-4">Connect</h3>
         <SocialLinks links={{ social_links }} />
     </div>
 
     <div>
-        <h3 class="text-base sm:text-lg font-medium text-white mb-3 sm:mb-4">Send a Message</h3>
+        <h3 class="text-base sm:text-lg font-medium text-foreground mb-3 sm:mb-4">Send a Message</h3>
         <ContactForm csrf_token={{ csrf_token }} />
     </div>
 </Grid>

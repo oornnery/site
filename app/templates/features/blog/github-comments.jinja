@@ -1,23 +1,23 @@
-{#import "@ui/button.jinja" as Button #}
+{#import "@ui/form/button.jinja" as Button #}
 {#def discussion_url="", post_title="", comments=(), comment_source_label="GitHub", show_cta=True #}
 
-<section id="comments" class="section-divider-spacing space-y-4 border-t border-gray-800/50">
-    <h2 class="text-xl sm:text-2xl font-bold text-white">Comments</h2>
+<section id="comments" class="section-divider-spacing space-y-4 border-t border-border/50">
+    <h2 class="text-xl sm:text-2xl font-bold text-foreground">Comments</h2>
     {% if discussion_url %}
-    <p class="text-sm text-gray-400">
-        Discussion for <span class="text-gray-200">{{ post_title }}</span> lives on {{ comment_source_label }}.
+    <p class="text-sm text-foreground/60">
+        Discussion for <span class="text-foreground/80">{{ post_title }}</span> lives on {{ comment_source_label }}.
     </p>
     {% endif %}
     {% if comments %}
     <div class="space-y-3">
         {% for comment in comments %}
-        <article class="rounded-md border border-gray-800/70 bg-gray-900/20 p-3 sm:p-4">
-            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-gray-500 mb-2">
+        <article class="rounded-md border border-border/70 bg-surface/20 p-3 sm:p-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-foreground/50 mb-2">
                 <div class="flex items-center gap-2">
                     {% if comment.profile_url %}
-                    <a href="{{ comment.profile_url }}" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-blue-400 transition-colors">{{ comment.author }}</a>
+                    <a href="{{ comment.profile_url }}" target="_blank" rel="noopener noreferrer" class="text-foreground/70 hover:text-accent transition-colors">{{ comment.author }}</a>
                     {% else %}
-                    <span class="text-gray-300">{{ comment.author }}</span>
+                    <span class="text-foreground/70">{{ comment.author }}</span>
                     {% endif %}
                     {% if comment.created_at %}
                     <span>&bull;</span>
@@ -25,23 +25,23 @@
                     {% endif %}
                 </div>
                 {% if comment.html_url %}
-                <a href="{{ comment.html_url }}" target="_blank" rel="noopener noreferrer" class="text-gray-400 hover:text-blue-400 transition-colors">View</a>
+                <a href="{{ comment.html_url }}" target="_blank" rel="noopener noreferrer" class="text-foreground/60 hover:text-accent transition-colors">View</a>
                 {% endif %}
             </div>
-            <p class="text-sm text-gray-300 whitespace-pre-line">{{ comment.body }}</p>
+            <p class="text-sm text-foreground/70 whitespace-pre-line">{{ comment.body }}</p>
         </article>
         {% endfor %}
     </div>
     {% elif discussion_url %}
-    <p class="text-sm text-gray-500">
+    <p class="text-sm text-foreground/50">
         No comments yet. Start the discussion on {{ comment_source_label }}.
     </p>
     {% elif comments|length == 0 %}
-    <p class="text-sm text-gray-500">
+    <p class="text-sm text-foreground/50">
         Comments are not available for this post yet.
     </p>
     {% else %}
-    <p class="text-sm text-gray-500">Comments via gist are not configured for this post yet.</p>
+    <p class="text-sm text-foreground/50">Comments via gist are not configured for this post yet.</p>
     {% endif %}
     {% if discussion_url and show_cta %}
     <div class="pt-2">

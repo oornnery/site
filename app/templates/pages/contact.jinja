@@ -1,10 +1,10 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
 {#import "@features/contact/contact-form.jinja" as ContactForm #}
 {#import "@ui/social-links.jinja" as SocialLinks #}
-{#import "@ui/breadcrumb.jinja" as Breadcrumb #}
+{#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
 {#import "@ui/page-header.jinja" as PageHeader #}
-{#import "@ui/stack.jinja" as Stack #}
-{#import "@ui/grid.jinja" as Grid #}
+{#import "@ui/layout/stack.jinja" as Stack #}
+{#import "@ui/layout/grid.jinja" as Grid #}
 {#def seo, csrf_token, success="", errors={}, form_data={}, current_path="/contact" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
@@ -21,12 +21,12 @@
 
         <Grid cols="2" gap="8">
             <section>
-                <h2 class="text-lg font-medium text-white mb-4">Connect</h2>
+                <h2 class="text-lg font-medium text-foreground mb-4">Connect</h2>
                 <SocialLinks links={{ social_links }} />
             </section>
 
             <section>
-                <h2 class="text-lg font-medium text-white mb-4">Send a Message</h2>
+                <h2 class="text-lg font-medium text-foreground mb-4">Send a Message</h2>
                 <ContactForm
                     csrf_token={{ csrf_token }}
                     success={{ success }}

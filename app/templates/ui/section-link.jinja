@@ -1,5 +1,5 @@
 {#def href, label, class_name="" #}
 
-{% set cls = ("inline-flex items-center text-sm text-gray-400 hover:text-blue-400 transition-colors " ~ class_name).strip() %}
+{% set cls = ("inline-flex items-center text-sm text-foreground/60 hover:text-accent transition-colors " ~ class_name).strip() %}
 
 <a href="{{ href }}" class="{{ cls }}" {{ attrs.render() }}>{{ label }} &rarr;</a>

@@ -1,4 +1,4 @@
-{#import "@ui/section.jinja" as Section #}
+{#import "@ui/layout/section.jinja" as Section #}
 {#import "@features/resume/entry-header.jinja" as EntryHeader #}
 {#def items #}
 
@@ -10,16 +10,16 @@
                 <EntryHeader title={{ item.title }} subtitle={{ item.company }} chip={{ item.location }} date_text={{ item.period }} size="lg" />
 
                 {% if item.content_html %}
-                <div class="resume-richtext text-sm sm:text-base text-gray-400 leading-relaxed">
+                <div class="resume-richtext text-sm sm:text-base text-foreground/60 leading-relaxed">
                     {{ item.content_html | safe }}
                 </div>
                 {% elif item.description or item.highlights %}
                     {% if item.description %}
-                    <p class="text-sm sm:text-base text-gray-400 leading-relaxed">{{ item.description }}</p>
+                    <p class="text-sm sm:text-base text-foreground/60 leading-relaxed">{{ item.description }}</p>
                     {% endif %}
 
                     {% if item.highlights %}
-                    <ul class="space-y-2 text-sm text-gray-300">
+                    <ul class="space-y-2 text-sm text-foreground/70">
                         {% for highlight in item.highlights %}
                         <li class="resume-impact-item">{{ highlight }}</li>
                         {% endfor %}

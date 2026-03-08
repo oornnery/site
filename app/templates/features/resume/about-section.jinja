@@ -1,8 +1,8 @@
-{#import "@ui/section.jinja" as Section #}
+{#import "@ui/layout/section.jinja" as Section #}
 {#def content_html #}
 
 <Section title="About" heading_id="about" class_name="gap-y-5">
-    <div class="resume-richtext text-sm sm:text-base text-gray-400 leading-relaxed">
+    <div class="resume-richtext text-sm sm:text-base text-foreground/60 leading-relaxed">
         {{ content_html | safe }}
     </div>
 </Section>

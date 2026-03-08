@@ -3,16 +3,16 @@
 {#def profile_name, site_name, profile_role, profile_location, profile_summary, social_links #}
 
 <div class="flex-1 text-center lg:text-left">
-    <h1 class="text-2xl sm:text-3xl font-bold text-white mb-0">{{ profile_name or site_name }}</h1>
+    <h1 class="text-2xl sm:text-3xl font-bold text-foreground mb-0">{{ profile_name or site_name }}</h1>
     {% if profile_role %}
-    <p class="text-sm sm:text-base text-gray-400 font-mono mb-1">
+    <p class="text-sm sm:text-base text-foreground/60 font-mono mb-1">
         {{ profile_role }}
     </p>
     {% endif %}
     {% if profile_location %}
-    <p class="text-xs sm:text-sm text-gray-500 font-mono mb-1.5">
+    <p class="text-xs sm:text-sm text-foreground/50 font-mono mb-1.5">
         <a
-            class="hover:underline hover:text-blue-400 transition-colors"
+            class="hover:underline hover:text-accent transition-colors"
             href="https://www.google.com/maps/search/{{ profile_location | urlencode }}"
             target="_blank"
             rel="noopener noreferrer"
@@ -25,7 +25,7 @@
         </a>
     </p>
     {% endif %}
-    <p class="text-xs sm:text-sm text-gray-500 mb-4 max-w-xl">
+    <p class="text-xs sm:text-sm text-foreground/50 mb-4 max-w-xl">
         {{ profile_summary }}
     </p>
 

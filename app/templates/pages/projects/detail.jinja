@@ -1,9 +1,9 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
 {#import "@ui/tag.jinja" as Tag #}
-{#import "@ui/button.jinja" as Button #}
+{#import "@ui/form/button.jinja" as Button #}
 {#import "@ui/icon.jinja" as Icon #}
-{#import "@ui/breadcrumb.jinja" as Breadcrumb #}
-{#import "@ui/row.jinja" as Row #}
+{#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
+{#import "@ui/layout/row.jinja" as Row #}
 {#import "@ui/content-shell.jinja" as ContentShell #}
 {#import "@ui/meta-info.jinja" as MetaInfo #}
 {#def seo, project, current_path="/projects" #}
@@ -16,7 +16,7 @@
     ) %}
 
     <div class="space-y-4 sm:space-y-6">
-        <Breadcrumb items={{ breadcrumb_items }} class_name="text-sm text-gray-500 -mt-2 sm:-mt-3 fade-in flex items-center" />
+        <Breadcrumb items={{ breadcrumb_items }} class_name="text-sm text-foreground/50 -mt-2 sm:-mt-3 fade-in flex items-center" />
 
         <article class="space-y-8">
             <header>
@@ -27,21 +27,21 @@
                         {% endif %}
                         {% if project.featured %}
                         <span>&bull;</span>
-                        <span class="text-green-500">★ Featured</span>
+                        <span class="text-accent">★ Featured</span>
                         {% endif %}
                     </MetaInfo>
 
-                    <h1 class="text-4xl font-bold text-white mb-4 sm:mb-5 leading-tight">{{ project.title }}</h1>
+                    <h1 class="text-4xl font-bold text-foreground mb-4 sm:mb-5 leading-tight">{{ project.title }}</h1>
 
                     {% if project.description %}
-                    <p class="text-xl text-gray-400">{{ project.description }}</p>
+                    <p class="text-xl text-foreground/60">{{ project.description }}</p>
                     {% endif %}
 
                     {% set chips = project.tech_stack if project.tech_stack else project.tags %}
                     {% if chips %}
                     <Row wrap={{ true }} gap="2" class_name="mt-4">
                         {% for tech in chips %}
-                        <Tag text={{ tech }} />
+                        <Tag text={{ tech }} variant="outline" />
                         {% endfor %}
                     </Row>
                     {% endif %}

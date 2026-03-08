@@ -1,4 +1,4 @@
-{#import "@ui/section.jinja" as Section #}
+{#import "@ui/layout/section.jinja" as Section #}
 {#import "@features/resume/entry-header.jinja" as EntryHeader #}
 {#def items #}
 
@@ -8,7 +8,7 @@
         <article class="resume-list-item">
             <EntryHeader title={{ item.school }} subtitle={{ item.degree }} date_text={{ item.period }} />
             {% if item.details_html %}
-            <div class="resume-richtext mt-3 text-sm text-gray-400 leading-relaxed">
+            <div class="resume-richtext mt-3 text-sm text-foreground/60 leading-relaxed">
                 {{ item.details_html | safe }}
             </div>
             {% endif %}

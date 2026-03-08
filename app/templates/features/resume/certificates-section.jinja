@@ -1,4 +1,4 @@
-{#import "@ui/section.jinja" as Section #}
+{#import "@ui/layout/section.jinja" as Section #}
 {#import "@features/resume/entry-header.jinja" as EntryHeader #}
 {#def items #}
 
@@ -8,10 +8,10 @@
         <article class="resume-certificate-item">
             <EntryHeader title={{ item.name }} subtitle={{ item.issuer }} date_text={{ item.date }} />
             {% if item.credential_id %}
-            <p class="mt-1 font-mono text-[11px] text-gray-500">ID: {{ item.credential_id }}</p>
+            <p class="mt-1 font-mono text-[11px] text-foreground/50">ID: {{ item.credential_id }}</p>
             {% endif %}
             {% if item.details_html %}
-            <div class="resume-richtext mt-3 text-sm text-gray-400 leading-relaxed">
+            <div class="resume-richtext mt-3 text-sm text-foreground/60 leading-relaxed">
                 {{ item.details_html | safe }}
             </div>
             {% endif %}

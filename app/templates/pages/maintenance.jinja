@@ -1,18 +1,18 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
-{#import "@ui/button.jinja" as Button #}
+{#import "@ui/form/button.jinja" as Button #}
 {#import "@ui/icon.jinja" as Icon #}
-{#import "@ui/center.jinja" as Center #}
-{#import "@ui/row.jinja" as Row #}
+{#import "@ui/layout/center.jinja" as Center #}
+{#import "@ui/layout/row.jinja" as Row #}
 {#def seo, current_path="", message="We are performing maintenance right now. Please try again in a few minutes." #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     <Center>
-        <p class="text-sm text-gray-500 mb-3">Service Status</p>
-        <h1 class="text-4xl sm:text-5xl font-bold text-white mb-4 inline-flex items-center justify-center gap-2">
-            <Icon name="check" size="lg" class_name="text-green-400" />
+        <p class="text-sm text-foreground/50 mb-3">Service Status</p>
+        <h1 class="text-4xl sm:text-5xl font-bold text-foreground mb-4 inline-flex items-center justify-center gap-2">
+            <Icon name="check" size="lg" class_name="text-accent" />
             Maintenance
         </h1>
-        <p class="text-base text-gray-400 mb-8 max-w-xl mx-auto">{{ message }}</p>
+        <p class="text-base text-foreground/60 mb-8 max-w-xl mx-auto">{{ message }}</p>
         <Row gap="3" justify="center">
             <Button href="/" variant="primary">Try Again</Button>
             <Button href="/contact" variant="secondary">Contact</Button>

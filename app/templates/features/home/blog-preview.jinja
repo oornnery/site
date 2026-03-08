@@ -1,8 +1,8 @@
-{#import "@ui/card.jinja" as Card #}
+{#import "@ui/card/card.jinja" as Card #}
 {#import "@ui/tag.jinja" as Tag #}
 {#import "@ui/section-link.jinja" as SectionLink #}
 {#import "@ui/empty-state.jinja" as EmptyState #}
-{#import "@ui/card-heading.jinja" as CardHeading #}
+{#import "@ui/card/card-heading.jinja" as CardHeading #}
 {#def latest_posts=() #}
 
 <section class="flex flex-col min-h-0">
@@ -23,12 +23,12 @@
         {% for post in latest_posts %}
         <Card href={{ '/blog/posts/' ~ post.slug }} padding="sm">
             <div class="flex flex-col gap-1">
-                <CardHeading title={{ post.title }} date={{ post.date }} featured={{ post.featured }} title_class="text-sm text-white font-medium group-hover:text-blue-400 transition-colors" />
-                <p class="text-xs text-gray-500 line-clamp-1">{{ post.description }}</p>
+                <CardHeading title={{ post.title }} date={{ post.date }} featured={{ post.featured }} title_class="text-sm text-foreground font-medium group-hover:text-accent transition-colors" />
+                <p class="text-xs text-foreground/50 line-clamp-1">{{ post.description }}</p>
                 {% if post.tags %}
                 <div class="mt-1 flex flex-wrap gap-1.5">
                     {% for tag in post.tags[:3] %}
-                    <Tag text={{ tag }} />
+                    <Tag text={{ tag }} variant="outline" />
                     {% endfor %}
                 </div>
                 {% endif %}

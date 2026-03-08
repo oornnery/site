@@ -1,17 +1,17 @@
-{#import "@ui/card.jinja" as Card #}
+{#import "@ui/card/card.jinja" as Card #}
 {#import "@ui/tag.jinja" as Tag #}
-{#import "@ui/card-heading.jinja" as CardHeading #}
+{#import "@ui/card/card-heading.jinja" as CardHeading #}
 {#def project, tight=False #}
 
 {% set card_padding = "sm" if tight else "default" %}
 {% set heading_class = "text-base sm:text-lg" if tight else "text-lg" %}
-{% set description_class = "text-gray-400 text-sm line-clamp-2 mb-2.5" if tight else "text-gray-400 text-sm line-clamp-2 mb-3" %}
+{% set description_class = "text-foreground/60 text-sm line-clamp-2 mb-2.5" if tight else "text-foreground/60 text-sm line-clamp-2 mb-3" %}
 {% set chips_limit = 3 if tight else 4 %}
 {% set top_margin = "mb-2.5" if tight else "mb-3" %}
 
 <Card href={{ '/projects/' ~ project.slug }} padding={{ card_padding }}>
     <article>
-        <CardHeading title={{ project.title }} date={{ project.date }} featured={{ project.featured }} title_class="{{ heading_class }} font-medium text-white group-hover:text-blue-400 transition-colors" featured_class="text-green-500" class="{{ top_margin }}" />
+        <CardHeading title={{ project.title }} date={{ project.date }} featured={{ project.featured }} title_class="{{ heading_class }} font-medium text-foreground group-hover:text-accent transition-colors" featured_class="text-accent" class="{{ top_margin }}" />
 
         {% if project.description %}
         <p class="{{ description_class }}">{{ project.description }}</p>

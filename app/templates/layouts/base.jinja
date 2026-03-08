@@ -2,10 +2,13 @@
 {#def seo #}
 
 <!DOCTYPE html>
-<html lang="en" class="dark" data-theme="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+    (function(){var d=document.documentElement,t=localStorage.getItem("theme"),p=localStorage.getItem("palette");if(!t){t=matchMedia("(prefers-color-scheme:light)").matches?"light":"dark"}d.dataset.theme=t;d.classList.toggle("dark",t==="dark");if(p&&p!=="default"){d.dataset.palette=p}})();
+    </script>
     <SeoHead
         title={{ seo.title }}
         description={{ seo.description }}

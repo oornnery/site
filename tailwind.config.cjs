@@ -1,6 +1,6 @@
 module.exports = {
   content: [
-    './app/components/**/*.jinja',
+    './app/templates/**/*.jinja',
     './app/**/*.py',
     './node_modules/flowbite/**/*.js',
   ],

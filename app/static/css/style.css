@@ -614,43 +614,6 @@ textarea:focus-visible {
     gap: 0.3rem;
 }
 
-.resume-projects-grid {
-    display: grid;
-    gap: 0.75rem;
-}
-
-.resume-project-link {
-    display: block;
-    padding: 1rem 1.05rem;
-    border: 1px solid rgba(31, 41, 55, 0.62);
-    border-radius: 0.9rem;
-    background: rgba(17, 24, 39, 0.16);
-    transition: background-color var(--transition-fast), border-color var(--transition-fast);
-}
-
-.resume-project-link:hover {
-    background: rgba(17, 24, 39, 0.28);
-    border-color: rgba(55, 65, 81, 0.9);
-}
-
-.resume-skills-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.resume-skill-group {
-    padding-top: 0.7rem;
-    border-top: 1px solid rgba(31, 41, 55, 0.62);
-}
-
-.resume-skill-group__title {
-    margin-bottom: 0.9rem;
-    font-size: 0.74rem;
-    line-height: 1.2;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-}
 
 @media (min-width: 768px) {
     .resume-sections-stack {
@@ -674,15 +637,6 @@ textarea:focus-visible {
         padding-top: 0.15rem;
     }
 
-    .resume-skills-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
-@media (min-width: 1024px) {
-    .resume-projects-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 }
 
 .blog-post-toc-wrap {
@@ -1211,6 +1165,44 @@ textarea:focus-visible {
     padding: 0.75rem 1rem;
     border-radius: 0.375rem;
     color: #c4c4cf;
+}
+
+/* ==========================================
+   Reusable Patterns
+   ========================================== */
+
+/* Interactive card link — used for blog posts, project cards, and nav cards */
+.card-link {
+    display: block;
+    border-radius: var(--radius-lg);
+    transition: all 200ms ease;
+    background: rgba(17, 24, 39, 0.5);
+    border: 1px solid rgba(31, 41, 55, 1);
+}
+
+.card-link:hover {
+    border-color: rgba(55, 65, 81, 1);
+    background: rgba(31, 41, 55, 0.5);
+}
+
+/* Heading text that highlights on group hover */
+.heading-hover {
+    color: #fafafa;
+    transition: color var(--transition-fast);
+}
+
+.group:hover .heading-hover {
+    color: #60a5fa;
+}
+
+/* Subtle link hover — nav, footer, social links */
+.link-hover {
+    color: #9ca3af;
+    transition: color var(--transition-fast);
+}
+
+.link-hover:hover {
+    color: #60a5fa;
 }
 
 /* ==========================================

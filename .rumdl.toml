@@ -62,11 +62,9 @@ flavor = "gfm"
 # [MD007]
 # indent = 4  # Unordered list indentation
 
-# [MD013]
-# line-length = 100  # Line length
-# code-blocks = false  # Exclude code blocks from line length check
-# tables = false  # Exclude tables from line length check
-# headings = true  # Include headings in line length check
+[MD013]
+code-blocks = false  # Long template/code examples should not be wrapped
+tables = false       # Table cells are not wrappable
 
 # [MD044]
 # names = ["rumdl", "Markdown", "GitHub"]  # Proper names that should be capitalized correctly

@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
@@ -71,6 +72,30 @@ def create_app() -> FastAPI:
         allowed_hosts=split_csv(settings.trusted_hosts) or ["localhost"],
     )
     app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error_handler(
+        request: Request, exc: RequestValidationError
+    ) -> Response:
+        if request.method == "POST" and request.url.path == "/contact":
+            from app.core.dependencies import get_contact_page_service
+            from app.core.rendering import render_page
+
+            user_agent = request.headers.get("user-agent", "")
+            page_service = get_contact_page_service()
+            page = page_service.build_page(
+                user_agent=user_agent,
+                errors={
+                    "form": "Invalid form submission. Please fill in all fields and try again."
+                },
+            )
+            return render_page(page, status_code=422)
+        from fastapi.responses import JSONResponse
+
+        return JSONResponse(
+            status_code=422,
+            content={"detail": exc.errors()},
+        )
 
     app.include_router(api_router)
     logger.info("Routers registered from app.api.router.")

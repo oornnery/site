@@ -26,9 +26,9 @@
     {{ content }}
 
     <script defer src="/static/js/alpine.min.js"></script>
-    <script src="/static/js/main.js"></script>
+    <script defer src="/static/js/main.js"></script>
     {% if analytics_enabled %}
-    <script src="/static/js/analytics.js" defer></script>
+    <script defer src="/static/js/analytics.js"></script>
     {% endif %}
     {{ assets.render_js() }}
 </body>

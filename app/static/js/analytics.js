@@ -1,33 +1,28 @@
-(function () {
-    "use strict";
+"use strict";
 
-    var ENDPOINT = "/api/v1/analytics/track";
-    var MAX_BATCH = 20;
-    var FLUSH_MS = 5000;
+(() => {
+    const ENDPOINT = "/api/v1/analytics/track";
+    const MAX_BATCH = 20;
+    const FLUSH_MS = 5000;
 
-    var queue = [];
-    var enabled = true;
+    let queue = [];
 
-    function enqueue(eventName, fields) {
+    const enqueue = (name, fields = {}) => {
         queue.push({
-            event_name: eventName,
-            page_path: fields.pagePath || window.location.pathname,
-            element_id: fields.elementId || "",
-            element_text: (fields.elementText || "").slice(0, 512),
-            target_url: fields.targetUrl || "",
-            metadata: fields.metadata || {},
+            event_name: name,
+            page_path: fields.pagePath ?? location.pathname,
+            element_id: fields.elementId ?? "",
+            element_text: (fields.elementText ?? "").slice(0, 512),
+            target_url: fields.targetUrl ?? "",
+            metadata: fields.metadata ?? {},
             occurred_at: new Date().toISOString(),
         });
-        if (queue.length >= MAX_BATCH) {
-            flush();
-        }
-    }
+        if (queue.length >= MAX_BATCH) flush();
+    };
 
-    function flush() {
-        if (queue.length === 0) {
-            return;
-        }
-        var payload = JSON.stringify({ events: queue.splice(0, MAX_BATCH) });
+    const flush = () => {
+        if (!queue.length) return;
+        const payload = JSON.stringify({ events: queue.splice(0, MAX_BATCH) });
         if (navigator.sendBeacon) {
             navigator.sendBeacon(ENDPOINT, new Blob([payload], { type: "application/json" }));
         } else {
@@ -37,67 +32,54 @@
                 body: payload,
                 keepalive: true,
                 credentials: "same-origin",
-            }).catch(function () {});
+            }).catch(() => {});
         }
-    }
+    };
 
-    function trackClicks() {
-        document.addEventListener("click", function (event) {
-            var el = event.target.closest("[data-analytics-event]");
-            if (!el) {
-                return;
-            }
-            var href = el.getAttribute("href") || "";
+    const trackClicks = () => {
+        document.addEventListener("click", (e) => {
+            const el = e.target.closest("[data-analytics-event]");
+            if (!el) return;
             enqueue(el.dataset.analyticsEvent || "click", {
-                pagePath: el.dataset.analyticsPath || window.location.pathname,
-                elementId: el.dataset.analyticsId || el.id || "",
-                elementText: el.dataset.analyticsLabel || (el.textContent || "").trim(),
-                targetUrl: el.dataset.analyticsTarget || href,
+                pagePath: el.dataset.analyticsPath,
+                elementId: el.dataset.analyticsId || el.id,
+                elementText: el.dataset.analyticsLabel || el.textContent?.trim(),
+                targetUrl: el.dataset.analyticsTarget || el.getAttribute("href"),
             });
         });
-    }
+    };
 
-    function trackSectionScroll() {
-        var sections = document.querySelectorAll("[data-analytics-section]");
-        if (sections.length === 0) {
-            return;
-        }
-        var observer = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (!entry.isIntersecting) {
-                    return;
-                }
+    const trackSectionScroll = () => {
+        const sections = document.querySelectorAll("[data-analytics-section]");
+        if (!sections.length) return;
+
+        const observer = new IntersectionObserver((entries) => {
+            for (const entry of entries) {
+                if (!entry.isIntersecting) continue;
                 observer.unobserve(entry.target);
                 enqueue("section_scroll", {
                     elementId: entry.target.dataset.analyticsSection || entry.target.id || "section",
                 });
-            });
+            }
         }, { threshold: 0.6 });
 
-        sections.forEach(function (section) {
-            observer.observe(section);
-        });
-    }
+        sections.forEach((s) => observer.observe(s));
+    };
 
-    function init() {
-        var meta = document.querySelector('meta[name="analytics-enabled"]');
-        if (meta && meta.content === "false") {
-            enabled = false;
-            return;
-        }
+    const init = () => {
+        const meta = document.querySelector('meta[name="analytics-enabled"]');
+        if (meta?.content === "false") return;
 
-        enqueue("page_view", { metadata: { referrer: document.referrer || "" } });
+        enqueue("page_view", { metadata: { referrer: document.referrer } });
         trackClicks();
         trackSectionScroll();
 
-        window.setInterval(flush, FLUSH_MS);
-        window.addEventListener("visibilitychange", function () {
-            if (document.visibilityState === "hidden") {
-                flush();
-            }
+        setInterval(flush, FLUSH_MS);
+        document.addEventListener("visibilitychange", () => {
+            if (document.visibilityState === "hidden") flush();
         });
-        window.addEventListener("beforeunload", flush);
-    }
+        addEventListener("beforeunload", flush);
+    };
 
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", init);

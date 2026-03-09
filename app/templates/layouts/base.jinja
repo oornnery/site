@@ -6,9 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script>
-    (function(){var d=document.documentElement,t=localStorage.getItem("theme"),p=localStorage.getItem("palette");if(!t){t=matchMedia("(prefers-color-scheme:light)").matches?"light":"dark"}d.dataset.theme=t;d.classList.toggle("dark",t==="dark");if(p&&p!=="default"){d.dataset.palette=p}})();
-    </script>
+    <script src="/static/js/theme-bootstrap.js"></script>
     <SeoHead
         title={{ seo.title }}
         description={{ seo.description }}
@@ -28,7 +26,6 @@
 <body class="bg-background text-foreground font-sans antialiased selection:bg-accent/20 selection:text-accent min-h-screen">
     {{ content }}
 
-    <script defer src="/static/js/alpine.min.js"></script>
     <script defer src="/static/js/main.js"></script>
     {% if analytics_enabled %}
     <script defer src="/static/js/analytics.js"></script>

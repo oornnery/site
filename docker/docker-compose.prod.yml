@@ -28,12 +28,14 @@ services:
       LOG_LEVEL: "INFO"
       TELEMETRY_ENABLED: "true"
       TELEMETRY_LOGS_ENABLED: "true"
+      TELEMETRY_EXPORTER_OTLP_ENDPOINT: "${PROD_TELEMETRY_EXPORTER_OTLP_ENDPOINT:-http://host.docker.internal:4317}"
       TRUST_FORWARDED_IP_HEADERS: "true"
       BASE_URL: "${PROD_BASE_URL:-https://example.com}"
       TRUSTED_HOSTS: "${PROD_TRUSTED_HOSTS:-example.com,www.example.com}"
       CORS_ALLOW_ORIGINS: "${PROD_CORS_ALLOW_ORIGINS:-https://example.com}"
-      ANALYTICS_ALLOWED_ORIGINS: "${PROD_ANALYTICS_ALLOWED_ORIGINS:-https://example.com}"
-      ANALYTICS_ALLOWED_SOURCES: "${PROD_ANALYTICS_ALLOWED_SOURCES:-0.0.0.0/0,::/0}"
+      FRONTEND_TELEMETRY_ENABLED: "${PROD_FRONTEND_TELEMETRY_ENABLED:-true}"
+      FRONTEND_TELEMETRY_OTLP_ENDPOINT: "${PROD_FRONTEND_TELEMETRY_OTLP_ENDPOINT:-}"
+      FRONTEND_TELEMETRY_SAMPLE_RATIO: "${PROD_FRONTEND_TELEMETRY_SAMPLE_RATIO:-1.0}"
     command:
       [
         "uvicorn",
@@ -51,6 +53,8 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     security_opt:
       - no-new-privileges:true
     healthcheck:

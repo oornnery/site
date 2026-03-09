@@ -17,7 +17,6 @@ from app.core.dependencies import limiter, render_template
 from app.core.logger import configure_logging
 from app.core.config import split_csv
 from app.core.security import (
-    AnalyticsSourceGuardMiddleware,
     RequestBodySizeLimitMiddleware,
     RequestTracingMiddleware,
     SecurityHeadersMiddleware,
@@ -57,7 +56,6 @@ def create_app() -> FastAPI:
     app.state.limiter = limiter
     app.add_middleware(RequestTracingMiddleware)  # type: ignore[arg-type]
     app.add_middleware(RequestBodySizeLimitMiddleware)  # type: ignore[arg-type]
-    app.add_middleware(AnalyticsSourceGuardMiddleware)  # type: ignore[arg-type]
     app.add_middleware(SecurityHeadersMiddleware)  # type: ignore[arg-type]
     app.add_middleware(SlowAPIMiddleware)  # type: ignore[arg-type]
     app.add_middleware(

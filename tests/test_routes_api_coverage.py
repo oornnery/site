@@ -3,26 +3,26 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
+import httpx
 import pytest
 from fastapi.testclient import TestClient
 
+import app.api.telemetry as telemetry_api_module
 import app.services.contact as contact_service_module
 from app.core.dependencies import (
-    get_analytics_service,
     get_blog_page_service,
     get_contact_orchestrator,
     get_projects_page_service,
 )
+from app.models.schemas import SEOMeta
 from app.models.schemas import ContactForm
 from app.infrastructure.notifications.email import (
     NotificationChannelResult,
     NotificationDispatchResult,
 )
 from app.main import create_app
-from app.observability.analytics import AnalyticsIngestResult
 from app.services.contact import ContactOrchestrator, ContactPageService
 from app.services.types import BlogPostsPageContext, ContactFormResult, PageRenderData
-from app.models.schemas import SEOMeta
 
 
 def _build_client(
@@ -54,35 +54,6 @@ def _seo() -> SEOMeta:
         title="Route Test",
         description="Route coverage test description.",
     )
-
-
-class StubAnalyticsService:
-    def __init__(self, result: AnalyticsIngestResult) -> None:
-        self._result = result
-
-    def ingest_events(
-        self,
-        events: list[object],
-        *,
-        request_id: str,
-        client_ip: str,
-        user_agent: str,
-    ) -> AnalyticsIngestResult:
-        del events, request_id, client_ip, user_agent
-        return self._result
-
-
-class AcceptAllAnalyticsService:
-    def ingest_events(
-        self,
-        events: list[object],
-        *,
-        request_id: str,
-        client_ip: str,
-        user_agent: str,
-    ) -> AnalyticsIngestResult:
-        del request_id, client_ip, user_agent
-        return AnalyticsIngestResult(accepted=len(events), rejected=0, errors=())
 
 
 @dataclass(frozen=True)
@@ -124,6 +95,43 @@ class StubNotificationService:
     ) -> NotificationDispatchResult:
         del contact, context
         return self._dispatch_result
+
+
+class StubTelemetryAsyncClient:
+    def __init__(
+        self,
+        *,
+        response: httpx.Response | None = None,
+        error: httpx.HTTPError | None = None,
+    ) -> None:
+        self._response = response or httpx.Response(status_code=202, content=b"")
+        self._error = error
+        self.calls: list[dict[str, object]] = []
+        self.init_kwargs: dict[str, object] = {}
+
+    async def __aenter__(self) -> "StubTelemetryAsyncClient":
+        return self
+
+    async def __aexit__(self, exc_type, exc, tb) -> None:
+        del exc_type, exc, tb
+
+    async def post(
+        self,
+        url: str,
+        *,
+        content: bytes,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        self.calls.append(
+            {
+                "url": url,
+                "content": content,
+                "headers": headers,
+            }
+        )
+        if self._error is not None:
+            raise self._error
+        return self._response
 
 
 class WrongBlogTagsPageService:
@@ -189,7 +197,6 @@ def _make_orchestrator(
     *,
     submission_service: object | None = None,
     notification_service: object | None = None,
-    analytics_service: object | None = None,
 ) -> ContactOrchestrator:
     """Build a ContactOrchestrator with optional stub services."""
     return ContactOrchestrator(
@@ -197,7 +204,6 @@ def _make_orchestrator(
         submission_service=submission_service,  # type: ignore[arg-type]
         notification_service=notification_service  # type: ignore[arg-type]
         or StubNotificationService(NotificationDispatchResult(results=())),
-        analytics_service=analytics_service or AcceptAllAnalyticsService(),  # type: ignore[arg-type]
     )
 
 
@@ -209,50 +215,105 @@ def test_health_endpoint_returns_ok() -> None:
         assert response.json() == {"status": "ok"}
 
 
-def test_analytics_track_route_returns_accept_message() -> None:
-    analytics_service = StubAnalyticsService(
-        AnalyticsIngestResult(accepted=1, rejected=0, errors=())
-    )
-    overrides = {get_analytics_service: lambda: analytics_service}
-
-    for client in _build_client(overrides=overrides):
-        response = client.post(
-            "/api/v1/analytics/track",
-            json={"events": [{"event_name": "page_view", "page_path": "/"}]},
-            headers={"user-agent": "pytest-agent"},
-        )
-
-        assert response.status_code == 200
-        payload = response.json()
-        assert payload["accepted"] == 1
-        assert payload["rejected"] == 0
-        assert payload["message"] == "Events accepted."
-        assert payload["errors"] == []
-
-
-def test_analytics_track_route_returns_rejection_message() -> None:
-    analytics_service = StubAnalyticsService(
-        AnalyticsIngestResult(
-            accepted=1,
-            rejected=1,
-            errors=("Invalid event metadata.",),
+def test_frontend_telemetry_route_forwards_payload_to_collector(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    telemetry_client = StubTelemetryAsyncClient(
+        response=httpx.Response(
+            status_code=202,
+            content=b"accepted",
+            headers={"content-type": "application/x-protobuf"},
         )
     )
-    overrides = {get_analytics_service: lambda: analytics_service}
 
-    for client in _build_client(overrides=overrides):
+    def _client_factory(*args: object, **kwargs: object) -> StubTelemetryAsyncClient:
+        telemetry_client.init_kwargs = dict(kwargs)
+        return telemetry_client
+
+    monkeypatch.setattr(
+        telemetry_api_module.httpx,
+        "AsyncClient",
+        _client_factory,
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.settings, "frontend_telemetry_enabled", True
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.settings,
+        "frontend_telemetry_otlp_endpoint",
+        "http://collector.test:4318/v1/traces",
+    )
+
+    for client in _build_client():
         response = client.post(
-            "/api/v1/analytics/track",
-            json={"events": [{"event_name": "page_view", "page_path": "/"}]},
-            headers={"user-agent": "pytest-agent"},
+            "/otel/v1/traces",
+            content=b"trace-payload",
+            headers={
+                "content-type": "application/x-protobuf",
+                "content-encoding": "gzip",
+                "user-agent": "pytest-agent",
+            },
         )
 
-        assert response.status_code == 200
-        payload = response.json()
-        assert payload["accepted"] == 1
-        assert payload["rejected"] == 1
-        assert payload["message"] == "Some events were rejected."
-        assert payload["errors"] == ["Invalid event metadata."]
+        assert response.status_code == 202
+        assert response.content == b"accepted"
+        assert telemetry_client.init_kwargs == {"timeout": 10.0}
+        assert telemetry_client.calls == [
+            {
+                "url": "http://collector.test:4318/v1/traces",
+                "content": b"trace-payload",
+                "headers": {
+                    "content-type": "application/x-protobuf",
+                    "content-encoding": "gzip",
+                    "user-agent": "pytest-agent",
+                },
+            }
+        ]
+
+
+def test_frontend_telemetry_route_returns_not_found_when_disabled(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        telemetry_api_module.settings, "frontend_telemetry_enabled", False
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.settings,
+        "frontend_telemetry_otlp_endpoint",
+        "http://collector.test:4318/v1/traces",
+    )
+
+    for client in _build_client():
+        response = client.post("/otel/v1/traces", content=b"trace-payload")
+
+        assert response.status_code == 404
+
+
+def test_frontend_telemetry_route_returns_bad_gateway_on_upstream_error(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    telemetry_client = StubTelemetryAsyncClient(
+        error=httpx.ConnectError("collector unavailable")
+    )
+
+    monkeypatch.setattr(
+        telemetry_api_module.httpx,
+        "AsyncClient",
+        lambda *args, **kwargs: telemetry_client,
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.settings, "frontend_telemetry_enabled", True
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.settings,
+        "frontend_telemetry_otlp_endpoint",
+        "http://collector.test:4318/v1/traces",
+    )
+
+    for client in _build_client():
+        response = client.post("/otel/v1/traces", content=b"trace-payload")
+
+        assert response.status_code == 502
 
 
 def test_contact_route_rejects_unsupported_content_type() -> None:

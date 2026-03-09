@@ -1,6 +1,8 @@
+from typing import TYPE_CHECKING, cast
+from urllib.parse import urlsplit, urlunsplit
+
 from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import TYPE_CHECKING, cast
 
 
 class Settings(BaseSettings):
@@ -41,17 +43,17 @@ class Settings(BaseSettings):
     )
     default_language: str = "en"
     supported_languages: list[str] = Field(default_factory=lambda: ["en", "pt"])
-    analytics_enabled: bool = True
-    analytics_log_events: bool = True
+    frontend_telemetry_enabled: bool = True
+    frontend_telemetry_service_name: str = "portfolio-frontend"
+    frontend_telemetry_otlp_endpoint: str = ""
+    frontend_telemetry_sample_ratio: float = Field(default=1.0, ge=0.0, le=1.0)
+    frontend_telemetry_proxy_path: str = "/otel/v1/traces"
 
     # Security
     secret_key: str = Field(min_length=16)
     csrf_token_expiry: int = 3600
     default_rate_limit: str = "60/minute"
     rate_limit: str = "10/minute"
-    analytics_rate_limit: str = "30/minute"
-    analytics_allowed_sources: str = "127.0.0.1,::1"
-    analytics_allowed_origins: str = ""
     trust_forwarded_ip_headers: bool = False
     trusted_hosts: str = "localhost,127.0.0.1,testserver"
     cors_allow_origins: str = ""
@@ -60,7 +62,6 @@ class Settings(BaseSettings):
     cors_allow_credentials: bool = False
     max_request_body_bytes: int = Field(default=1_048_576, ge=1024)
     contact_max_body_bytes: int = Field(default=65_536, ge=1024)
-    analytics_max_body_bytes: int = Field(default=262_144, ge=1024)
 
     # Content
     markdown_cache_ttl: int = Field(default=300, ge=0)
@@ -81,6 +82,54 @@ class Settings(BaseSettings):
     smtp_use_tls: bool = True
     smtp_use_ssl: bool = False
     smtp_timeout_seconds: int = Field(default=10, ge=1, le=120)
+
+    def frontend_telemetry_collector_endpoint(self) -> str:
+        explicit = self.frontend_telemetry_otlp_endpoint.strip()
+        if explicit:
+            return explicit
+
+        backend = self.telemetry_exporter_otlp_endpoint.strip()
+        if not backend:
+            return ""
+
+        parsed = urlsplit(backend)
+        if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+            return ""
+
+        port = parsed.port
+        path = parsed.path.strip() or "/"
+        if port == 4317:
+            netloc = parsed.hostname
+            if parsed.username:
+                credentials = parsed.username
+                if parsed.password:
+                    credentials = f"{credentials}:{parsed.password}"
+                netloc = f"{credentials}@{netloc}"
+            netloc = f"{netloc}:4318"
+            return urlunsplit((parsed.scheme, netloc, "/v1/traces", "", ""))
+
+        if port == 4318 and path == "/":
+            return urlunsplit(
+                (
+                    parsed.scheme,
+                    parsed.netloc,
+                    "/v1/traces",
+                    parsed.query,
+                    parsed.fragment,
+                )
+            )
+
+        return backend
+
+    def frontend_telemetry_browser_endpoint(self) -> str:
+        if not self.frontend_telemetry_is_enabled():
+            return ""
+        return self.frontend_telemetry_proxy_path
+
+    def frontend_telemetry_is_enabled(self) -> bool:
+        return self.frontend_telemetry_enabled and bool(
+            self.frontend_telemetry_collector_endpoint()
+        )
 
 
 def split_csv(value: str) -> tuple[str, ...]:

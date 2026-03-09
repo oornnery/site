@@ -12,8 +12,12 @@ services:
     environment:
       DEBUG: "true"
       LOG_LEVEL: "DEBUG"
-      TELEMETRY_ENABLED: "false"
-      TELEMETRY_LOGS_ENABLED: "false"
+      TELEMETRY_ENABLED: "${DEV_TELEMETRY_ENABLED:-true}"
+      TELEMETRY_LOGS_ENABLED: "${DEV_TELEMETRY_LOGS_ENABLED:-true}"
+      TELEMETRY_EXPORTER_OTLP_ENDPOINT: "${DEV_TELEMETRY_EXPORTER_OTLP_ENDPOINT:-http://host.docker.internal:4317}"
+      FRONTEND_TELEMETRY_ENABLED: "${DEV_FRONTEND_TELEMETRY_ENABLED:-true}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ../app:/app/app
       - ../content:/app/content

@@ -78,23 +78,10 @@ def test_owasp_path_traversal_attempt_returns_404(client: TestClient) -> None:
     assert "root:x:0:0" not in response.text
 
 
-def test_owasp_rejects_extra_fields_in_analytics_payload(
-    client: TestClient,
-) -> None:
-    response = client.post(
-        "/api/v1/analytics/track",
-        json={
-            "events": [
-                {
-                    "event_name": "page_view",
-                    "page_path": "/",
-                    "unexpected_field": "bad",
-                }
-            ]
-        },
-    )
+def test_owasp_removed_analytics_endpoint_returns_404(client: TestClient) -> None:
+    response = client.post("/api/v1/analytics/track", json={"events": []})
 
-    assert response.status_code == 422
+    assert response.status_code == 404
 
 
 def test_owasp_contact_requires_csrf_token_field(client: TestClient) -> None:
@@ -180,46 +167,6 @@ def test_owasp_contact_handles_injection_strings_as_plain_data(
     assert "Message sent successfully" in response.text
 
 
-def test_owasp_analytics_rejects_batch_flood_payload(
-    client: TestClient,
-) -> None:
-    events = [{"event_name": "page_view", "page_path": "/"} for _ in range(51)]
-
-    response = client.post("/api/v1/analytics/track", json={"events": events})
-    assert response.status_code == 422
-
-
-def test_owasp_analytics_rejects_oversized_event_field(
-    client: TestClient,
-) -> None:
-    response = client.post(
-        "/api/v1/analytics/track",
-        json={
-            "events": [
-                {
-                    "event_name": "page_view",
-                    "page_path": "/",
-                    "element_text": "A" * 513,
-                }
-            ]
-        },
-    )
-    assert response.status_code == 422
-
-
-def test_owasp_analytics_blocks_disallowed_source_ip(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(settings, "analytics_allowed_sources", "203.0.113.10")
-    app = create_app()
-    with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/analytics/track",
-            json={"events": [{"event_name": "page_view", "page_path": "/"}]},
-        )
-        assert response.status_code == 403
-
-
 def test_owasp_default_rate_limit_applies_to_public_routes(
     client: TestClient,
 ) -> None:
@@ -252,41 +199,29 @@ def test_owasp_contact_body_size_limit_rejects_oversized_payload(
         assert response.status_code == 413
 
 
-def test_owasp_analytics_allows_forwarded_source_when_trusted(
+def test_owasp_csp_keeps_same_origin_connect_src_for_frontend_telemetry_proxy(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setattr(settings, "analytics_allowed_sources", "203.0.113.10")
-    monkeypatch.setattr(settings, "trust_forwarded_ip_headers", True)
+    monkeypatch.setattr(settings, "frontend_telemetry_enabled", True)
+    monkeypatch.setattr(
+        settings,
+        "frontend_telemetry_otlp_endpoint",
+        "https://ingest.signoz.example/v1/traces",
+    )
     app = create_app()
     with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/analytics/track",
-            json={"events": [{"event_name": "page_view", "page_path": "/"}]},
-            headers={"x-forwarded-for": "203.0.113.10"},
-        )
+        response = client.get("/")
+        csp = response.headers["Content-Security-Policy"]
         assert response.status_code == 200
-
-
-def test_owasp_analytics_ignores_forwarded_source_when_not_trusted(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setattr(settings, "analytics_allowed_sources", "203.0.113.10")
-    monkeypatch.setattr(settings, "trust_forwarded_ip_headers", False)
-    app = create_app()
-    with TestClient(app) as client:
-        response = client.post(
-            "/api/v1/analytics/track",
-            json={"events": [{"event_name": "page_view", "page_path": "/"}]},
-            headers={"x-forwarded-for": "203.0.113.10"},
-        )
-        assert response.status_code == 403
+        assert "connect-src 'self'" in csp
+        assert "https://ingest.signoz.example" not in csp
 
 
 def test_owasp_cors_preflight_rejects_unlisted_origin(
     client: TestClient,
 ) -> None:
     response = client.options(
-        "/api/v1/analytics/track",
+        "/contact",
         headers={
             "origin": "https://collector.example",
             "access-control-request-method": "POST",
@@ -307,7 +242,7 @@ def test_owasp_cors_preflight_allows_configured_origin(
     app = create_app()
     with TestClient(app) as client:
         response = client.options(
-            "/api/v1/analytics/track",
+            "/contact",
             headers={
                 "origin": "https://collector.example",
                 "access-control-request-method": "POST",

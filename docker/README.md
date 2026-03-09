@@ -67,8 +67,9 @@ Recommended production values in `.env`:
 PROD_BASE_URL=https://example.com
 PROD_TRUSTED_HOSTS=example.com,www.example.com
 PROD_CORS_ALLOW_ORIGINS=https://example.com
-PROD_ANALYTICS_ALLOWED_ORIGINS=https://example.com
-PROD_ANALYTICS_ALLOWED_SOURCES=0.0.0.0/0,::/0
+PROD_TELEMETRY_EXPORTER_OTLP_ENDPOINT=http://host.docker.internal:4317
+PROD_FRONTEND_TELEMETRY_ENABLED=true
+PROD_FRONTEND_TELEMETRY_OTLP_ENDPOINT=
 PROD_PUBLIC_HTTP_PORT=80
 ```
 
@@ -118,10 +119,11 @@ Defined in compose files:
 - Enables proxy headers for reverse-proxy deployment.
 - Enables trusted forwarded headers in the app (`TRUST_FORWARDED_IP_HEADERS=true`).
 - Requires explicit production host/origin environment values
-  (`PROD_BASE_URL`, `PROD_TRUSTED_HOSTS`, `PROD_CORS_ALLOW_ORIGINS`,
-  `PROD_ANALYTICS_ALLOWED_ORIGINS`).
-- Applies edge `ipAllowList` on analytics endpoint, with default open ranges
-  (must be narrowed when using fixed collector/CDN IP ranges).
+  (`PROD_BASE_URL`, `PROD_TRUSTED_HOSTS`, `PROD_CORS_ALLOW_ORIGINS`).
+- Frontend OTLP export is configured with `PROD_FRONTEND_TELEMETRY_*`
+  variables and uses the same-origin proxy route `POST /otel/v1/traces`.
+- Both dev and prod compose files map `host.docker.internal` to the Docker host
+  so the app container can reach a collector published on host ports `4317/4318`.
 - Applies container hardening:
   - read-only filesystem
   - `tmpfs` for `/tmp`
@@ -130,25 +132,20 @@ Defined in compose files:
 
 ## Traefik route security
 
-`docker/traefik/dynamic/routing.yml` defines three Traefik routers:
+`docker/traefik/dynamic/routing.yml` defines two Traefik routers:
 
 - `portfolio-web`: serves all regular routes.
 - `portfolio-contact`: handles only `POST /contact` with stricter body-size cap.
-- `portfolio-analytics`: matches only
-  `POST /api/v1/analytics/track` and applies IP allowlist.
 
 Main middlewares in Traefik dynamic config:
 
 - `portfolio-rate-limit-global`: global edge rate limit.
-- `portfolio-analytics-rate-limit`: tighter limit only for analytics ingestion.
 - `portfolio-body-limit-web`: global request body cap.
 - `portfolio-body-limit-contact`: stricter cap for contact form submission.
-- `portfolio-body-limit-analytics`: dedicated cap for analytics payloads.
 - `portfolio-inflight-global`: caps concurrent in-flight requests.
 - `portfolio-compress`: response compression.
-- `portfolio-analytics-allow`: IP allowlist for analytics ingest.
 
-To customize host matching and analytics source allowlist, edit:
+To customize host matching, edit:
 
 - `docker/traefik/dynamic/routing.yml`
 

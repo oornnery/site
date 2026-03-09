@@ -1,19 +1,5 @@
 http:
   routers:
-    portfolio-analytics:
-      entryPoints:
-        - web
-      rule: Path(`/api/v1/analytics/track`) && Method(`POST`)
-      priority: 100
-      service: portfolio-app
-      middlewares:
-        - portfolio-rate-limit-global
-        - portfolio-inflight-global
-        - portfolio-body-limit-analytics
-        - portfolio-analytics-rate-limit
-        - portfolio-compress
-        - portfolio-analytics-allow
-
     portfolio-contact:
       entryPoints:
         - web
@@ -48,12 +34,6 @@ http:
         burst: 120
         period: 1m
 
-    portfolio-analytics-rate-limit:
-      rateLimit:
-        average: 30
-        burst: 30
-        period: 1m
-
     portfolio-inflight-global:
       inFlightReq:
         amount: 200
@@ -65,16 +45,6 @@ http:
     portfolio-body-limit-contact:
       buffering:
         maxRequestBodyBytes: 65536
-
-    portfolio-body-limit-analytics:
-      buffering:
-        maxRequestBodyBytes: 262144
-
-    portfolio-analytics-allow:
-      ipAllowList:
-        sourceRange:
-          - 0.0.0.0/0
-          - ::/0
 
   services:
     portfolio-app:

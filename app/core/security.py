@@ -1,9 +1,9 @@
 import hashlib
 import hmac
-import ipaddress
 import logging
 import secrets
 import time
+from urllib.parse import urlsplit
 from uuid import uuid4
 
 from fastapi import Request
@@ -14,41 +14,12 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.config import settings
 from app.core.logger import bind_request_context, event_message, reset_request_context
-from app.core.config import split_csv
 from app.observability.events import LogEvent
 from app.observability.metrics import get_app_metrics
 
 logger = logging.getLogger(__name__)
 
 _TRACING_SKIP_PATHS = frozenset({"/health"})
-
-_PROD_CSP = (
-    "default-src 'self'; "
-    "style-src 'self'; "
-    "script-src 'self'; "
-    "img-src 'self' data: https:; "
-    "font-src 'self' data:; "
-    "connect-src 'self'; "
-    "frame-ancestors 'none'; "
-    "base-uri 'self'; "
-    "form-action 'self'; "
-    "object-src 'none'; "
-    "frame-src 'none'"
-)
-
-_DEV_CSP = (
-    "default-src 'self'; "
-    "style-src 'self' 'unsafe-inline'; "
-    "script-src 'self' 'unsafe-inline'; "
-    "img-src 'self' data: https:; "
-    "font-src 'self' data:; "
-    "connect-src 'self' ws: wss:; "
-    "frame-ancestors 'none'; "
-    "base-uri 'self'; "
-    "form-action 'self'; "
-    "object-src 'none'; "
-    "frame-src 'none'"
-)
 
 
 def _csrf_user_agent_hash(user_agent: str) -> str:
@@ -142,57 +113,47 @@ def extract_source_ip(request: Request) -> str:
     return "unknown"
 
 
-def _is_allowed_source(source: str, allowed_sources: tuple[str, ...]) -> bool:
-    normalized_source = source.strip().lower()
-    if not normalized_source:
-        return False
+def _frontend_telemetry_connect_sources() -> tuple[str, ...]:
+    if not settings.frontend_telemetry_is_enabled():
+        return ()
 
-    source_ip: ipaddress.IPv4Address | ipaddress.IPv6Address | None
-    try:
-        source_ip = ipaddress.ip_address(normalized_source)
-    except ValueError:
-        source_ip = None
+    endpoint = settings.frontend_telemetry_browser_endpoint().strip()
+    if not endpoint:
+        return ()
 
-    for allowed in allowed_sources:
-        normalized_allowed = allowed.strip().lower()
-        if not normalized_allowed:
-            continue
-        if normalized_allowed == normalized_source:
-            return True
-        if source_ip is None:
-            continue
-        try:
-            network = ipaddress.ip_network(normalized_allowed, strict=False)
-        except ValueError:
-            continue
-        if source_ip in network:
-            return True
-    return False
+    parsed = urlsplit(endpoint)
+    if not parsed.scheme or not parsed.netloc:
+        return ()
+    if parsed.scheme not in {"http", "https"}:
+        return ()
+    return (f"{parsed.scheme}://{parsed.netloc}",)
 
 
-def is_allowed_analytics_request(request: Request) -> tuple[bool, str]:
-    source_ip = extract_source_ip(request)
-    allowed_sources = split_csv(settings.analytics_allowed_sources)
-    if not _is_allowed_source(source_ip, allowed_sources):
-        return False, source_ip
+def _content_security_policy(*, dev_mode: bool) -> str:
+    connect_sources = ["'self'"]
+    connect_sources.extend(_frontend_telemetry_connect_sources())
+    if dev_mode:
+        connect_sources.extend(["ws:", "wss:"])
 
-    allowed_origins = {
-        origin.lower().rstrip("/")
-        for origin in split_csv(settings.analytics_allowed_origins)
-    }
-    if allowed_origins:
-        origin = request.headers.get("origin", "").strip().lower().rstrip("/")
-        if origin not in allowed_origins:
-            return False, source_ip
-
-    return True, source_ip
+    directives = [
+        "default-src 'self'",
+        "style-src 'self'" + (" 'unsafe-inline'" if dev_mode else ""),
+        "script-src 'self'" + (" 'unsafe-inline'" if dev_mode else ""),
+        "img-src 'self' data: https:",
+        "font-src 'self' data:",
+        f"connect-src {' '.join(dict.fromkeys(connect_sources))}",
+        "frame-ancestors 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+        "object-src 'none'",
+        "frame-src 'none'",
+    ]
+    return "; ".join(directives)
 
 
 def _body_size_limit_for_path(path: str) -> int:
     if path == "/contact":
         return settings.contact_max_body_bytes
-    if path == "/api/v1/analytics/track":
-        return settings.analytics_max_body_bytes
     return settings.max_request_body_bytes
 
 
@@ -256,37 +217,6 @@ class RequestBodySizeLimitMiddleware:
                 content={"detail": "Request body is too large."},
             )
             await response(scope, receive, send)
-
-
-class AnalyticsSourceGuardMiddleware:
-    """Restrict analytics ingestion endpoint to configured source allowlists."""
-
-    def __init__(self, app: ASGIApp) -> None:
-        self.app = app
-
-    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
-        if scope["type"] != "http":
-            await self.app(scope, receive, send)
-            return
-
-        if scope.get("method") == "POST" and scope["path"] == "/api/v1/analytics/track":
-            request = Request(scope)
-            source_allowed, source_ip = is_allowed_analytics_request(request)
-            scope.setdefault("state", {})["analytics_source_ip"] = source_ip
-            if not source_allowed:
-                request_id = scope.get("state", {}).get("request_id", "unknown")
-                logger.warning(
-                    "Rejected analytics request from disallowed source "
-                    f"request_id={request_id} source={source_ip}."
-                )
-                response = JSONResponse(
-                    status_code=403,
-                    content={"detail": "Analytics request source is not allowed."},
-                )
-                await response(scope, receive, send)
-                return
-
-        await self.app(scope, receive, send)
 
 
 class RequestTracingMiddleware:
@@ -408,9 +338,15 @@ class SecurityHeadersMiddleware:
                         "Strict-Transport-Security",
                         "max-age=63072000; includeSubDomains; preload",
                     )
-                    headers.append("Content-Security-Policy", _PROD_CSP)
+                    headers.append(
+                        "Content-Security-Policy",
+                        _content_security_policy(dev_mode=False),
+                    )
                 elif settings.dev_csp_enabled:
-                    headers.append("Content-Security-Policy", _DEV_CSP)
+                    headers.append(
+                        "Content-Security-Policy",
+                        _content_security_policy(dev_mode=True),
+                    )
             await send(message)
 
         await self.app(scope, receive, send_with_headers)

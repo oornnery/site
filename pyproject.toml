@@ -26,6 +26,7 @@ dependencies = [
     "slowapi>=0.1.9",
     "uvicorn>=0.41.0",
     "rich>=14.3.3",
+    "opentelemetry-distro>=0.60b1",
 ]
 
 [dependency-groups]
@@ -57,6 +58,7 @@ watch_js  = "npm run watch:js"
 # --- dev server ---
 run      = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
 run_prod = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
+run_otel = "python scripts/run_otel.py --host 0.0.0.0 --port 8000"
 
 # --- formatting ---
 md_fmt = "rumdl fmt ."

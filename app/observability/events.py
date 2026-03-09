@@ -10,6 +10,3 @@ class LogEvent(StrEnum):
     CONTACT_SUBMISSION_RECEIVED = "contact.submission.received"
     CONTACT_SUBMISSION_REJECTED = "contact.submission.rejected"
     CONTACT_SUBMISSION_SUCCEEDED = "contact.submission.succeeded"
-
-    ANALYTICS_EVENT_ACCEPTED = "analytics.event.accepted"
-    ANALYTICS_EVENT_REJECTED = "analytics.event.rejected"

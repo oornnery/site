@@ -11,7 +11,7 @@
 | Infrastructure | `app/infrastructure/*`  | Markdown IO, sanitization, notifications             |
 | Rendering      | `app/core/rendering.py` | `render_page`, `render_fragment`, `is_htmx` helpers  |
 | Core           | `app/core/*`            | Settings, security, logging, dependencies, utilities |
-| Observability  | `app/observability/*`   | Analytics service and app metrics                    |
+| Observability  | `app/observability/*`   | OpenTelemetry bootstrap and app metrics              |
 
 ## App Factory
 
@@ -21,7 +21,7 @@
 - FastAPI docs toggled by `DEBUG`
 - Static mount at `/static`
 - Telemetry (`configure_telemetry`)
-- Middlewares (security headers, body limits, analytics guard, tracing, CORS,
+- Middlewares (security headers, body limits, tracing, CORS,
   host validation)
   - All custom middleware uses pure ASGI protocol
 - Rate-limit exception handler
@@ -44,6 +44,7 @@
 - `GET /blog/tags/{tag}` -> posts filtered by tag (htmx fragment support)
 - `GET /blog/feed.xml` -> RSS feed (`application/rss+xml`)
 - `GET /contact` -> `ContactPageService.build_page()`
+- `POST /otel/v1/traces` -> same-origin OTLP HTTP proxy for browser traces
 
 ### Health check
 
@@ -58,17 +59,10 @@
 - Thin router delegates to `ContactOrchestrator.handle_submission()`
 - Orchestrator validates content type, CSRF, and Pydantic constraints
 - Dispatches webhook/SMTP channels concurrently
-- Emits analytics events for attempt/failure/success
+- Emits span events for attempt/failure/success on the current request trace
 - Returns `ContactFormResult` with page, status code, and outcome
 - On htmx request (`HX-Request` header), returns only the form fragment
   instead of a full page — enables inline validation error display
-
-### Analytics route
-
-- `POST /api/v1/analytics/track`
-- Input: `AnalyticsTrackRequest` (`events` max 50)
-- Output: `AnalyticsTrackResponse` with accepted/rejected counts
-- Protected by source validation and route-specific rate limit
 
 ## Service Responsibilities
 
@@ -92,7 +86,6 @@ Defined in `app/models/schemas.py`:
 - `ProjectFrontmatter` and normalized metadata
 - `BlogPostFrontmatter` and normalized blog metadata
   - Supports optional `gist_url` and `gist_file`
-- Analytics schemas (`AnalyticsTrackEvent`, request/response)
 
 Typed page contexts in `app/services/types.py` ensure stable template contracts.
 
@@ -151,5 +144,14 @@ Per-channel metrics capture outcome and latency.
 
 - Request lifecycle metrics in `app/observability/metrics.py`
 - Structured event logs with request/trace IDs
-- Analytics counter metrics in `app/observability/analytics.py`
 - Trace, metrics, and logs exporter setup in `app/observability/telemetry.py`
+- Helper functions in `app/observability/telemetry.py` attach manual span
+  attributes/events to the current request
+- `app/api/telemetry.py` forwards browser OTLP HTTP payloads to the collector
+  derived from `TELEMETRY_EXPORTER_OTLP_ENDPOINT` (or overridden by
+  `FRONTEND_TELEMETRY_OTLP_ENDPOINT`)
+- `configure_telemetry()` auto-detects preconfigured global providers
+  (for `opentelemetry-instrument`) and reuses them instead of trying to
+  override tracer/meter/logger providers a second time
+- FastAPI and HTTPX instrumentation are only applied when they are not already
+  instrumented

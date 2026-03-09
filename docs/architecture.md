@@ -9,8 +9,7 @@ The system is a server-side rendered portfolio application with:
 - Alpine.js (reactive state), Stimulus (controllers), htmx (fragment swaps)
 - Markdown + frontmatter as content source
 - Contact workflow with validation and notifications
-- Analytics ingestion endpoint for browser events
-- OpenTelemetry integration for traces, metrics, and logs
+- OpenTelemetry integration for backend telemetry and browser traces
 
 ## High-Level Architecture
 
@@ -57,6 +56,10 @@ flowchart LR
 
 - Contact notifications: webhook (HTTPX) and SMTP channels.
 - Telemetry export: OTLP (traces/metrics/logs) with optional console exporter.
+- Runtime supports two observability bootstraps:
+  - app-managed setup via `configure_telemetry()`
+  - auto-instrumented setup via `opentelemetry-instrument`, with provider reuse
+    to avoid double instrumentation
 
 ## Request Lifecycle (Conceptual)
 
@@ -96,7 +99,7 @@ sequenceDiagram
 | `GET`  | `/blog/feed.xml`          | RSS feed            |
 | `GET`  | `/contact`                | Contact form page   |
 | `POST` | `/contact`                | Contact submission  |
-| `POST` | `/api/v1/analytics/track` | Analytics ingestion |
+| `POST` | `/otel/v1/traces`         | Frontend OTLP proxy |
 | `GET`  | `/health`                 | Health check        |
 
 ## Deployment Topology
@@ -121,10 +124,11 @@ flowchart TB
 
 ```mermaid
 flowchart LR
+    Browser[Browser + OTel JS] --> OTLP[OTLP HTTP Endpoint]
     App[FastAPI + OTel Instrumentation] --> Tr[Traces]
     App --> Me[Metrics]
     App --> Lo[Logs]
-    Tr --> OTLP[OTLP Endpoint]
+    Tr --> OTLP
     Me --> OTLP
     Lo --> OTLP
     OTLP --> SigNoz[SigNoz or compatible backend]

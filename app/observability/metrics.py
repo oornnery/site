@@ -1,11 +1,11 @@
 from functools import lru_cache
 
-from app.observability.telemetry import get_meter
+from opentelemetry import metrics
 
 
 class AppMetrics:
     def __init__(self) -> None:
-        meter = get_meter(__name__)
+        meter = metrics.get_meter(__name__)
         self._requests_total = meter.create_counter(
             name="portfolio.http.requests_total",
             description="Total HTTP requests served.",

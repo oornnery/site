@@ -5,18 +5,22 @@ from pydantic import ValidationError
 
 from app.core.logger import event_message
 from app.core.security import (
+    _anonymize_identifier,
     generate_csrf_token,
     is_allowed_form_content_type,
     validate_csrf_token,
 )
-from app.models.schemas import AnalyticsEventName, AnalyticsTrackEvent, ContactForm
+from app.models.schemas import ContactForm
 from app.infrastructure.notifications.email import (
     ContactNotificationContext,
     ContactNotificationService,
 )
-from app.observability.analytics import AnalyticsService
 from app.observability.events import LogEvent
 from app.observability.metrics import get_app_metrics
+from app.observability.telemetry import (
+    add_current_span_event,
+    set_current_span_attributes,
+)
 from app.services.seo import seo_for_page
 from app.services.types import (
     ContactFormResult,
@@ -153,33 +157,52 @@ class ContactOrchestrator:
         page_service: ContactPageService,
         submission_service: ContactSubmissionService,
         notification_service: ContactNotificationService,
-        analytics_service: AnalyticsService,
     ) -> None:
         self._page_service = page_service
         self._submission_service = submission_service
         self._notification_service = notification_service
-        self._analytics_service = analytics_service
 
-    def _track(
-        self,
-        event_name: AnalyticsEventName,
+    @staticmethod
+    def _record_submission_event(
+        name: str,
         *,
         request_id: str,
         client_ip: str,
         user_agent: str,
-        metadata: dict[str, str] | None = None,
+        outcome: str = "",
+        reason: str = "",
+        extra: dict[str, str] | None = None,
     ) -> None:
-        self._analytics_service.ingest_events(
-            [
-                AnalyticsTrackEvent(
-                    event_name=event_name,
-                    page_path="/contact",
-                    metadata=metadata or {},
-                )
-            ],
-            request_id=request_id,
-            client_ip=client_ip,
-            user_agent=user_agent,
+        user_agent_hash = _anonymize_identifier(user_agent, namespace="user_agent")
+        attributes: dict[str, str] = {
+            "app.request_id": request_id,
+            "client.ip_hash": client_ip,
+            "client.user_agent_hash": user_agent_hash,
+            "portfolio.contact.path": "/contact",
+        }
+        if outcome:
+            attributes["portfolio.contact.outcome"] = outcome
+        if reason:
+            attributes["portfolio.contact.reason"] = reason
+        if extra:
+            attributes.update(extra)
+        add_current_span_event(name, attributes)
+
+    @staticmethod
+    def _set_submission_context(
+        *,
+        request_id: str,
+        client_ip: str,
+        user_agent: str,
+    ) -> None:
+        user_agent_hash = _anonymize_identifier(user_agent, namespace="user_agent")
+        set_current_span_attributes(
+            {
+                "app.request_id": request_id,
+                "client.ip_hash": client_ip,
+                "client.user_agent_hash": user_agent_hash,
+                "portfolio.contact.path": "/contact",
+            }
         )
 
     def _error_page(
@@ -209,18 +232,24 @@ class ContactOrchestrator:
         request_id: str,
     ) -> ContactFormResult:
         app_metrics = get_app_metrics()
-        ctx = dict(request_id=request_id, client_ip=client_ip, user_agent=user_agent)
         form_data = {
             "name": name,
             "email": email,
             "subject": subject,
             "message": message,
         }
+        self._set_submission_context(
+            request_id=request_id,
+            client_ip=client_ip,
+            user_agent=user_agent,
+        )
 
-        self._track(
-            AnalyticsEventName.CONTACT_ATTEMPT,
-            **ctx,
-            metadata={"source": "contact_form"},
+        self._record_submission_event(
+            "contact.submit.attempt",
+            request_id=request_id,
+            client_ip=client_ip,
+            user_agent=user_agent,
+            extra={"portfolio.contact.source": "contact_form"},
         )
 
         if not is_allowed_form_content_type(content_type):
@@ -233,10 +262,13 @@ class ContactOrchestrator:
                     request_id=request_id,
                 )
             )
-            self._track(
-                AnalyticsEventName.CONTACT_FAILURE,
-                **ctx,
-                metadata={"reason": "unsupported_content_type"},
+            self._record_submission_event(
+                "contact.submit.rejected",
+                request_id=request_id,
+                client_ip=client_ip,
+                user_agent=user_agent,
+                outcome="unsupported_content_type",
+                reason="unsupported_content_type",
             )
             page = self._error_page(
                 user_agent=user_agent,
@@ -267,10 +299,13 @@ class ContactOrchestrator:
                     request_id=request_id,
                 )
             )
-            self._track(
-                AnalyticsEventName.CONTACT_FAILURE,
-                **ctx,
-                metadata={"reason": reason},
+            self._record_submission_event(
+                "contact.submit.rejected",
+                request_id=request_id,
+                client_ip=client_ip,
+                user_agent=user_agent,
+                outcome=reason,
+                reason=reason,
             )
             page = self._error_page(
                 user_agent=user_agent,
@@ -290,10 +325,13 @@ class ContactOrchestrator:
                     request_id=request_id,
                 )
             )
-            self._track(
-                AnalyticsEventName.CONTACT_FAILURE,
-                **ctx,
-                metadata={"reason": "unexpected_submission_state"},
+            self._record_submission_event(
+                "contact.submit.rejected",
+                request_id=request_id,
+                client_ip=client_ip,
+                user_agent=user_agent,
+                outcome="unexpected_submission_state",
+                reason="unexpected_submission_state",
             )
             page = self._error_page(
                 user_agent=user_agent,
@@ -326,10 +364,13 @@ class ContactOrchestrator:
                     request_id=request_id,
                 )
             )
-            self._track(
-                AnalyticsEventName.CONTACT_FAILURE,
-                **ctx,
-                metadata={"reason": "notification_all_failed"},
+            self._record_submission_event(
+                "contact.submit.rejected",
+                request_id=request_id,
+                client_ip=client_ip,
+                user_agent=user_agent,
+                outcome="notification_failed",
+                reason="notification_all_failed",
             )
             page = self._error_page(
                 user_agent=user_agent,
@@ -361,11 +402,12 @@ class ContactOrchestrator:
                 request_id=request_id,
             )
         )
-        self._track(
-            AnalyticsEventName.CONTACT_SUCCESS,
+        self._record_submission_event(
+            "contact.submit.succeeded",
             request_id=request_id,
             client_ip=client_ip,
             user_agent=user_agent,
+            outcome=outcome,
         )
         page = self._page_service.build_page(
             user_agent=user_agent,

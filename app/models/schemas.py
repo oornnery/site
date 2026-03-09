@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
-from enum import StrEnum
-from typing import Any
+from datetime import date
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, computed_field
 
@@ -134,40 +132,3 @@ class BlogPostFrontmatter(BaseModel):
     draft: bool = False
 
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
-
-
-class AnalyticsEventName(StrEnum):
-    PAGE_VIEW = "page_view"
-    CLICK = "click"
-    OUTBOUND_CLICK = "outbound_click"
-    SECTION_SCROLL = "section_scroll"
-    CONTACT_ATTEMPT = "contact_attempt"
-    CONTACT_SUCCESS = "contact_success"
-    CONTACT_FAILURE = "contact_failure"
-
-
-class AnalyticsTrackEvent(BaseModel):
-    event_name: AnalyticsEventName
-    page_path: str = Field(min_length=1, max_length=2048)
-    element_id: str = Field(default="", max_length=256)
-    element_text: str = Field(default="", max_length=512)
-    target_url: str = Field(default="", max_length=2048)
-    metadata: dict[str, Any] = Field(default_factory=dict)
-    occurred_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class AnalyticsTrackRequest(BaseModel):
-    events: list[AnalyticsTrackEvent] = Field(min_length=1, max_length=50)
-
-    model_config = ConfigDict(extra="forbid")
-
-
-class AnalyticsTrackResponse(BaseModel):
-    accepted: int
-    rejected: int
-    message: str
-    errors: list[str] = Field(default_factory=list)
-
-    model_config = ConfigDict(extra="forbid")

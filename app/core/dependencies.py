@@ -8,7 +8,6 @@ from slowapi import Limiter
 
 from app.core.config import settings
 from app.core.security import extract_source_ip
-from app.observability.analytics import AnalyticsService, build_analytics_service
 from app.infrastructure.notifications.email import (
     ContactNotificationService,
     EmailNotificationChannel,
@@ -55,7 +54,14 @@ def get_catalog() -> Catalog:
         profile_role=profile_globals.profile_role,
         profile_location=profile_globals.profile_location,
         profile_summary=profile_globals.profile_summary,
-        analytics_enabled=settings.analytics_enabled,
+        frontend_telemetry_enabled=settings.frontend_telemetry_is_enabled(),
+        frontend_telemetry_service_name=settings.frontend_telemetry_service_name,
+        frontend_telemetry_service_namespace=settings.telemetry_service_namespace,
+        frontend_telemetry_otlp_endpoint=settings.frontend_telemetry_browser_endpoint(),
+        frontend_telemetry_sample_ratio=settings.frontend_telemetry_sample_ratio,
+        frontend_telemetry_environment=(
+            "development" if settings.debug else "production"
+        ),
     )
     prefixed_folders = (
         (components_root / "ui", "ui"),
@@ -137,17 +143,11 @@ def get_contact_submission_service() -> ContactSubmissionService:
 
 
 @lru_cache(maxsize=1)
-def get_analytics_service() -> AnalyticsService:
-    return build_analytics_service()
-
-
-@lru_cache(maxsize=1)
 def get_contact_orchestrator() -> ContactOrchestrator:
     return ContactOrchestrator(
         page_service=get_contact_page_service(),
         submission_service=get_contact_submission_service(),
         notification_service=get_contact_notification_service(),
-        analytics_service=get_analytics_service(),
     )
 
 

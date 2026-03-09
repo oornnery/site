@@ -3,12 +3,15 @@ from __future__ import annotations
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
+import pytest
 from fastapi.testclient import TestClient
 
 import app.services.contact as contact_service_module
 from app.core.dependencies import (
     get_analytics_service,
+    get_blog_page_service,
     get_contact_orchestrator,
+    get_projects_page_service,
 )
 from app.models.schemas import ContactForm
 from app.infrastructure.notifications.email import (
@@ -18,6 +21,8 @@ from app.infrastructure.notifications.email import (
 from app.main import create_app
 from app.observability.analytics import AnalyticsIngestResult
 from app.services.contact import ContactOrchestrator, ContactPageService
+from app.services.types import BlogPostsPageContext, ContactFormResult, PageRenderData
+from app.models.schemas import SEOMeta
 
 
 def _build_client(
@@ -42,6 +47,13 @@ def _contact_payload(*, csrf_token: str = "csrf-token") -> dict[str, str]:
         "message": "Hello, this is a valid contact message for route tests.",
         "csrf_token": csrf_token,
     }
+
+
+def _seo() -> SEOMeta:
+    return SEOMeta(
+        title="Route Test",
+        description="Route coverage test description.",
+    )
 
 
 class StubAnalyticsService:
@@ -112,6 +124,65 @@ class StubNotificationService:
     ) -> NotificationDispatchResult:
         del contact, context
         return self._dispatch_result
+
+
+class WrongBlogTagsPageService:
+    def build_tags_page(self, tag: str | None = None) -> PageRenderData:
+        del tag
+        return PageRenderData(
+            template="pages/blog/tags.jinja",
+            context=BlogPostsPageContext(seo=_seo(), posts=()),
+        )
+
+
+class WrongProjectsPageService:
+    def build_list_page(
+        self,
+        *,
+        q: str = "",
+        tag: str = "",
+        page: int = 1,
+    ) -> PageRenderData:
+        del q, tag, page
+        return PageRenderData(
+            template="pages/projects/list.jinja",
+            context=BlogPostsPageContext(seo=_seo(), posts=()),
+        )
+
+
+class WrongContactOrchestrator:
+    async def handle_submission(
+        self,
+        *,
+        name: str,
+        email: str,
+        subject: str,
+        message: str,
+        csrf_token: str,
+        content_type: str,
+        client_ip: str,
+        user_agent: str,
+        request_id: str,
+    ) -> ContactFormResult:
+        del (
+            name,
+            email,
+            subject,
+            message,
+            csrf_token,
+            content_type,
+            client_ip,
+            user_agent,
+            request_id,
+        )
+        return ContactFormResult(
+            page=PageRenderData(
+                template="pages/contact.jinja",
+                context=BlogPostsPageContext(seo=_seo(), posts=()),
+            ),
+            status_code=422,
+            outcome="validation_error",
+        )
 
 
 def _make_orchestrator(
@@ -198,6 +269,52 @@ def test_contact_route_rejects_unsupported_content_type() -> None:
             assert "Unsupported content type." in response.text
     finally:
         contact_service_module.is_allowed_form_content_type = original_checker
+
+
+def test_blog_tags_route_returns_fragment_for_htmx_requests() -> None:
+    for client in _build_client():
+        response = client.get("/blog/tags", headers={"HX-Request": "true"})
+
+        assert response.status_code == 200
+        assert 'id="tag-posts"' in response.text
+        assert "<html" not in response.text.lower()
+
+
+def test_blog_tag_detail_route_raises_type_error_for_invalid_htmx_context() -> None:
+    overrides = {get_blog_page_service: lambda: WrongBlogTagsPageService()}
+
+    for client in _build_client(overrides=overrides):
+        with pytest.raises(TypeError, match="Expected BlogTagsPageContext"):
+            client.get("/blog/tags/python", headers={"HX-Request": "true"})
+
+
+def test_blog_tags_route_raises_type_error_for_invalid_htmx_context() -> None:
+    overrides = {get_blog_page_service: lambda: WrongBlogTagsPageService()}
+
+    for client in _build_client(overrides=overrides):
+        with pytest.raises(TypeError, match="Expected BlogTagsPageContext"):
+            client.get("/blog/tags", headers={"HX-Request": "true"})
+
+
+def test_projects_route_raises_type_error_for_invalid_htmx_context() -> None:
+    overrides = {get_projects_page_service: lambda: WrongProjectsPageService()}
+
+    for client in _build_client(overrides=overrides):
+        with pytest.raises(TypeError, match="Expected ProjectsListPageContext"):
+            client.get("/projects", headers={"HX-Request": "true"})
+
+
+def test_contact_route_raises_type_error_for_invalid_htmx_context() -> None:
+    contact_payload = _contact_payload()
+    overrides = {get_contact_orchestrator: lambda: WrongContactOrchestrator()}
+
+    for client in _build_client(overrides=overrides):
+        with pytest.raises(TypeError, match="Expected ContactPageContext"):
+            client.post(
+                "/contact",
+                data=contact_payload,
+                headers={"HX-Request": "true"},
+            )
 
 
 def test_contact_route_handles_unexpected_submission_state() -> None:

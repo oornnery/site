@@ -132,6 +132,9 @@ More details: [docker/README.md](docker/README.md).
 - `uv run task run` uses the app-managed telemetry bootstrap.
 - `uv run task run_otel` runs under `opentelemetry-instrument` and reuses
   preconfigured global providers instead of configuring them twice.
+- Plain `uv run opentelemetry-instrument uvicorn app.main:app ...` also picks up
+  the project telemetry resource defaults from `.env`, so spans are labeled as
+  `portfolio-backend` instead of `unknown_service`.
 - Importable SigNoz dashboards and alert manifests live under
   [infra/signoz](infra/signoz).
 - Observability runbook: [infra/README.md](infra/README.md).

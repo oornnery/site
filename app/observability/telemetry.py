@@ -25,6 +25,7 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 from opentelemetry.sdk.trace.sampling import ParentBased, TraceIdRatioBased
 
 from app.core.config import settings
+from app.observability.bootstrap import configure_auto_instrumentation_resources
 
 logger = logging.getLogger(__name__)
 
@@ -230,6 +231,11 @@ def configure_telemetry(app: FastAPI) -> None:
     if not settings.telemetry_enabled:
         logger.info("Telemetry is disabled by configuration.")
         return
+
+    if configure_auto_instrumentation_resources():
+        logger.info(
+            "Applied project telemetry resource defaults to pre-configured OpenTelemetry providers."
+        )
 
     resource = _build_resource()
 

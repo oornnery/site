@@ -1,7 +1,12 @@
 from __future__ import annotations
 
 from fastapi import FastAPI
+from opentelemetry.sdk._logs import LoggerProvider
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
 
+import app.observability.bootstrap as bootstrap
 import app.observability.telemetry as telemetry
 from app.core.config import Settings
 
@@ -158,3 +163,56 @@ def test_frontend_telemetry_browser_endpoint_uses_same_origin_proxy() -> None:
 
     assert settings.frontend_telemetry_is_enabled() is True
     assert settings.frontend_telemetry_browser_endpoint() == "/otel/v1/traces"
+
+
+def test_auto_instrumentation_resource_defaults_replace_unknown_service_name(
+    monkeypatch,
+) -> None:
+    tracer_provider = TracerProvider(
+        resource=Resource.create({"service.name": "unknown_service"})
+    )
+    meter_provider = MeterProvider(
+        resource=Resource.create({"service.name": "unknown_service"})
+    )
+    logger_provider = LoggerProvider(
+        resource=Resource.create({"service.name": "unknown_service"})
+    )
+
+    monkeypatch.setattr(
+        bootstrap.trace,
+        "get_tracer_provider",
+        lambda: tracer_provider,
+    )
+    monkeypatch.setattr(
+        bootstrap.metrics,
+        "get_meter_provider",
+        lambda: meter_provider,
+    )
+    monkeypatch.setattr(
+        bootstrap.otel_logs,
+        "get_logger_provider",
+        lambda: logger_provider,
+    )
+    monkeypatch.setattr(
+        bootstrap.settings,
+        "telemetry_service_name",
+        "portfolio-backend",
+    )
+    monkeypatch.setattr(
+        bootstrap.settings,
+        "telemetry_service_namespace",
+        "portfolio",
+    )
+    monkeypatch.setattr(bootstrap.settings, "debug", True)
+
+    assert bootstrap.configure_auto_instrumentation_resources() is True
+    assert tracer_provider.resource.attributes["service.name"] == "portfolio-backend"
+    assert tracer_provider.resource.attributes["service.namespace"] == "portfolio"
+    assert (
+        tracer_provider.resource.attributes["deployment.environment"] == "development"
+    )
+    assert (
+        meter_provider._sdk_config.resource.attributes["service.name"]
+        == "portfolio-backend"
+    )
+    assert logger_provider.resource.attributes["service.name"] == "portfolio-backend"

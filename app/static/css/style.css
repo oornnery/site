@@ -242,7 +242,7 @@ textarea:focus-visible {
     /* overflow-x:auto + hidden scrollbar: scrollTo() controls position without
        inline styles, which would violate style-src 'self' CSP. */
     overflow-x: auto;
-    border-radius: var(--radius-lg);
+    overflow-y: hidden;
     /* hide scrollbar cross-browser */
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -259,6 +259,8 @@ textarea:focus-visible {
 .featured-carousel-slide {
     min-width: 100%;
     flex: 0 0 100%;
+    /* Keep the card slightly inset so the border and radius render cleanly. */
+    padding: 2px;
 }
 
 .featured-carousel-dot {

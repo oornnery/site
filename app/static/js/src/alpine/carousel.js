@@ -23,8 +23,30 @@ export default (autoplayMs = 3000) => ({
     autoplayId: null,
 
     init() {
-        this.total = this.$el.querySelectorAll("[data-slide]").length;
-        this._syncAriaHidden();
+        this._slides = [...this.$el.querySelectorAll("[data-slide]")];
+        this._viewport = this.$el.querySelector("[data-carousel-viewport]");
+        this._prevButton = this.$el.querySelector("[data-carousel-prev]");
+        this._nextButton = this.$el.querySelector("[data-carousel-next]");
+        this._dotButtons = [...this.$el.querySelectorAll("[data-carousel-dot]")];
+        this.total = this._slides.length;
+
+        this._onPrevClick = () => this.prev();
+        this._onNextClick = () => this.next();
+        this._onDotClick = (event) => {
+            const index = Number(event.currentTarget.dataset.carouselDot);
+            if (!Number.isNaN(index)) {
+                this.goTo(index);
+                this.startAutoplay();
+            }
+        };
+
+        this._prevButton?.addEventListener("click", this._onPrevClick);
+        this._nextButton?.addEventListener("click", this._onNextClick);
+        this._dotButtons.forEach((button) => {
+            button.addEventListener("click", this._onDotClick);
+        });
+
+        this._syncState();
         if (this.total > 1) {
             this.startAutoplay();
         }
@@ -38,18 +60,25 @@ export default (autoplayMs = 3000) => ({
     destroy() {
         this.stopAutoplay();
         document.removeEventListener("visibilitychange", this._onVisibility);
+        this._prevButton?.removeEventListener("click", this._onPrevClick);
+        this._nextButton?.removeEventListener("click", this._onNextClick);
+        this._dotButtons?.forEach((button) => {
+            button.removeEventListener("click", this._onDotClick);
+        });
     },
 
     goTo(index) {
+        if (!this.total) {
+            return;
+        }
         this.current = ((index % this.total) + this.total) % this.total;
-        const viewport = this.$el.querySelector("[data-carousel-viewport]");
-        if (viewport) {
-            viewport.scrollTo({
-                left: this.current * viewport.offsetWidth,
+        if (this._viewport) {
+            this._viewport.scrollTo({
+                left: this.current * this._viewport.offsetWidth,
                 behavior: "smooth",
             });
         }
-        this._syncAriaHidden();
+        this._syncState();
     },
 
     prev() {
@@ -87,10 +116,15 @@ export default (autoplayMs = 3000) => ({
         return this.total > 1;
     },
 
-    /** Sync aria-hidden on slides via DOM (not template-level, avoids Jinja/Alpine index mismatch). */
-    _syncAriaHidden() {
-        this.$el.querySelectorAll("[data-slide]").forEach((slide, i) => {
+    _syncState() {
+        this._slides.forEach((slide, i) => {
             slide.setAttribute("aria-hidden", String(i !== this.current));
+        });
+
+        this._dotButtons.forEach((button, i) => {
+            const isActive = i === this.current;
+            button.classList.toggle("is-active", isActive);
+            button.setAttribute("aria-current", isActive ? "true" : "false");
         });
     },
 });

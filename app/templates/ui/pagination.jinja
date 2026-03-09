@@ -1,0 +1,30 @@
+{#def page=1, total_pages=1, base_url="" #}
+
+{% if total_pages > 1 %}
+{% set cls_link = "inline-flex items-center justify-center px-3 py-1.5 text-sm rounded-lg transition-all" %}
+{% set cls_active = cls_link ~ " bg-accent/10 text-accent font-medium border border-accent/20" %}
+{% set cls_default = cls_link ~ " text-foreground/60 hover:text-accent hover:bg-surface-2/30" %}
+{% set cls_disabled = cls_link ~ " text-foreground/30 cursor-not-allowed" %}
+
+<nav class="flex items-center justify-center gap-1 mt-10 pt-6 border-t border-border" aria-label="Pagination">
+    {% if page > 1 %}
+    <a href="{{ base_url }}page={{ page - 1 }}" class="{{ cls_default }}" rel="prev">← Prev</a>
+    {% else %}
+    <span class="{{ cls_disabled }}" aria-disabled="true">← Prev</span>
+    {% endif %}
+
+    {% for p in range(1, total_pages + 1) %}
+    <a
+        href="{{ base_url }}page={{ p }}"
+        class="{{ cls_active if p == page else cls_default }}"
+        {% if p == page %}aria-current="page"{% endif %}
+    >{{ p }}</a>
+    {% endfor %}
+
+    {% if page < total_pages %}
+    <a href="{{ base_url }}page={{ page + 1 }}" class="{{ cls_default }}" rel="next">Next →</a>
+    {% else %}
+    <span class="{{ cls_disabled }}" aria-disabled="true">Next →</span>
+    {% endif %}
+</nav>
+{% endif %}

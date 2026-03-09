@@ -3,8 +3,9 @@
 {#import "@ui/page-header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
 {#import "@ui/empty-state.jinja" as EmptyState #}
+{#import "@ui/pagination.jinja" as Pagination #}
 {#import "@features/blog/post-card.jinja" as PostCard #}
-{#def seo, posts=(), current_path="/blog" #}
+{#def seo, posts=(), page=1, total_pages=1, current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% set breadcrumb_items = (
@@ -30,5 +31,7 @@
             <EmptyState message="No posts published yet." />
             {% endfor %}
         </Stack>
+
+        <Pagination page={{ page }} total_pages={{ total_pages }} base_url="/blog/posts?" />
     </Stack>
 </PublicLayout>

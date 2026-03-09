@@ -47,6 +47,8 @@ class ProjectsListPageContext(BaseModel):
     all_tags: tuple[str, ...] = ()
     q: str = ""
     selected_tag: str = ""
+    page: int = 1
+    total_pages: int = 1
     current_path: str = "/projects"
 
 
@@ -84,6 +86,8 @@ class BlogPostsPageContext(BaseModel):
 
     seo: SEOMeta
     posts: tuple[BlogPost, ...]
+    page: int = 1
+    total_pages: int = 1
     current_path: str = "/blog"
 
 

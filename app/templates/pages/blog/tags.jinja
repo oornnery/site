@@ -1,7 +1,6 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
 {#import "@ui/page-header.jinja" as PageHeader #}
-{#import "@ui/tag.jinja" as Tag #}
 {#import "@ui/layout/stack.jinja" as Stack #}
 {#import "@features/blog/tag-posts-fragment.jinja" as TagPosts #}
 {#def seo, tags=(), posts=(), selected_tag="", current_path="/blog" #}
@@ -25,36 +24,12 @@
     <Stack gap="6" class_name="sm:space-y-8">
         <Stack gap="4" class_name="sm:space-y-6">
             <Breadcrumb items={{ breadcrumb_items }} />
-
             <PageHeader
                 title={{ ("Tag: " ~ selected_tag) if selected_tag else "Tags" }}
                 subtitle="Browse posts by topic."
             />
         </Stack>
 
-        <div class="flex flex-wrap gap-2">
-            <Tag
-                href="/blog/tags"
-                text="All"
-                variant={{ "accent" if selected_tag == "" else "outline" }}
-                hx-get="/blog/tags"
-                hx-target="#tag-posts"
-                hx-swap="outerHTML"
-                hx-push-url="true"
-            />
-            {% for tag in tags %}
-            <Tag
-                href={{ "/blog/tags/" ~ (tag.name | urlencode) }}
-                text={{ tag.name ~ " (" ~ tag.count ~ ")" }}
-                variant={{ "accent" if selected_tag and selected_tag | lower == tag.name | lower else "outline" }}
-                hx-get={{ "/blog/tags/" ~ (tag.name | urlencode) }}
-                hx-target="#tag-posts"
-                hx-swap="outerHTML"
-                hx-push-url="true"
-            />
-            {% endfor %}
-        </div>
-
-        <TagPosts posts={{ posts }} />
+        <TagPosts tags={{ tags }} posts={{ posts }} selected_tag={{ selected_tag }} />
     </Stack>
 </PublicLayout>

@@ -29,9 +29,15 @@ export default (autoplayMs = 3000) => ({
             this.startAutoplay();
         }
         // pause when tab becomes hidden
-        document.addEventListener("visibilitychange", () => {
+        this._onVisibility = () => {
             document.hidden ? this.stopAutoplay() : this.startAutoplay();
-        });
+        };
+        document.addEventListener("visibilitychange", this._onVisibility);
+    },
+
+    destroy() {
+        this.stopAutoplay();
+        document.removeEventListener("visibilitychange", this._onVisibility);
     },
 
     goTo(index) {

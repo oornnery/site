@@ -1,7 +1,7 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Request
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from fastapi.responses import HTMLResponse, Response
 
 from app.core.dependencies import get_blog_page_service
@@ -23,10 +23,13 @@ async def blog_home(page_service: BlogPageServiceDep) -> HTMLResponse:
 
 
 @router.get("/posts", response_class=HTMLResponse)
-async def blog_posts(page_service: BlogPageServiceDep) -> HTMLResponse:
-    page = page_service.build_posts_page()
+async def blog_posts(
+    page_service: BlogPageServiceDep,
+    page: Annotated[int, Query(ge=1)] = 1,
+) -> HTMLResponse:
+    page_data = page_service.build_posts_page(page=page)
     logger.debug("Blog posts page rendered.")
-    return render_page(page)
+    return render_page(page_data)
 
 
 @router.get("/posts/{slug}", response_class=HTMLResponse)
@@ -49,10 +52,13 @@ async def blog_tags(request: Request, page_service: BlogPageServiceDep) -> HTMLR
     logger.debug("Blog tags page rendered.")
     if is_htmx(request):
         ctx = page.context
-        assert isinstance(ctx, BlogTagsPageContext)
+        if not isinstance(ctx, BlogTagsPageContext):
+            raise TypeError(f"Expected BlogTagsPageContext, got {type(ctx).__name__}")
         return render_fragment(
             "@features/blog/tag-posts-fragment.jinja",
+            tags=ctx.tags,
             posts=ctx.posts,
+            selected_tag=ctx.selected_tag,
         )
     return render_page(page)
 
@@ -67,10 +73,13 @@ async def blog_tag_detail(
     logger.debug(f"Blog tag page rendered for tag={tag}.")
     if is_htmx(request):
         ctx = page.context
-        assert isinstance(ctx, BlogTagsPageContext)
+        if not isinstance(ctx, BlogTagsPageContext):
+            raise TypeError(f"Expected BlogTagsPageContext, got {type(ctx).__name__}")
         return render_fragment(
             "@features/blog/tag-posts-fragment.jinja",
+            tags=ctx.tags,
             posts=ctx.posts,
+            selected_tag=ctx.selected_tag,
         )
     return render_page(page)
 

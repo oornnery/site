@@ -23,17 +23,21 @@ async def projects_list(
     page_service: ProjectsPageServiceDep,
     q: Annotated[str, Query()] = "",
     tag: Annotated[str, Query()] = "",
+    page: Annotated[int, Query(ge=1)] = 1,
 ) -> HTMLResponse:
-    page = page_service.build_list_page(q=q, tag=tag)
+    page_data = page_service.build_list_page(q=q, tag=tag, page=page)
     logger.debug("Projects list page rendered.")
     if is_htmx(request):
-        ctx = page.context
-        assert isinstance(ctx, ProjectsListPageContext)
+        ctx = page_data.context
+        if not isinstance(ctx, ProjectsListPageContext):
+            raise TypeError(
+                f"Expected ProjectsListPageContext, got {type(ctx).__name__}"
+            )
         return render_fragment(
             "@features/projects/projects-list-fragment.jinja",
             projects=ctx.projects,
         )
-    return render_page(page)
+    return render_page(page_data)
 
 
 @router.get("/{slug}", response_class=HTMLResponse)

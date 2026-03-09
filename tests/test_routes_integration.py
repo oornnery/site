@@ -81,6 +81,59 @@ def test_blog_tag_detail_route_returns_success() -> None:
         assert response.status_code == 200
 
 
+def test_blog_posts_route_supports_pagination() -> None:
+    posts = load_all_blog_posts()
+    assert len(posts) > 10
+    first_page_title = posts[0].title
+    second_page_title = posts[10].title
+
+    for client in _build_client():
+        response = client.get("/blog/posts?page=2")
+        assert response.status_code == 200
+        assert second_page_title in response.text
+        assert first_page_title not in response.text
+
+
+def test_projects_route_supports_pagination() -> None:
+    projects = load_all_projects()
+    assert len(projects) > 10
+    first_page_title = projects[0].title
+    second_page_title = projects[10].title
+
+    for client in _build_client():
+        response = client.get("/projects?page=2")
+        assert response.status_code == 200
+        assert second_page_title in response.text
+        assert first_page_title not in response.text
+
+
+def test_blog_tags_route_returns_fragment_for_htmx_requests() -> None:
+    posts = load_all_blog_posts()
+    assert posts
+    tag = posts[0].tags[0]
+
+    for client in _build_client():
+        response = client.get(
+            f"/blog/tags/{tag}",
+            headers={"HX-Request": "true"},
+        )
+        assert response.status_code == 200
+        assert 'id="tag-posts"' in response.text
+        assert "<html" not in response.text.lower()
+        assert f">{tag} (" in response.text
+
+
+def test_projects_route_returns_fragment_for_htmx_requests() -> None:
+    for client in _build_client():
+        response = client.get(
+            "/projects",
+            headers={"HX-Request": "true"},
+        )
+        assert response.status_code == 200
+        assert 'id="projects-list"' in response.text
+        assert "<html" not in response.text.lower()
+
+
 def test_resume_download_returns_markdown_file() -> None:
     for client in _build_client():
         response = client.get("/about/resume.md")
@@ -156,3 +209,28 @@ def test_contact_submission_returns_validation_errors() -> None:
 
         assert post_response.status_code == 422
         assert "valid email address" in post_response.text
+
+
+def test_contact_submission_returns_fragment_for_htmx_validation_errors() -> None:
+    for client in _build_client():
+        get_response = client.get("/contact", headers={"user-agent": "pytest-agent"})
+        csrf_token = _extract_csrf_token(get_response.text)
+
+        post_response = client.post(
+            "/contact",
+            data={
+                "name": "A",
+                "email": "not-an-email",
+                "subject": "Hi",
+                "message": "short",
+                "csrf_token": csrf_token,
+            },
+            headers={
+                "user-agent": "pytest-agent",
+                "HX-Request": "true",
+            },
+        )
+
+        assert post_response.status_code == 422
+        assert 'id="contact-form-section"' in post_response.text
+        assert "<html" not in post_response.text.lower()

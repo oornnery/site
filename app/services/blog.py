@@ -103,8 +103,14 @@ class BlogPageService:
             ),
         )
 
-    def build_posts_page(self) -> PageRenderData:
-        posts = load_all_blog_posts()
+    def build_posts_page(self, page: int = 1, page_size: int = 10) -> PageRenderData:
+        all_posts = load_all_blog_posts()
+        total = len(all_posts)
+        total_pages = max(1, math.ceil(total / page_size))
+        page = max(1, min(page, total_pages))
+        start = (page - 1) * page_size
+        posts = all_posts[start : start + page_size]
+
         seo = seo_for_page(
             title="Blog Posts",
             description="All published blog posts.",
@@ -115,6 +121,8 @@ class BlogPageService:
             context=BlogPostsPageContext(
                 seo=seo,
                 posts=posts,
+                page=page,
+                total_pages=total_pages,
             ),
         )
 

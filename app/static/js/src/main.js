@@ -33,6 +33,12 @@ Alpine.start();
 
 window.htmx = htmx;
 
+// Swap fragment even on 4xx/5xx so inline validation errors are displayed.
+htmx.config.responseHandling = [
+    { code: "204", swap: false },
+    { code: ".*", swap: true },
+];
+
 /* ── Stimulus ── */
 
 const stimulusApp = Application.start();

@@ -1,4 +1,5 @@
 import logging
+import math
 
 from app.models.models import Project
 from app.infrastructure.markdown import get_project_by_slug, load_all_projects
@@ -14,7 +15,13 @@ logger = logging.getLogger(__name__)
 
 class ProjectsPageService:
     def build_list_page(
-        self, *, q: str = "", tag: str = "", featured: bool | None = None
+        self,
+        *,
+        q: str = "",
+        tag: str = "",
+        featured: bool | None = None,
+        page: int = 1,
+        page_size: int = 10,
     ) -> PageRenderData:
         all_projects = load_all_projects()
         all_tags = tuple(sorted({t for p in all_projects for t in p.tags}))
@@ -35,23 +42,31 @@ class ProjectsPageService:
         if featured is not None:
             filtered = tuple(p for p in filtered if p.featured == featured)
 
+        total = len(filtered)
+        total_pages = max(1, math.ceil(total / page_size))
+        page = max(1, min(page, total_pages))
+        start = (page - 1) * page_size
+        paginated = filtered[start : start + page_size]
+
         seo = seo_for_page(
             title="Projects",
             description="My projects and selected work.",
             path="/projects",
         )
         logger.debug(
-            f"Projects list use-case built with project_count={len(filtered)}"
-            f" (q={q!r} tag={tag!r} featured={featured})"
+            f"Projects list use-case built with project_count={len(paginated)}"
+            f" (q={q!r} tag={tag!r} featured={featured} page={page}/{total_pages})"
         )
         return PageRenderData(
             template="pages/projects/list.jinja",
             context=ProjectsListPageContext(
                 seo=seo,
-                projects=filtered,
+                projects=paginated,
                 all_tags=all_tags,
                 q=q,
                 selected_tag=tag,
+                page=page,
+                total_pages=total_pages,
             ),
         )
 

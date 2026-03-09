@@ -409,7 +409,8 @@ for testing strategies, CI setup, `jx collect_assets`, and JinjaX migration.
 ## Integrations
 
 See [the integrations reference](references/integrations.md) for FastAPI,
-Flask, Django, HTMX, and Alpine.js integration guidance.
+Flask, Django, HTMX (fragment rendering, 4xx config, URL sync), Alpine.js,
+Stimulus (lifecycle controllers), and esbuild build system guidance.
 
 ## Organization
 

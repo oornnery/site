@@ -52,15 +52,14 @@ Configured routers:
 
 - `portfolio-web` for public website traffic
 - `portfolio-contact` for `POST /contact`
-- `portfolio-analytics` for `POST /api/v1/analytics/track`
+- Browser traces use same-origin `POST /otel/v1/traces` served by the app,
+  which forwards to the OTLP HTTP collector
 
 Configured edge controls:
 
-- Global and route-specific rate limiting
+- Global rate limiting
 - In-flight request cap
 - Body size limits per route profile
-- IP allowlist for analytics endpoint
-  (open by default in prod compose; narrow in production network policy)
 - Compression middleware
 
 ## Application Runtime Hardening (Prod)
@@ -77,14 +76,24 @@ From `docker/docker-compose.prod.yml`:
 - Production compose maps `PROD_*` env vars to app-layer checks:
   `PROD_TRUSTED_HOSTS` -> `TRUSTED_HOSTS`
   `PROD_CORS_ALLOW_ORIGINS` -> `CORS_ALLOW_ORIGINS`
-  `PROD_ANALYTICS_ALLOWED_ORIGINS` -> `ANALYTICS_ALLOWED_ORIGINS`
+  `PROD_FRONTEND_TELEMETRY_ENABLED` -> `FRONTEND_TELEMETRY_ENABLED`
+  `PROD_FRONTEND_TELEMETRY_OTLP_ENDPOINT` -> `FRONTEND_TELEMETRY_OTLP_ENDPOINT`
 - Health check via `GET /health` endpoint
 
 ## Observability Assets
 
-- `infra/grafana/portfolio-overview-dashboard.json`
-- `infra/alerts/portfolio-alert-rules.yaml`
-- Runbook: `infra/README.md` (includes SigNoz setup)
+- `infra/signoz/dashboards/portfolio-backend-overview.json`
+- `infra/signoz/dashboards/portfolio-frontend-telemetry.json`
+- `infra/signoz/alerts/*.json`
+- Runbooks: `infra/README.md` and `infra/signoz/README.md`
+- `scripts/run_otel.py` maps app telemetry settings to standard `OTEL_*`
+  environment variables before launching `opentelemetry-instrument`
+- `uv run task run_otel` is the supported local entrypoint for auto-instrumented
+  runs
+- Browser tracing is configured with `FRONTEND_TELEMETRY_*` settings and uses
+  the same-origin OTLP proxy route `/otel/v1/traces`
+- Grafana and Prometheus rule assets are no longer maintained in this repo;
+  SigNoz is the supported observability target
 
 ## CI/Quality Automation
 

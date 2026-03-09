@@ -23,7 +23,7 @@ Detailed technical documentation lives in [docs/README.md](docs/README.md):
 - Markdown-driven content model with TTL-cached nh3 sanitization.
 - Contact flow with CSRF, strict validation, rate limiting,
   and decoupled notifications (webhook + SMTP).
-- Analytics ingestion endpoint with allowlist and telemetry integration.
+- Browser telemetry via OpenTelemetry JS plus backend OTLP export.
 - Health check endpoint for container probes.
 - OpenTelemetry traces, metrics, and logs export.
 
@@ -44,7 +44,7 @@ Detailed technical documentation lives in [docs/README.md](docs/README.md):
 | GET    | `/about/resume.md`        | Resume download     |
 | GET    | `/contact`                | Contact page        |
 | POST   | `/contact`                | Contact submission  |
-| POST   | `/api/v1/analytics/track` | Analytics ingestion |
+| POST   | `/otel/v1/traces`         | Frontend OTLP proxy |
 | GET    | `/health`                 | Health check        |
 
 ## Tech Stack
@@ -81,6 +81,12 @@ uv run task build
 
 ```bash
 uv run task run
+```
+
+Auto-instrumented runtime with OpenTelemetry distro:
+
+```bash
+uv run task run_otel
 ```
 
 1. Open:
@@ -121,4 +127,11 @@ More details: [docker/README.md](docker/README.md).
 - Security controls exist at both edge (Traefik) and app middleware levels.
 - Request and route limits are applied globally and for critical endpoints.
 - OTLP export supports local and cloud backends (including SigNoz).
+- Frontend telemetry uses same-origin `POST /otel/v1/traces`, and the app
+  forwards OTLP HTTP payloads to the configured collector.
+- `uv run task run` uses the app-managed telemetry bootstrap.
+- `uv run task run_otel` runs under `opentelemetry-instrument` and reuses
+  preconfigured global providers instead of configuring them twice.
+- Importable SigNoz dashboards and alert manifests live under
+  [infra/signoz](infra/signoz).
 - Observability runbook: [infra/README.md](infra/README.md).

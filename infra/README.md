@@ -1,33 +1,23 @@
 # Infrastructure Observability Assets
 
-This directory stores operational observability artifacts used by dashboards
-and alerting tools.
+This directory stores operational observability artifacts for SigNoz.
+Grafana- and Prometheus-specific assets were removed from this repository.
 
 ## Contents
 
-- `grafana/portfolio-overview-dashboard.json`
-  - Grafana dashboard definition for the portfolio service.
-- `alerts/portfolio-alert-rules.yaml`
-  - Alert rules intended for Prometheus-compatible alert managers.
-
-## How to use
-
-### Grafana dashboard
-
-1. Open Grafana and go to Dashboard import.
-2. Import `infra/grafana/portfolio-overview-dashboard.json`.
-3. Bind the dashboard to your metrics datasource.
-
-### Alert rules
-
-1. Add `infra/alerts/portfolio-alert-rules.yaml` to your Prometheus rules path.
-2. Reload or restart the Prometheus server.
-3. Confirm alert groups are active in your alerting UI.
+- `signoz/dashboards/portfolio-backend-overview.json`
+  - Backend service health dashboard built from app-level OpenTelemetry metrics.
+- `signoz/dashboards/portfolio-frontend-telemetry.json`
+  - Frontend tracing and OTLP proxy dashboard for browser telemetry.
+- `signoz/alerts/*.json`
+  - Alert rule manifests for the SigNoz `/api/v1/rules` API.
+- `signoz/README.md`
+  - Import runbook for dashboards and alerts.
 
 ## Runtime dependencies
 
-These files assume the application is exporting telemetry (metrics/logs/traces)
-through OpenTelemetry, as configured in the app settings.
+These assets assume the application is exporting telemetry through
+OpenTelemetry, as configured in the app settings.
 
 ## SigNoz setup (logs, metrics, traces)
 
@@ -40,6 +30,7 @@ TELEMETRY_ENABLED=true
 TELEMETRY_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 TELEMETRY_EXPORTER_OTLP_INSECURE=true
 TELEMETRY_LOGS_ENABLED=true
+FRONTEND_TELEMETRY_ENABLED=true
 ```
 
 For SigNoz Cloud, include auth headers:
@@ -49,23 +40,28 @@ TELEMETRY_ENABLED=true
 TELEMETRY_EXPORTER_OTLP_ENDPOINT=https://ingest.<region>.signoz.cloud:443
 TELEMETRY_EXPORTER_OTLP_INSECURE=false
 TELEMETRY_LOGS_ENABLED=true
+FRONTEND_TELEMETRY_ENABLED=true
 TELEMETRY_EXPORTER_OTLP_HEADERS=signoz-ingestion-key=<your-key>
 ```
 
-### Validation checklist (SigNoz)
+## Validation checklist
 
 1. Start the app and hit `/`, `/about`, `/projects`, `/contact`.
-2. Open SigNoz and confirm service `portfolio-backend` appears.
-3. Verify traces, metrics, and logs are all being ingested.
-4. Confirm logs can be correlated by trace ID.
+2. Open SigNoz and confirm services `portfolio-backend` and
+   `portfolio-frontend` appear.
+3. Verify traces, metrics, and logs are ingesting.
+4. Confirm `POST /otel/v1/traces` traffic appears in the frontend dashboard.
+5. Import the dashboards and alerts from `infra/signoz/`.
 
-This file is the primary runbook for observability setup in this repository.
+Detailed import instructions live in `infra/signoz/README.md`.
 
 ## Refs
 
 - OpenTelemetry Python docs:
   <https://opentelemetry.io/docs/languages/python/>
-- Grafana dashboard import docs:
-  <https://grafana.com/docs/grafana/latest/dashboards/build-dashboards/import-dashboards/>
-- Prometheus alerting rules docs:
-  <https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/>
+- OpenTelemetry JS docs:
+  <https://opentelemetry.io/docs/languages/js/>
+- SigNoz dashboards repo:
+  <https://github.com/SigNoz/dashboards>
+- SigNoz API docs:
+  <https://github.com/SigNoz/signoz/blob/main/docs/api/openapi.yml>

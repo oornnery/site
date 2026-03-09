@@ -1,0 +1,64 @@
+{
+  "alert": "portfolio_backend_high_5xx_rate",
+  "ruleType": "promql_rule",
+  "alertType": "METRIC_BASED_ALERT",
+  "condition": {
+    "thresholds": {
+      "kind": "basic",
+      "spec": [
+        {
+          "name": "critical",
+          "target": 5,
+          "matchType": "2",
+          "op": "1",
+          "channels": [
+            "__REPLACE_WITH_SIGNOZ_CHANNEL__"
+          ]
+        }
+      ]
+    },
+    "compositeQuery": {
+      "queryType": "promql",
+      "panelType": "graph",
+      "queries": [
+        {
+          "type": "promql",
+          "spec": {
+            "name": "A",
+            "query": "sum(rate({\"portfolio.http.requests_total\",\"status_code\"=~\"5..\"}[5m])) / clamp_min(sum(rate({\"portfolio.http.requests_total\"}[5m])), 1) * 100"
+          }
+        }
+      ]
+    },
+    "selectedQueryName": "A"
+  },
+  "evaluation": {
+    "kind": "rolling",
+    "spec": {
+      "evalWindow": "5m0s",
+      "frequency": "30s"
+    }
+  },
+  "labels": {
+    "service": "portfolio-backend",
+    "severity": "critical"
+  },
+  "annotations": {
+    "summary": "Portfolio backend 5xx ratio above 5%",
+    "description": "HTTP 5xx ratio is {{$value}}%, above the {{$threshold}}% threshold for the portfolio backend."
+  },
+  "notificationSettings": {
+    "groupBy": [
+      "service",
+      "severity"
+    ],
+    "usePolicy": false,
+    "renotify": {
+      "enabled": false,
+      "interval": "30m",
+      "alertStates": []
+    }
+  },
+  "version": "v5",
+  "schemaVersion": "v2alpha1"
+}

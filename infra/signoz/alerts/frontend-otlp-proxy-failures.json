@@ -1,0 +1,64 @@
+{
+  "alert": "portfolio_frontend_otlp_proxy_failures",
+  "ruleType": "promql_rule",
+  "alertType": "METRIC_BASED_ALERT",
+  "condition": {
+    "thresholds": {
+      "kind": "basic",
+      "spec": [
+        {
+          "name": "critical",
+          "target": 2,
+          "matchType": "2",
+          "op": "1",
+          "channels": [
+            "__REPLACE_WITH_SIGNOZ_CHANNEL__"
+          ]
+        }
+      ]
+    },
+    "compositeQuery": {
+      "queryType": "promql",
+      "panelType": "graph",
+      "queries": [
+        {
+          "type": "promql",
+          "spec": {
+            "name": "A",
+            "query": "sum(rate({\"portfolio.http.requests_total\",\"path\"=\"/otel/v1/traces\",\"status_code\"=~\"5..\"}[10m])) / clamp_min(sum(rate({\"portfolio.http.requests_total\",\"path\"=\"/otel/v1/traces\"}[10m])), 1) * 100"
+          }
+        }
+      ]
+    },
+    "selectedQueryName": "A"
+  },
+  "evaluation": {
+    "kind": "rolling",
+    "spec": {
+      "evalWindow": "10m0s",
+      "frequency": "30s"
+    }
+  },
+  "labels": {
+    "service": "portfolio-frontend",
+    "severity": "critical"
+  },
+  "annotations": {
+    "summary": "Portfolio OTLP proxy 5xx ratio above 2%",
+    "description": "The same-origin OTLP proxy route is returning 5xx responses at {{$value}}%, above the {{$threshold}}% threshold."
+  },
+  "notificationSettings": {
+    "groupBy": [
+      "service",
+      "severity"
+    ],
+    "usePolicy": false,
+    "renotify": {
+      "enabled": false,
+      "interval": "30m",
+      "alertStates": []
+    }
+  },
+  "version": "v5",
+  "schemaVersion": "v2alpha1"
+}

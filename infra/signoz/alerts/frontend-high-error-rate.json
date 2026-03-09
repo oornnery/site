@@ -1,0 +1,64 @@
+{
+  "alert": "portfolio_frontend_high_error_rate",
+  "ruleType": "promql_rule",
+  "alertType": "METRIC_BASED_ALERT",
+  "condition": {
+    "thresholds": {
+      "kind": "basic",
+      "spec": [
+        {
+          "name": "warning",
+          "target": 10,
+          "matchType": "2",
+          "op": "1",
+          "channels": [
+            "__REPLACE_WITH_SIGNOZ_CHANNEL__"
+          ]
+        }
+      ]
+    },
+    "compositeQuery": {
+      "queryType": "promql",
+      "panelType": "graph",
+      "queries": [
+        {
+          "type": "promql",
+          "spec": {
+            "name": "A",
+            "query": "sum(rate({\"signoz_calls_total\",\"service.name\"=\"portfolio-frontend\",\"status.code\"=\"STATUS_CODE_ERROR\"}[5m])) / clamp_min(sum(rate({\"signoz_calls_total\",\"service.name\"=\"portfolio-frontend\"}[5m])), 1) * 100"
+          }
+        }
+      ]
+    },
+    "selectedQueryName": "A"
+  },
+  "evaluation": {
+    "kind": "rolling",
+    "spec": {
+      "evalWindow": "10m0s",
+      "frequency": "30s"
+    }
+  },
+  "labels": {
+    "service": "portfolio-frontend",
+    "severity": "warning"
+  },
+  "annotations": {
+    "summary": "Portfolio frontend span error ratio above 10%",
+    "description": "Frontend span error ratio is {{$value}}%, above the {{$threshold}}% threshold for portfolio-frontend."
+  },
+  "notificationSettings": {
+    "groupBy": [
+      "service",
+      "severity"
+    ],
+    "usePolicy": false,
+    "renotify": {
+      "enabled": false,
+      "interval": "30m",
+      "alertStates": []
+    }
+  },
+  "version": "v5",
+  "schemaVersion": "v2alpha1"
+}

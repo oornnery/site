@@ -114,7 +114,7 @@ full-page loads and in-page fragment swaps.
 Blog posts (`/blog/posts`) and projects (`/projects`) support SSR pagination
 via `?page=N` query parameter. Services accept `page` and `page_size`
 (default 10), clamp to `[1, total_pages]`, and include `page` and
-`total_pages` in the page context for the `@ui/pagination.jinja` component.
+`total_pages` in the page context for the `@ui/nav/pagination.jinja` component.
 
 ## Content Pipeline
 

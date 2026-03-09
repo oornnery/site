@@ -21,13 +21,15 @@ The frontend is SSR-first using Jx/Jinja templates.
 
 The `ui/` folder is organized into subfolders:
 
-| Subfolder    | Contents                                                                                                                                               |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `ui/layout/` | `center`, `grid`, `row`, `section`, `stack`                                                                                                            |
-| `ui/nav/`    | `breadcrumb`, `footer`, `navbar`, `scroll-indicator`                                                                                                   |
-| `ui/card/`   | `card`, `card-heading`                                                                                                                                 |
-| `ui/form/`   | `button`, `input`                                                                                                                                      |
-| `ui/` root   | `alert`, `avatar`, `content-shell`, `empty-state`, `icon`, `meta-info`, `page-header`, `pagination`, `section-link`, `seo-head`, `social-links`, `tag` |
+| Subfolder      | Contents                                                                      |
+| -------------- | ----------------------------------------------------------------------------- |
+| `ui/layout/`   | `center`, `grid`, `row`, `section`, `stack`                                   |
+| `ui/nav/`      | `breadcrumb`, `footer`, `navbar`, `pagination`, `scroll`, `section`, `social` |
+| `ui/card/`     | `card`, `card/heading`                                                        |
+| `ui/content/`  | `header`, `meta`, `shell`                                                     |
+| `ui/feedback/` | `alert`, `empty`                                                              |
+| `ui/form/`     | `button`, `input`                                                             |
+| `ui/` root     | `avatar`, `icon`, `seo`, `tag`                                                |
 
 ## Jx Catalog
 
@@ -160,7 +162,7 @@ Vanilla JS utilities that run on `DOMContentLoaded`:
 ## Pagination
 
 SSR pagination via `?page=N` query parameter, rendered by
-`@ui/pagination.jinja`. Used on `/blog/posts` and `/projects`.
+`@ui/nav/pagination.jinja`. Used on `/blog/posts` and `/projects`.
 
 Services accept `page` and `page_size` (default 10), clamp to valid range,
 and pass `page` + `total_pages` to the template context.

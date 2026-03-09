@@ -1,11 +1,11 @@
 {#def seo, featured=(), latest_posts=(), csrf_token="", current_path="/" #}
 {#import "@layouts/home.jinja" as HomeLayout #}
 {#import "@ui/avatar.jinja" as Avatar #}
-{#import "@ui/nav/scroll-indicator.jinja" as ScrollIndicator #}
-{#import "@features/home/profile-summary.jinja" as ProfileSummary #}
-{#import "@features/home/projects-preview.jinja" as ProjectsPreview #}
-{#import "@features/home/blog-preview.jinja" as BlogPreview #}
-{#import "@features/home/contact-preview.jinja" as ContactPreview #}
+{#import "@ui/nav/scroll.jinja" as ScrollIndicator #}
+{#import "@features/home/profile.jinja" as ProfileSummary #}
+{#import "@features/home/projects.jinja" as ProjectsPreview #}
+{#import "@features/home/blog.jinja" as BlogPreview #}
+{#import "@features/home/contact.jinja" as ContactPreview #}
 
 <HomeLayout seo={{ seo }} current_path={{ current_path }}>
     <section class="snap-section home-hero-section" data-analytics-section="home-hero">

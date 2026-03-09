@@ -34,7 +34,7 @@ async def projects_list(
                 f"Expected ProjectsListPageContext, got {type(ctx).__name__}"
             )
         return render_fragment(
-            "@features/projects/projects-list-fragment.jinja",
+            "@features/projects/list-fragment.jinja",
             projects=ctx.projects,
         )
     return render_page(page_data)

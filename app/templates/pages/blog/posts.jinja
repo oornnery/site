@@ -1,10 +1,10 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
-{#import "@ui/page-header.jinja" as PageHeader #}
+{#import "@ui/content/header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
-{#import "@ui/empty-state.jinja" as EmptyState #}
-{#import "@ui/pagination.jinja" as Pagination #}
-{#import "@features/blog/post-card.jinja" as PostCard #}
+{#import "@ui/feedback/empty.jinja" as EmptyState #}
+{#import "@ui/nav/pagination.jinja" as Pagination #}
+{#import "@features/blog/card.jinja" as PostCard #}
 {#def seo, posts=(), page=1, total_pages=1, current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>

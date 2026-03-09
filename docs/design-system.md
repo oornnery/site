@@ -32,26 +32,32 @@ Core UI components in `app/templates/ui`, organized by subfolder:
 
 - `card.jinja` — variants: default, elevated, outlined, ghost, glass, gradient;
   idle border uses `border-accent/20`, hover `border-accent/40`
-- `card-heading.jinja` — title, date, featured badge
+- `card/heading.jinja` — title, date, featured badge
 
 **`ui/nav/`**
 
 - `navbar.jinja` — top navigation with theme/palette switcher
   (checkmark on active palette)
-- `footer.jinja`, `breadcrumb.jinja`, `scroll-indicator.jinja`
+- `footer.jinja`, `breadcrumb.jinja`, `pagination.jinja`, `scroll.jinja`,
+  `section.jinja`, `social.jinja`
 
 **`ui/layout/`**
 
 - `row.jinja`, `stack.jinja`, `grid.jinja`, `center.jinja`, `section.jinja`
 
+**`ui/content/`**
+
+- `header.jinja`, `meta.jinja`, `shell.jinja`
+
+**`ui/feedback/`**
+
+- `alert.jinja`, `empty.jinja`
+
 **`ui/` root atoms**
 
 - `tag.jinja` — variants: default, outline, accent, secondary, success, warning,
   danger; hover applies `hover:bg-surface-2/80` on all variants
-- `alert.jinja`, `avatar.jinja`, `icon.jinja`, `section-link.jinja`,
-  `social-links.jinja`
-- `content-shell.jinja`, `empty-state.jinja`, `meta-info.jinja`,
-  `page-header.jinja`, `pagination.jinja`, `seo-head.jinja`
+- `avatar.jinja`, `icon.jinja`, `seo.jinja`
 
 ## Page Design Patterns
 

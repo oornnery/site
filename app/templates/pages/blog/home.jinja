@@ -1,11 +1,11 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
-{#import "@ui/page-header.jinja" as PageHeader #}
+{#import "@ui/content/header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
 {#import "@ui/tag.jinja" as Tag #}
-{#import "@ui/section-link.jinja" as SectionLink #}
-{#import "@ui/empty-state.jinja" as EmptyState #}
-{#import "@features/blog/post-card.jinja" as PostCard #}
+{#import "@ui/nav/section.jinja" as SectionLink #}
+{#import "@ui/feedback/empty.jinja" as EmptyState #}
+{#import "@features/blog/card.jinja" as PostCard #}
 {#def seo, featured_posts=(), recent_posts=(), tags=(), current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>

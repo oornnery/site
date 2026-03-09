@@ -1,8 +1,8 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
-{#import "@ui/page-header.jinja" as PageHeader #}
+{#import "@ui/content/header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
-{#import "@features/blog/tag-posts-fragment.jinja" as TagPosts #}
+{#import "@features/blog/tags-fragment.jinja" as TagPosts #}
 {#def seo, tags=(), posts=(), selected_tag="", current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>

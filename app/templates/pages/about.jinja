@@ -1,12 +1,12 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
-{#import "@ui/content-shell.jinja" as ContentShell #}
-{#import "@features/resume/profile-header.jinja" as ProfileHeader #}
-{#import "@features/resume/about-section.jinja" as AboutSection #}
-{#import "@features/resume/experience-section.jinja" as ExperienceSection #}
-{#import "@features/resume/education-section.jinja" as EducationSection #}
-{#import "@features/resume/certificates-section.jinja" as CertificatesSection #}
-{#import "@features/resume/skills-section.jinja" as SkillsSection #}
+{#import "@ui/content/shell.jinja" as ContentShell #}
+{#import "@features/resume/header.jinja" as ProfileHeader #}
+{#import "@features/resume/about.jinja" as AboutSection #}
+{#import "@features/resume/experience.jinja" as ExperienceSection #}
+{#import "@features/resume/education.jinja" as EducationSection #}
+{#import "@features/resume/certificates.jinja" as CertificatesSection #}
+{#import "@features/resume/skills.jinja" as SkillsSection #}
 {#def seo, meta, hero_html="", about_html="", work_experience=(), education=(), certificates=(), skill_groups=(), current_path="/about" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>

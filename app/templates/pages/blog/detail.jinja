@@ -2,10 +2,10 @@
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
 {#import "@ui/tag.jinja" as Tag #}
 {#import "@ui/layout/row.jinja" as Row #}
-{#import "@ui/content-shell.jinja" as ContentShell #}
-{#import "@ui/meta-info.jinja" as MetaInfo #}
+{#import "@ui/content/shell.jinja" as ContentShell #}
+{#import "@ui/content/meta.jinja" as MetaInfo #}
 {#import "@ui/card/card.jinja" as Card #}
-{#import "@features/blog/github-comments.jinja" as GithubComments #}
+{#import "@features/blog/comments.jinja" as GithubComments #}
 {#def seo, post, previous_post=None, next_post=None, read_time_minutes=1, current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>

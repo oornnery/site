@@ -140,7 +140,7 @@ class BlogPageService:
         previous_post, next_post = self._adjacent_posts(post)
         read_time_minutes = self._estimate_read_time_minutes(post.content_html)
         return PageRenderData(
-            template="pages/blog/post-detail.jinja",
+            template="pages/blog/detail.jinja",
             context=BlogPostDetailPageContext(
                 seo=seo,
                 post=post,

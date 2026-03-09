@@ -83,7 +83,7 @@ async def contact_post(
         if not isinstance(ctx, ContactPageContext):
             raise TypeError(f"Expected ContactPageContext, got {type(ctx).__name__}")
         return render_fragment(
-            "@features/contact/contact-form-fragment.jinja",
+            "@features/contact/fragment.jinja",
             status_code=result.status_code,
             csrf_token=ctx.csrf_token,
             success=ctx.success,

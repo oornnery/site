@@ -134,9 +134,9 @@ This file maps current implementation tokens to a Figma-ready structure.
 | `Button`           | `app/templates/ui/form/button.jinja`       |
 | `Input / Textarea` | `app/templates/ui/form/input.jinja`        |
 | `Card`             | `app/templates/ui/card/card.jinja`         |
-| `CardHeading`      | `app/templates/ui/card/card-heading.jinja` |
+| `CardHeading`      | `app/templates/ui/card/heading.jinja`      |
 | `Tag`              | `app/templates/ui/tag.jinja`               |
-| `Alert`            | `app/templates/ui/alert.jinja`             |
+| `Alert`            | `app/templates/ui/feedback/alert.jinja`    |
 | `Navbar`           | `app/templates/ui/nav/navbar.jinja`        |
 | `Footer`           | `app/templates/ui/nav/footer.jinja`        |
 | `Breadcrumb`       | `app/templates/ui/nav/breadcrumb.jinja`    |

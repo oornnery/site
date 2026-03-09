@@ -120,12 +120,13 @@ prefix:
 | Subfolder    | Components                                                   |
 | ------------ | ------------------------------------------------------------ |
 | `ui/layout/` | `center`, `grid`, `row`, `section`, `stack`                  |
-| `ui/nav/`    | `breadcrumb`, `footer`, `navbar`, `scroll-indicator`         |
-| `ui/card/`   | `card`, `card-heading`                                       |
+| `ui/nav/`    | `breadcrumb`, `footer`, `navbar`, `pagination`, `scroll`,    |
+|              | `section`, `social`                                          |
+| `ui/card/`   | `card`, `card/heading`                                       |
+| `ui/content/`| `header`, `meta`, `shell`                                    |
+| `ui/feedback/` | `alert`, `empty`                                           |
 | `ui/form/`   | `button`, `input`                                            |
-| `ui/` root   | `alert`, `avatar`, `content-shell`, `empty-state`, `icon`,   |
-|              | `meta-info`, `page-header`, `pagination`, `section-link`,    |
-|              | `seo-head`, `social-links`, `tag`                            |
+| `ui/` root   | `avatar`, `icon`, `seo`, `tag`                               |
 
 Import with the full subfolder path:
 `{#import "@ui/form/button.jinja" as Button #}`

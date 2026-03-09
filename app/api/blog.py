@@ -55,7 +55,7 @@ async def blog_tags(request: Request, page_service: BlogPageServiceDep) -> HTMLR
         if not isinstance(ctx, BlogTagsPageContext):
             raise TypeError(f"Expected BlogTagsPageContext, got {type(ctx).__name__}")
         return render_fragment(
-            "@features/blog/tag-posts-fragment.jinja",
+            "@features/blog/tags-fragment.jinja",
             tags=ctx.tags,
             posts=ctx.posts,
             selected_tag=ctx.selected_tag,
@@ -76,7 +76,7 @@ async def blog_tag_detail(
         if not isinstance(ctx, BlogTagsPageContext):
             raise TypeError(f"Expected BlogTagsPageContext, got {type(ctx).__name__}")
         return render_fragment(
-            "@features/blog/tag-posts-fragment.jinja",
+            "@features/blog/tags-fragment.jinja",
             tags=ctx.tags,
             posts=ctx.posts,
             selected_tag=ctx.selected_tag,

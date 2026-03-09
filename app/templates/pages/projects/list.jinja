@@ -1,9 +1,9 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
-{#import "@features/projects/projects-list-fragment.jinja" as ProjectsList #}
+{#import "@features/projects/list-fragment.jinja" as ProjectsList #}
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
-{#import "@ui/page-header.jinja" as PageHeader #}
+{#import "@ui/content/header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
-{#import "@ui/pagination.jinja" as Pagination #}
+{#import "@ui/nav/pagination.jinja" as Pagination #}
 {#def seo, projects=(), q="", selected_tag="", page=1, total_pages=1, current_path="/projects" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>

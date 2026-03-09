@@ -11,6 +11,7 @@
 
 import Alpine from "@alpinejs/csp";
 import { Application } from "@hotwired/stimulus";
+import htmx from "htmx.org";
 
 import navbar from "./alpine/navbar.js";
 import palette from "./alpine/palette.js";
@@ -27,6 +28,10 @@ Alpine.data("carousel", carousel);
 
 window.Alpine = Alpine;
 Alpine.start();
+
+/* ── htmx ── */
+
+window.htmx = htmx;
 
 /* ── Stimulus ── */
 

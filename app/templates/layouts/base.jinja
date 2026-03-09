@@ -17,7 +17,27 @@
     />
     <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <link rel="shortcut icon" href="/static/favicon.svg">
-    <meta name="analytics-enabled" content="{{ 'true' if analytics_enabled else 'false' }}">
+    <meta
+        name="frontend-telemetry-enabled"
+        content="{{ 'true' if frontend_telemetry_enabled and frontend_telemetry_otlp_endpoint else 'false' }}"
+    >
+    <meta name="frontend-telemetry-service-name" content="{{ frontend_telemetry_service_name }}">
+    <meta
+        name="frontend-telemetry-service-namespace"
+        content="{{ frontend_telemetry_service_namespace }}"
+    >
+    <meta
+        name="frontend-telemetry-otlp-endpoint"
+        content="{{ frontend_telemetry_otlp_endpoint }}"
+    >
+    <meta
+        name="frontend-telemetry-sample-ratio"
+        content="{{ frontend_telemetry_sample_ratio }}"
+    >
+    <meta
+        name="frontend-telemetry-environment"
+        content="{{ frontend_telemetry_environment }}"
+    >
     <link rel="stylesheet" href="/static/css/tailwind.css">
     <link rel="stylesheet" href="/static/css/style.css">
 
@@ -27,9 +47,6 @@
     {{ content }}
 
     <script defer src="/static/js/main.js"></script>
-    {% if analytics_enabled %}
-    <script defer src="/static/js/analytics.js"></script>
-    {% endif %}
     {{ assets.render_js() }}
 </body>
 </html>

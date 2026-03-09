@@ -8,7 +8,7 @@
 {#import "@features/home/contact.jinja" as ContactPreview #}
 
 <HomeLayout seo={{ seo }} current_path={{ current_path }}>
-    <section class="snap-section home-hero-section" data-analytics-section="home-hero">
+    <section class="snap-section home-hero-section" data-telemetry-section="home-hero">
         <div class="snap-section-content home-hero-content">
             <header class="flex flex-col lg:flex-row lg:items-start items-center gap-5 lg:gap-8">
                 <Avatar name={{ site_name }} />
@@ -27,7 +27,7 @@
         <ScrollIndicator />
     </section>
 
-    <section class="snap-section" data-analytics-section="home-projects">
+    <section class="snap-section" data-telemetry-section="home-projects">
         <div class="snap-section-content">
             <div class="home-projects-grid">
                 <ProjectsPreview featured={{ featured }} />
@@ -38,7 +38,7 @@
         <ScrollIndicator />
     </section>
 
-    <section class="snap-section home-contact-section" data-analytics-section="home-contact">
+    <section class="snap-section home-contact-section" data-telemetry-section="home-contact">
         <div class="snap-section-content home-contact-content">
             <ContactPreview social_links={{ social_links }} csrf_token={{ csrf_token }} />
         </div>

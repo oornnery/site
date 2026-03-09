@@ -13,7 +13,7 @@
 {% set cls = "rounded-lg transition-all duration-200 " ~ variant_map[variant] ~ " " ~ pad_map[padding] ~ " " ~ hover %}
 
 {% if href %}
-<a href="{{ href }}" class="block group {{ cls }}" data-analytics-event="click" data-analytics-id="card-link" data-analytics-target="{{ href }}" {{ attrs.render() }}>
+<a href="{{ href }}" class="block group {{ cls }}" data-telemetry-event="click" data-telemetry-id="card-link" data-telemetry-target="{{ href }}" {{ attrs.render() }}>
     {{ content }}
 </a>
 {% else %}

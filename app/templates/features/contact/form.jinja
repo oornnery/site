@@ -15,7 +15,14 @@
 <Alert message={{ errors.get('form') }} tone="danger" />
 {% endif %}
 
-<form {{ attrs.render(class="space-y-4") }} method="post" action="/contact" novalidate>
+<form
+    {{ attrs.render(class="space-y-4") }}
+    x-data="contactForm()"
+    @submit.prevent="submit"
+    method="post"
+    action="/contact"
+    novalidate
+>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="subject" value="{{ form_data.get('subject', 'Contact form submission') }}">
 
@@ -26,6 +33,10 @@
         value={{ form_data.get('name', '') }}
         required={{ true }}
         error={{ errors.get('name', '') }}
+        client_error="clientErrors.name"
+        client_dirty="dirty.name"
+        @input="onFieldInput"
+        @blur="onFieldBlur"
         minlength="2"
         maxlength="100"
     />
@@ -38,6 +49,10 @@
         value={{ form_data.get('email', '') }}
         required={{ true }}
         error={{ errors.get('email', '') }}
+        client_error="clientErrors.email"
+        client_dirty="dirty.email"
+        @input="onFieldInput"
+        @blur="onFieldBlur"
     />
 
     <Input
@@ -49,6 +64,10 @@
         rows={{ 4 }}
         required={{ true }}
         error={{ errors.get('message', '') }}
+        client_error="clientErrors.message"
+        client_dirty="dirty.message"
+        @input="onFieldInput"
+        @blur="onFieldBlur"
         minlength="10"
         maxlength="5000"
     />

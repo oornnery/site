@@ -13,18 +13,23 @@ import Alpine from "@alpinejs/csp";
 import { Application } from "@hotwired/stimulus";
 import htmx from "htmx.org";
 
+import { initFrontendTelemetry } from "./telemetry.js";
 import navbar from "./alpine/navbar.js";
 import palette from "./alpine/palette.js";
 import carousel from "./alpine/carousel.js";
+import contactForm from "./alpine/contact-form.js";
 
 import TocController from "./controllers/toc-controller.js";
 import ReadingProgressController from "./controllers/reading-progress-controller.js";
+
+initFrontendTelemetry();
 
 /* ── Alpine ── */
 
 Alpine.data("navbar", navbar);
 Alpine.data("palette", palette);
 Alpine.data("carousel", carousel);
+Alpine.data("contactForm", contactForm);
 
 window.Alpine = Alpine;
 Alpine.start();

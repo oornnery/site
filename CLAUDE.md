@@ -17,6 +17,7 @@ uv run task watch_js               # esbuild watch mode for development
 
 # Run dev server
 uv run task run                    # uvicorn with --reload on port 8000
+uv run task run_otel               # opentelemetry-instrument + uvicorn
 
 # Lint & format
 uv run task fmt                    # ruff format + rumdl fmt
@@ -57,7 +58,7 @@ framework. Progressive enhancement via Alpine.js (reactive state), Stimulus
 | Rendering      | `app/core/dependencies.py` | Jx Catalog setup and `render_template`                |
 | Rendering      | `app/core/rendering.py`    | `render_page`, `render_fragment`, `is_htmx`           |
 | Core           | `app/core/*`               | Settings, security middleware, logging                |
-| Observability  | `app/observability/*`      | OpenTelemetry, analytics service                      |
+| Observability  | `app/observability/*`      | OpenTelemetry bootstrap and app metrics               |
 | Templates      | `app/templates/`           | `ui/` (subfolders), `layouts/`, `features/`, `pages/` |
 | Content        | `content/`                 | Markdown files (about, projects, blog)                |
 
@@ -68,8 +69,8 @@ framework. Progressive enhancement via Alpine.js (reactive state), Stimulus
   to detect `HX-Request` header and return a fragment via `render_fragment()`
   instead of a full page.
 - **Orchestrator pattern**: complex flows like contact submission use
-  `ContactOrchestrator` which composes validation, notification, and analytics
-  services.
+  `ContactOrchestrator` which composes validation, notification, and telemetry
+  span events.
 - **Content pipeline**: markdown files in `content/` are parsed (YAML
   frontmatter + body), converted to HTML, sanitized with nh3, and cached with
   TTLCache. `content/about.md` uses markdown `##`/`###` headings to define
@@ -80,7 +81,7 @@ framework. Progressive enhancement via Alpine.js (reactive state), Stimulus
 - **Page context contracts**: typed dataclasses in `app/services/types.py`
   define what each page template receives.
 - **Pure ASGI middleware**: all custom middleware (security headers, body
-  limits, tracing, analytics guard) uses raw ASGI protocol, not
+  limits, tracing) uses raw ASGI protocol, not
   `BaseHTTPMiddleware`.
 - **Settings**: `app/core/config.py` uses `pydantic-settings` reading from
   `.env`. Copy `.env.example` to `.env` before running.
@@ -100,9 +101,10 @@ single IIFE at `app/static/js/main.js`.
 
 | Framework   | Role                          | Components                                |
 | ----------- | ----------------------------- | ----------------------------------------- |
-| Alpine.js   | Reactive state and toggles    | `navbar`, `palette`, `carousel`           |
+| Alpine.js   | Reactive state and toggles    | `navbar`, `palette`, `carousel`, `contactForm` |
 | Stimulus    | Lifecycle-bound controllers   | `toc-controller`, `reading-progress`      |
 | htmx        | Fragment swaps and SSR forms  | Contact form, blog tags, projects filter  |
+| OTel JS     | Browser tracing + manual spans| `telemetry`, contact/form events          |
 
 Color tokens use RGB channels (`--accent-rgb`, `--warn-rgb`, `--danger-rgb`,
 `--accent-2-rgb`) so Tailwind opacity modifiers work: `bg-accent/10`,
@@ -157,7 +159,6 @@ Application-level controls — never remove or weaken without explicit approval:
 - Security headers middleware (CSP strict in prod, relaxed in dev)
 - Trusted host middleware
 - CORS policy from settings
-- Analytics source allowlist checks
 - HTML sanitization via nh3 with strict tag/attribute allowlists
 
 ## Test Requirements

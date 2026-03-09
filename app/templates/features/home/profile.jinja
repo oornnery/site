@@ -16,10 +16,10 @@
             href="https://www.google.com/maps/search/{{ profile_location | urlencode }}"
             target="_blank"
             rel="noopener noreferrer"
-            data-analytics-event="outbound_click"
-            data-analytics-id="profile-location"
-            data-analytics-label="{{ profile_location }}"
-            data-analytics-target="https://www.google.com/maps/search/{{ profile_location | urlencode }}"
+            data-telemetry-event="outbound_click"
+            data-telemetry-id="profile-location"
+            data-telemetry-label="{{ profile_location }}"
+            data-telemetry-target="https://www.google.com/maps/search/{{ profile_location | urlencode }}"
         >
             {{ profile_location }}
         </a>
@@ -35,5 +35,5 @@
         container_class="flex flex-wrap justify-center lg:justify-start gap-2 mb-3"
     />
 
-    <SectionLink href="/about" label="View full resume" data-analytics-event="click" data-analytics-id="section-link-view-full-resume" data-analytics-label="View full resume" data-analytics-target="/about" />
+    <SectionLink href="/about" label="View full resume" data-telemetry-event="click" data-telemetry-id="section-link-view-full-resume" data-telemetry-label="View full resume" data-telemetry-target="/about" />
 </div>

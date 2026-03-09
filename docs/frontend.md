@@ -115,11 +115,12 @@ Config files: `esbuild.config.mjs` (JS), `tailwind.config.cjs` (CSS).
 
 Reactive client state via `x-data` factories registered in `main.js`.
 
-| Factory    | File                 | Responsibility                            |
-| ---------- | -------------------- | ----------------------------------------- |
-| `navbar`   | `alpine/navbar.js`   | Mobile menu toggle                        |
-| `palette`  | `alpine/palette.js`  | Theme/palette switching with localStorage |
-| `carousel` | `alpine/carousel.js` | Featured posts carousel with autoplay     |
+| Factory       | File                     | Responsibility                            |
+| ------------- | ------------------------ | ----------------------------------------- |
+| `navbar`      | `alpine/navbar.js`       | Mobile menu toggle                        |
+| `palette`     | `alpine/palette.js`      | Theme/palette switching with localStorage |
+| `carousel`    | `alpine/carousel.js`     | Featured posts carousel with autoplay     |
+| `contactForm` | `alpine/contact-form.js` | Client-side validation + htmx submit      |
 
 ### Stimulus
 
@@ -134,11 +135,11 @@ Lifecycle-bound controllers for complex behavior.
 
 Server-driven fragment swaps for progressive enhancement.
 
-| Feature         | Trigger                     | Target                  | Notes                       |
-| --------------- | --------------------------- | ----------------------- | --------------------------- |
-| Contact form    | `hx-post="/contact"`        | `#contact-form-section` | Inline validation on 4xx    |
-| Blog tag filter | `hx-get="/blog/tags/{tag}"` | `#tag-posts`            | Pills + posts swap together |
-| Projects filter | `hx-get` (htmx request)     | `#projects-list`        | Fragment response           |
+| Feature         | Trigger                     | Target                  | Notes                                                 |
+| --------------- | --------------------------- | ----------------------- | ----------------------------------------------------- |
+| Contact form    | `hx-post="/contact"`        | `#contact-form-section` | Alpine validates locally, valid submits swap via htmx |
+| Blog tag filter | `hx-get="/blog/tags/{tag}"` | `#tag-posts`            | Pills + posts swap together                           |
+| Projects filter | `hx-get` (htmx request)     | `#projects-list`        | Fragment response                                     |
 
 htmx config in `main.js` enables fragment swaps on 4xx/5xx responses so
 inline validation errors display correctly.
@@ -151,13 +152,22 @@ Vanilla JS utilities that run on `DOMContentLoaded`:
 - `initScrollSnap()` — responsive scroll-snap switching (proximity on mobile,
   mandatory on desktop)
 
-### Analytics
+### Frontend Telemetry
 
-`app/static/js/analytics.js` tracks:
+`app/static/js/src/telemetry.js` initializes OpenTelemetry Web tracing when
+`FRONTEND_TELEMETRY_ENABLED=true`.
 
-- Page views
-- Click events (`data-analytics-event`)
-- Section visibility (`data-analytics-section`)
+The browser sends spans to the same-origin proxy route `POST /otel/v1/traces`.
+The app forwards those OTLP HTTP payloads to the collector configured on the
+server side.
+
+It provides:
+
+- Document load instrumentation
+- `fetch` and `XMLHttpRequest` tracing for same-origin requests
+- Manual UI spans for elements marked with `data-telemetry-event`
+- Manual section visibility spans for elements marked with `data-telemetry-section`
+- Manual contact-form spans via `recordTelemetryEvent()`
 
 ## Pagination
 

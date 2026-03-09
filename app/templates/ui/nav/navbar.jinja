@@ -7,7 +7,7 @@
     @keydown.escape.window="close()"
 >
     <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
-        <a href="/" class="text-base sm:text-lg font-medium text-foreground tracking-tight hover:text-accent transition-colors" data-analytics-event="click" data-analytics-id="nav-logo" data-analytics-label="logo">
+        <a href="/" class="text-base sm:text-lg font-medium text-foreground tracking-tight hover:text-accent transition-colors" data-telemetry-event="click" data-telemetry-id="nav-logo" data-telemetry-label="logo">
             {{ site_name }}
         </a>
 
@@ -16,9 +16,9 @@
             class="navbar-toggle inline-flex items-center p-2.5 justify-center text-foreground/60 rounded-lg md:hidden hover:bg-surface-2/50 hover:text-accent focus:outline-none focus:ring-2 focus:ring-border-hover"
             :aria-expanded="ariaExpanded"
             @click="toggle()"
-            data-analytics-event="click"
-            data-analytics-id="nav-menu-toggle"
-            data-analytics-label="menu toggle"
+            data-telemetry-event="click"
+            data-telemetry-id="nav-menu-toggle"
+            data-telemetry-label="menu toggle"
         >
             <span class="sr-only">Open main menu</span>
             {# hamburger icon — hidden when open #}
@@ -35,7 +35,7 @@
             <ul class="flex flex-col mt-4 md:mt-0 md:flex-row md:space-x-1 lg:space-x-2 font-medium text-sm rounded-lg md:border-0 border border-border bg-background/95 md:bg-transparent p-4 md:p-0 items-center">
                 {% for link in nav_links %}
                 <li>
-                    <a href="{{ link.href }}" class="block px-3 py-2 rounded-lg {{ 'text-foreground bg-surface-2/50' if current_path == link.href else 'text-foreground/60 hover:text-accent hover:bg-surface-2/30' }} transition-all" data-analytics-event="click" data-analytics-id="nav-{{ link.label | lower }}" data-analytics-label="{{ link.label }}">
+                    <a href="{{ link.href }}" class="block px-3 py-2 rounded-lg {{ 'text-foreground bg-surface-2/50' if current_path == link.href else 'text-foreground/60 hover:text-accent hover:bg-surface-2/30' }} transition-all" data-telemetry-event="click" data-telemetry-id="nav-{{ link.label | lower }}" data-telemetry-label="{{ link.label }}">
                         {{ link.label }}
                     </a>
                 </li>

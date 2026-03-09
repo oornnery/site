@@ -47,6 +47,26 @@ def test_base_layout_includes_favicon() -> None:
         )
 
 
+def test_base_layout_exposes_frontend_telemetry_meta_and_no_legacy_script() -> None:
+    for client in _build_client():
+        response = client.get("/")
+
+        assert response.status_code == 200
+        assert 'name="frontend-telemetry-enabled"' in response.text
+        assert 'name="frontend-telemetry-otlp-endpoint"' in response.text
+        assert "/static/js/analytics.js" not in response.text
+
+
+def test_contact_page_renders_htmx_and_alpine_form_enhancement() -> None:
+    for client in _build_client():
+        response = client.get("/contact", headers={"user-agent": "pytest-agent"})
+        assert response.status_code == 200
+        assert 'hx-post="/contact"' in response.text
+        assert 'hx-target="#contact-form-section"' in response.text
+        assert 'x-data="contactForm()"' in response.text
+        assert '@submit.prevent="submit"' in response.text
+
+
 def test_project_detail_existing_and_missing_slug() -> None:
     projects = load_all_projects()
     assert projects

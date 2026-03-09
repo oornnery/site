@@ -1,4 +1,4 @@
-{#def name, label="", type="text", placeholder="", value="", required=False, disabled=False, readonly=False, rows=4, variant="default", size="default", error="", hint="" #}
+{#def name, label="", type="text", placeholder="", value="", required=False, disabled=False, readonly=False, rows=4, variant="default", size="default", error="", hint="", client_error="", client_dirty="" #}
 
 {% set base = "block w-full rounded-lg text-sm transition-all duration-200 placeholder:text-foreground/50 disabled:cursor-not-allowed disabled:opacity-50" %}
 {% set variants = {
@@ -10,6 +10,12 @@
 {% set sizes = {"sm": "p-2 text-sm", "default": "p-2.5 text-sm", "lg": "p-3 text-base"} %}
 {% set err_cls = "border-danger/50 focus:border-danger focus:ring-danger/30" if error else "" %}
 {% set cls = base ~ " " ~ variants[variant] ~ " " ~ sizes[size] ~ " " ~ err_cls %}
+{% set has_server_error = "true" if error else "false" %}
+{% set server_error_text = error | tojson %}
+{% set client_state_expr = "(" ~ client_dirty ~ ")" if client_dirty else "false" %}
+{% set client_error_expr = "(" ~ client_error ~ ")" if client_error else "''" %}
+{% set show_error_expr = "(" ~ client_state_expr ~ " ? Boolean(" ~ client_error_expr ~ ") : " ~ has_server_error ~ ")" %}
+{% set error_text_expr = "(" ~ client_state_expr ~ " ? (" ~ client_error_expr ~ " || '') : " ~ server_error_text ~ ")" %}
 
 <div>
     {% if label %}
@@ -19,13 +25,13 @@
     {% endif %}
 
     {% if type == "textarea" %}
-    <textarea id="{{ name }}" name="{{ name }}" rows="{{ rows }}" placeholder="{{ placeholder }}" {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} class="{{ cls }} resize-y min-h-[100px]" {{ attrs.render() }}>{{ value }}</textarea>
+    <textarea id="{{ name }}" name="{{ name }}" rows="{{ rows }}" placeholder="{{ placeholder }}" {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} class="{{ cls }} resize-y min-h-[100px]" {% if client_error %}:class="{ 'border-danger/50 focus:border-danger focus:ring-danger/30': {{ show_error_expr }} }"{% endif %} {{ attrs.render() }}>{{ value }}</textarea>
     {% else %}
-    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value }}" placeholder="{{ placeholder }}" {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} class="{{ cls }}" {{ attrs.render() }}>
+    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value }}" placeholder="{{ placeholder }}" {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} class="{{ cls }}" {% if client_error %}:class="{ 'border-danger/50 focus:border-danger focus:ring-danger/30': {{ show_error_expr }} }"{% endif %} {{ attrs.render() }}>
     {% endif %}
 
-    {% if error %}
-    <p class="mt-1 text-sm text-danger">{{ error }}</p>
+    {% if error or client_error %}
+    <p class="mt-1 text-sm text-danger" {% if client_error %}{% if not error %}x-cloak {% endif %}x-show="{{ show_error_expr }}" x-text="{{ error_text_expr }}"{% endif %}>{{ error }}</p>
     {% elif hint %}
     <p class="mt-1 text-sm text-foreground/50">{{ hint }}</p>
     {% endif %}

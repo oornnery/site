@@ -49,6 +49,10 @@ pythonpath = ["."]
 testpaths = ["tests"]
 
 [tool.taskipy.tasks]
+build_js = "npm run build:js"
+build_css = "npx tailwindcss -c tailwind.config.cjs -i app/static/css/tailwind.input.css -o app/static/css/tailwind.css --minify"
+build = "task build_js && task build_css"
+watch_js = "npm run watch:js"
 run = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
 run_prod = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
 lint = "ruff check app tests app/static/js"

@@ -1,5 +1,16 @@
 {
+  "scripts": {
+    "build:js": "esbuild app/static/js/src/main.js --bundle --outfile=app/static/js/main.js --format=iife --target=es2018 --minify",
+    "watch:js": "esbuild app/static/js/src/main.js --bundle --outfile=app/static/js/main.js --format=iife --target=es2018 --watch",
+    "build:css": "tailwindcss -c tailwind.config.cjs -i app/static/css/tailwind.input.css -o app/static/css/tailwind.css --minify",
+    "watch:css": "tailwindcss -c tailwind.config.cjs -i app/static/css/tailwind.input.css -o app/static/css/tailwind.css --watch",
+    "build": "npm run build:js && npm run build:css"
+  },
   "devDependencies": {
+    "@alpinejs/csp": "^3.15.8",
+    "@hotwired/stimulus": "^3.2.2",
+    "esbuild": "^0.27.3",
+    "htmx.org": "^2.0.8",
     "tailwindcss": "^3.4.17"
   }
 }

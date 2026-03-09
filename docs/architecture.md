@@ -59,7 +59,8 @@ flowchart LR
 - Runtime supports two observability bootstraps:
   - app-managed setup via `configure_telemetry()`
   - auto-instrumented setup via `opentelemetry-instrument`, with provider reuse
-    to avoid double instrumentation
+    to avoid double instrumentation; this path expects `OTEL_*` to already be
+    exported in the process environment
 
 ## Request Lifecycle (Conceptual)
 

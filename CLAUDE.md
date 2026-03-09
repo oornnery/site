@@ -17,7 +17,7 @@ uv run task watch_js               # esbuild watch mode for development
 
 # Run dev server
 uv run task run                    # uvicorn with --reload on port 8000
-uv run task run_otel               # opentelemetry-instrument + uvicorn
+uv run task run_otel               # opentelemetry-instrument + uvicorn (requires exported OTEL_*)
 
 # Lint & format
 uv run task fmt                    # ruff format + rumdl fmt

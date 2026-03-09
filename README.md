@@ -132,10 +132,11 @@ More details: [docker/README.md](docker/README.md).
 - `uv run task run` uses the app-managed telemetry bootstrap.
 - `uv run task run_otel` is just a convenience alias for
   `uv run opentelemetry-instrument uvicorn app.main:app ...`.
-- `usercustomize.py` maps the project's `.env` telemetry settings into
-  standard `OTEL_*` variables early in process startup, so direct
-  auto-instrumented runs pick up the same collector, headers, and
-  `service.name` defaults as the app-managed bootstrap.
+- Direct `opentelemetry-instrument` runs only see `OTEL_*` variables that are
+  already exported in the shell or process environment; values present only in
+  `.env` are not loaded by the OTel distro.
+- The app still accepts `OTEL_*` aliases in [app/core/config.py](app/core/config.py),
+  so exported `OTEL_*` values are reused by both the SDK and the app bootstrap.
 - Importable SigNoz dashboards and alert manifests live under
   [infra/signoz](infra/signoz).
 - Observability runbook: [infra/README.md](infra/README.md).

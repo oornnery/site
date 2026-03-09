@@ -44,6 +44,9 @@ class ProjectsListPageContext(BaseModel):
 
     seo: SEOMeta
     projects: tuple[Project, ...]
+    all_tags: tuple[str, ...] = ()
+    q: str = ""
+    selected_tag: str = ""
     current_path: str = "/projects"
 
 

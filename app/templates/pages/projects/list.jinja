@@ -1,10 +1,10 @@
 {#import "@layouts/public.jinja" as PublicLayout #}
-{#import "@features/projects/project-card.jinja" as ProjectCard #}
+{#import "@features/projects/projects-list-fragment.jinja" as ProjectsList #}
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
 {#import "@ui/page-header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
-{#import "@ui/empty-state.jinja" as EmptyState #}
-{#def seo, projects=(), current_path="/projects" #}
+{#import "@ui/tag.jinja" as Tag #}
+{#def seo, projects=(), all_tags=(), q="", selected_tag="", current_path="/projects" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% set breadcrumb_items = (
@@ -18,12 +18,31 @@
             <PageHeader title="Projects" subtitle="A collection of projects I've worked on." />
         </Stack>
 
-        <Stack gap="3" class_name="sm:space-y-4">
-            {% for project in projects %}
-            <ProjectCard project={{ project }} tight={{ true }} />
-            {% else %}
-            <EmptyState message="No projects yet." />
+        {% if all_tags %}
+        <div class="flex flex-wrap gap-2">
+            <Tag
+                href="/projects"
+                text="All"
+                variant={{ "accent" if selected_tag == "" else "outline" }}
+                hx-get="/projects"
+                hx-target="#projects-list"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+            />
+            {% for t in all_tags %}
+            <Tag
+                href={{ "/projects?tag=" ~ (t | urlencode) }}
+                text={{ t }}
+                variant={{ "accent" if selected_tag | lower == t | lower else "outline" }}
+                hx-get={{ "/projects?tag=" ~ (t | urlencode) }}
+                hx-target="#projects-list"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+            />
             {% endfor %}
-        </Stack>
+        </div>
+        {% endif %}
+
+        <ProjectsList projects={{ projects }} />
     </Stack>
 </PublicLayout>

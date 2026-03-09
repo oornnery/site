@@ -1,0 +1,11 @@
+{#import "@features/projects/project-card.jinja" as ProjectCard #}
+{#import "@ui/empty-state.jinja" as EmptyState #}
+{#def projects=() #}
+
+<div id="projects-list" class="space-y-3 sm:space-y-4">
+    {% for project in projects %}
+    <ProjectCard project={{ project }} tight={{ true }} />
+    {% else %}
+    <EmptyState message="No projects found." />
+    {% endfor %}
+</div>

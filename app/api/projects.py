@@ -1,12 +1,13 @@
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from fastapi.responses import HTMLResponse
 
 from app.core.dependencies import get_projects_page_service
-from app.core.rendering import render_page
+from app.core.rendering import is_htmx, render_fragment, render_page
 from app.services import ProjectsPageService
+from app.services.types import ProjectsListPageContext
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 logger = logging.getLogger(__name__)
@@ -18,10 +19,20 @@ ProjectsPageServiceDep = Annotated[
 
 @router.get("", response_class=HTMLResponse)
 async def projects_list(
+    request: Request,
     page_service: ProjectsPageServiceDep,
+    q: Annotated[str, Query()] = "",
+    tag: Annotated[str, Query()] = "",
 ) -> HTMLResponse:
-    page = page_service.build_list_page()
+    page = page_service.build_list_page(q=q, tag=tag)
     logger.debug("Projects list page rendered.")
+    if is_htmx(request):
+        ctx = page.context
+        assert isinstance(ctx, ProjectsListPageContext)
+        return render_fragment(
+            "@features/projects/projects-list-fragment.jinja",
+            projects=ctx.projects,
+        )
     return render_page(page)
 
 

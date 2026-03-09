@@ -13,21 +13,45 @@ logger = logging.getLogger(__name__)
 
 
 class ProjectsPageService:
-    def build_list_page(self) -> PageRenderData:
+    def build_list_page(
+        self, *, q: str = "", tag: str = "", featured: bool | None = None
+    ) -> PageRenderData:
         all_projects = load_all_projects()
+        all_tags = tuple(sorted({t for p in all_projects for t in p.tags}))
+
+        filtered = all_projects
+        if q:
+            q_lower = q.lower()
+            filtered = tuple(
+                p
+                for p in filtered
+                if q_lower in p.title.lower() or q_lower in p.description.lower()
+            )
+        if tag:
+            tag_lower = tag.lower()
+            filtered = tuple(
+                p for p in filtered if any(t.lower() == tag_lower for t in p.tags)
+            )
+        if featured is not None:
+            filtered = tuple(p for p in filtered if p.featured == featured)
+
         seo = seo_for_page(
             title="Projects",
             description="My projects and selected work.",
             path="/projects",
         )
         logger.debug(
-            f"Projects list use-case built with project_count={len(all_projects)}"
+            f"Projects list use-case built with project_count={len(filtered)}"
+            f" (q={q!r} tag={tag!r} featured={featured})"
         )
         return PageRenderData(
             template="pages/projects/list.jinja",
             context=ProjectsListPageContext(
                 seo=seo,
-                projects=all_projects,
+                projects=filtered,
+                all_tags=all_tags,
+                q=q,
+                selected_tag=tag,
             ),
         )
 

@@ -9,7 +9,7 @@
 | Use-cases      | `app/services/*`        | Page building and business orchestration             |
 | Domain         | `app/models/*`          | Typed schemas and entities                           |
 | Infrastructure | `app/infrastructure/*`  | Markdown IO, sanitization, notifications             |
-| Rendering      | `app/core/rendering.py` | Typed page render path                               |
+| Rendering      | `app/core/rendering.py` | `render_page`, `render_fragment`, `is_htmx` helpers  |
 | Core           | `app/core/*`            | Settings, security, logging, dependencies, utilities |
 | Observability  | `app/observability/*`   | Analytics service and app metrics                    |
 
@@ -34,13 +34,14 @@
 
 - `GET /` -> `HomePageService.build_page()`
 - `GET /about` -> `AboutPageService.build_page()`
-- `GET /projects` -> `ProjectsPageService.build_list_page()`
+- `GET /projects?page=N` -> `ProjectsPageService.build_list_page()`
+  (paginated, htmx fragment support)
 - `GET /projects/{slug}` -> detail page or HTTP 404
 - `GET /blog` -> `BlogPageService.build_home_page()`
-- `GET /blog/posts` -> `BlogPageService.build_posts_page()`
+- `GET /blog/posts?page=N` -> `BlogPageService.build_posts_page()` (paginated)
 - `GET /blog/posts/{slug}` -> blog post detail or HTTP 404
-- `GET /blog/tags` -> tags overview page
-- `GET /blog/tags/{tag}` -> posts filtered by tag
+- `GET /blog/tags` -> tags overview page (htmx fragment support)
+- `GET /blog/tags/{tag}` -> posts filtered by tag (htmx fragment support)
 - `GET /blog/feed.xml` -> RSS feed (`application/rss+xml`)
 - `GET /contact` -> `ContactPageService.build_page()`
 
@@ -59,6 +60,8 @@
 - Dispatches webhook/SMTP channels concurrently
 - Emits analytics events for attempt/failure/success
 - Returns `ContactFormResult` with page, status code, and outcome
+- On htmx request (`HX-Request` header), returns only the form fragment
+  instead of a full page — enables inline validation error display
 
 ### Analytics route
 
@@ -92,6 +95,26 @@ Defined in `app/models/schemas.py`:
 - Analytics schemas (`AnalyticsTrackEvent`, request/response)
 
 Typed page contexts in `app/services/types.py` ensure stable template contracts.
+
+## Rendering Helpers
+
+`app/core/rendering.py` provides three helpers:
+
+- `render_page(page: PageRenderData)` — renders a full page template
+- `render_fragment(template, **context)` — renders a component template
+  directly (used for htmx fragment responses)
+- `is_htmx(request)` — detects `HX-Request: true` header
+
+Routes that support htmx check `is_htmx()` and return a fragment instead of a
+full page. This enables progressive enhancement: the same route serves both
+full-page loads and in-page fragment swaps.
+
+## Pagination
+
+Blog posts (`/blog/posts`) and projects (`/projects`) support SSR pagination
+via `?page=N` query parameter. Services accept `page` and `page_size`
+(default 10), clamp to `[1, total_pages]`, and include `page` and
+`total_pages` in the page context for the `@ui/pagination.jinja` component.
 
 ## Content Pipeline
 

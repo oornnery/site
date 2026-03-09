@@ -50,9 +50,11 @@ Detailed technical documentation lives in [docs/README.md](docs/README.md):
 ## Tech Stack
 
 - Backend: FastAPI, Uvicorn, Pydantic v2, SlowAPI, HTTPX
-- Rendering: Jx, Jinja2, Tailwind CSS, custom CSS, vanilla JS
-- Content: Markdown, PyYAML, nh3, cachetools
-- Observability: OpenTelemetry (OTLP)
+- Rendering: Jx, Jinja2, Tailwind CSS, custom CSS
+- Frontend JS: Alpine.js (CSP-safe), Stimulus, htmx
+- Build: esbuild (JS bundle), Tailwind CLI (CSS)
+- Content: Markdown, PyYAML, Pygments, nh3, cachetools
+- Observability: OpenTelemetry (OTLP), Rich (logging)
 - Quality: Ruff, ty, pytest, rumdl, Taskipy
 
 ## Quick Start (Local)
@@ -63,19 +65,25 @@ Detailed technical documentation lives in [docs/README.md](docs/README.md):
 cp .env.example .env
 ```
 
-2. Install dependencies:
+1. Install dependencies:
 
 ```bash
-uv sync
+uv sync && npm install
 ```
 
-3. Run app:
+1. Build assets:
 
 ```bash
-uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uv run task build
 ```
 
-4. Open:
+1. Run app:
+
+```bash
+uv run task run
+```
+
+1. Open:
 
 - <http://localhost:8000>
 

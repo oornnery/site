@@ -5,7 +5,8 @@
 The system is a server-side rendered portfolio application with:
 
 - FastAPI as web backend
-- Jx/Jinja components for SSR pages
+- Jx/Jinja components for SSR pages with htmx progressive enhancement
+- Alpine.js (reactive state), Stimulus (controllers), htmx (fragment swaps)
 - Markdown + frontmatter as content source
 - Contact workflow with validation and notifications
 - Analytics ingestion endpoint for browser events
@@ -46,8 +47,11 @@ flowchart LR
 ### Rendering Layer
 
 - Jx `Catalog` is built in `app/core/dependencies.py`.
-- Components are organized in `app/components/{layouts,pages,features,ui}`.
+- Components are organized in `app/templates/{layouts,pages,features,ui}`.
 - Templates are rendered with explicit context contracts (`PageRenderData`).
+- `render_fragment()` in `app/core/rendering.py` supports htmx partial
+  responses — routes detect `HX-Request` header and return fragments instead
+  of full pages for progressive enhancement.
 
 ### Integrations
 

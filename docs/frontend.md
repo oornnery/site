@@ -4,9 +4,11 @@
 
 The frontend is SSR-first using Jx/Jinja templates.
 
-- No SPA framework
-- HTML rendered on server for every route
-- Progressive enhancement via small vanilla JS scripts
+- No SPA framework — HTML rendered on server for every route
+- Progressive enhancement via Alpine.js, Stimulus controllers, and htmx
+- htmx handles fragment swaps for forms and in-page filtering
+- Alpine.js manages reactive client state (theme, carousel, navbar)
+- Stimulus provides lifecycle-bound controllers (TOC, reading progress)
 
 ## Template Organization
 
@@ -19,13 +21,13 @@ The frontend is SSR-first using Jx/Jinja templates.
 
 The `ui/` folder is organized into subfolders:
 
-| Subfolder    | Contents                                                                                                                                 |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `ui/layout/` | `center`, `grid`, `row`, `section`, `stack`                                                                                              |
-| `ui/nav/`    | `breadcrumb`, `footer`, `navbar`, `scroll-indicator`                                                                                     |
-| `ui/card/`   | `card`, `card-heading`                                                                                                                   |
-| `ui/form/`   | `button`, `input`                                                                                                                        |
-| `ui/` root   | `alert`, `avatar`, `content-shell`, `empty-state`, `icon`, `meta-info`, `page-header`, `section-link`, `seo-head`, `social-links`, `tag` |
+| Subfolder    | Contents                                                                                                                                               |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `ui/layout/` | `center`, `grid`, `row`, `section`, `stack`                                                                                                            |
+| `ui/nav/`    | `breadcrumb`, `footer`, `navbar`, `scroll-indicator`                                                                                                   |
+| `ui/card/`   | `card`, `card-heading`                                                                                                                                 |
+| `ui/form/`   | `button`, `input`                                                                                                                                      |
+| `ui/` root   | `alert`, `avatar`, `content-shell`, `empty-state`, `icon`, `meta-info`, `page-header`, `pagination`, `section-link`, `seo-head`, `social-links`, `tag` |
 
 ## Jx Catalog
 
@@ -91,18 +93,77 @@ This enables consistent imports and composable templates.
 - Social links
 - Contact form with inline validation messages
 
-## JavaScript Behavior
+## Build System
 
-| File                         | Responsibility                                 |
-| ---------------------------- | ---------------------------------------------- |
-| `app/static/js/main.js`      | Mobile menu, year update, scroll snap behavior |
-| `app/static/js/analytics.js` | Event queue, batching, beacon/fetch delivery   |
+JS source lives in `app/static/js/src/` and is bundled by esbuild into a
+single IIFE at `app/static/js/main.js`. CSS is compiled by Tailwind CLI.
 
-Analytics JS tracks:
+| Command                 | Action                         |
+| ----------------------- | ------------------------------ |
+| `uv run task build`     | Build JS + CSS (production)    |
+| `uv run task build_js`  | esbuild IIFE bundle (minified) |
+| `uv run task build_css` | Tailwind CSS (minified)        |
+| `uv run task watch_js`  | esbuild watch mode for dev     |
 
-- page view
-- click events (`data-analytics-event`)
-- section visibility (`data-analytics-section`)
+Config files: `esbuild.config.mjs` (JS), `tailwind.config.cjs` (CSS).
+
+## JavaScript Frameworks
+
+### Alpine.js (CSP-safe)
+
+Reactive client state via `x-data` factories registered in `main.js`.
+
+| Factory    | File                 | Responsibility                            |
+| ---------- | -------------------- | ----------------------------------------- |
+| `navbar`   | `alpine/navbar.js`   | Mobile menu toggle                        |
+| `palette`  | `alpine/palette.js`  | Theme/palette switching with localStorage |
+| `carousel` | `alpine/carousel.js` | Featured posts carousel with autoplay     |
+
+### Stimulus
+
+Lifecycle-bound controllers for complex behavior.
+
+| Controller         | File                                         | Responsibility                      |
+| ------------------ | -------------------------------------------- | ----------------------------------- |
+| `toc`              | `controllers/toc-controller.js`              | Auto-generated TOC with scroll sync |
+| `reading-progress` | `controllers/reading-progress-controller.js` | Scroll progress bar                 |
+
+### htmx
+
+Server-driven fragment swaps for progressive enhancement.
+
+| Feature         | Trigger                     | Target                  | Notes                       |
+| --------------- | --------------------------- | ----------------------- | --------------------------- |
+| Contact form    | `hx-post="/contact"`        | `#contact-form-section` | Inline validation on 4xx    |
+| Blog tag filter | `hx-get="/blog/tags/{tag}"` | `#tag-posts`            | Pills + posts swap together |
+| Projects filter | `hx-get` (htmx request)     | `#projects-list`        | Fragment response           |
+
+htmx config in `main.js` enables fragment swaps on 4xx/5xx responses so
+inline validation errors display correctly.
+
+### Bootstrap Utilities
+
+Vanilla JS utilities that run on `DOMContentLoaded`:
+
+- `initCurrentYear()` — updates `[data-current-year]` elements
+- `initScrollSnap()` — responsive scroll-snap switching (proximity on mobile,
+  mandatory on desktop)
+
+### Analytics
+
+`app/static/js/analytics.js` tracks:
+
+- Page views
+- Click events (`data-analytics-event`)
+- Section visibility (`data-analytics-section`)
+
+## Pagination
+
+SSR pagination via `?page=N` query parameter, rendered by
+`@ui/pagination.jinja`. Used on `/blog/posts` and `/projects`.
+
+Services accept `page` and `page_size` (default 10), clamp to valid range,
+and pass `page` + `total_pages` to the template context.
 
 ## Styling Stack
 

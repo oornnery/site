@@ -1,6 +1,6 @@
 [project]
 name = "portfolio"
-version = "0.0.3"
+version = "0.0.4"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -26,7 +26,6 @@ dependencies = [
     "slowapi>=0.1.9",
     "uvicorn>=0.41.0",
     "rich>=14.3.3",
-    "fpdf2>=2.8.5",
 ]
 
 [dependency-groups]
@@ -49,26 +48,36 @@ pythonpath = ["."]
 testpaths = ["tests"]
 
 [tool.taskipy.tasks]
-build_js = "npm run build:js"
+# --- assets: compile JS and CSS ---
+build_js  = "npm run build:js"
 build_css = "npx tailwindcss -c tailwind.config.cjs -i app/static/css/tailwind.input.css -o app/static/css/tailwind.css --minify"
-build = "task build_js && task build_css"
-watch_js = "npm run watch:js"
-run = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+build     = "task build_js && task build_css"
+watch_js  = "npm run watch:js"
+
+# --- dev server ---
+run      = "uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
 run_prod = "uvicorn app.main:app --host 0.0.0.0 --port 8000"
-lint = "ruff check app tests app/static/js"
-format = "ruff format ."
-typecheck = "ty check app"
-test = "pytest -q"
-test_routes = "pytest --cov=app/api --cov-report=term-missing --cov-fail-under=100 -q"
-test_security = "pytest tests/test_security_csrf.py tests/test_markdown_sanitization.py tests/test_security_owasp.py -q"
-md_check = "rumdl check ."
+
+# --- formatting ---
 md_fmt = "rumdl fmt ."
-jx_check = "DEBUG=true PYTHONPATH=. uv run jx check app/catalog.py:catalog"
-fmt = "task format && task md_fmt"
-check = "task lint && task typecheck && task test && task md_check && task jx_check"
-ci = "task fmt && task check"
+fmt = "ruff format . && task md_fmt"
+
+# --- checks (lint / types / tests / templates / docs) ---
+lint      = "ruff check app tests app/static/js"
+typecheck = "ty check app"
+test      = "pytest -q"
+test_routes   = "pytest --cov=app/api --cov-report=term-missing --cov-fail-under=100 -q"
+test_security = "pytest tests/test_security_csrf.py tests/test_markdown_sanitization.py tests/test_security_owasp.py -q"
+md_check  = "rumdl check ."
+jx_check  = "DEBUG=true PYTHONPATH=. uv run jx check app/catalog.py:catalog"
+check     = "task lint && task typecheck && task test && task md_check && task jx_check"
+
+# --- CI: format everything then run all checks ---
+ci        = "task fmt && task check"
 precommit = "pre-commit run --all-files"
-docker_dev_up = "docker compose --env-file .env -f docker/docker-compose.yml up --build -d"
-docker_dev_down = "docker compose --env-file .env -f docker/docker-compose.yml down"
-docker_prod_up = "docker compose --env-file .env -f docker/docker-compose.prod.yml up --build -d"
+
+# --- docker ---
+docker_dev_up    = "docker compose --env-file .env -f docker/docker-compose.yml up --build -d"
+docker_dev_down  = "docker compose --env-file .env -f docker/docker-compose.yml down"
+docker_prod_up   = "docker compose --env-file .env -f docker/docker-compose.prod.yml up --build -d"
 docker_prod_down = "docker compose --env-file .env -f docker/docker-compose.prod.yml down"

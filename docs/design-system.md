@@ -51,7 +51,7 @@ Core UI components in `app/templates/ui`, organized by subfolder:
 - `alert.jinja`, `avatar.jinja`, `icon.jinja`, `section-link.jinja`,
   `social-links.jinja`
 - `content-shell.jinja`, `empty-state.jinja`, `meta-info.jinja`,
-  `page-header.jinja`, `seo-head.jinja`
+  `page-header.jinja`, `pagination.jinja`, `seo-head.jinja`
 
 ## Page Design Patterns
 

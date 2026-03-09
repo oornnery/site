@@ -7,7 +7,13 @@ repository.
 
 ```bash
 # Install dependencies
-uv sync
+uv sync && npm install
+
+# Build assets (JS bundle + Tailwind CSS)
+uv run task build                  # build_js + build_css
+uv run task build_js               # esbuild IIFE bundle → app/static/js/main.js
+uv run task build_css              # tailwindcss → app/static/css/tailwind.css
+uv run task watch_js               # esbuild watch mode for development
 
 # Run dev server
 uv run task run                    # uvicorn with --reload on port 8000
@@ -36,7 +42,8 @@ Pre-commit hooks run ruff format, ruff check --fix, ty check, and rumdl fmt/chec
 ## Architecture
 
 SSR portfolio app: FastAPI backend renders HTML via Jx/Jinja templates. No SPA
-framework.
+framework. Progressive enhancement via Alpine.js (reactive state), Stimulus
+(controllers), and htmx (fragment swaps).
 
 ### Layer map
 
@@ -48,6 +55,7 @@ framework.
 | Models         | `app/models/*`             | Pydantic schemas and models                           |
 | Infrastructure | `app/infrastructure/*`     | Markdown IO, sanitization, notifications              |
 | Rendering      | `app/core/dependencies.py` | Jx Catalog setup and `render_template`                |
+| Rendering      | `app/core/rendering.py`    | `render_page`, `render_fragment`, `is_htmx`           |
 | Core           | `app/core/*`               | Settings, security middleware, logging                |
 | Observability  | `app/observability/*`      | OpenTelemetry, analytics service                      |
 | Templates      | `app/templates/`           | `ui/` (subfolders), `layouts/`, `features/`, `pages/` |
@@ -56,7 +64,9 @@ framework.
 ### Key patterns
 
 - **Routers are thin**: they call a service method and return `HTMLResponse`.
-  Business logic lives in services.
+  Business logic lives in services. Routes that support htmx use `is_htmx()`
+  to detect `HX-Request` header and return a fragment via `render_fragment()`
+  instead of a full page.
 - **Orchestrator pattern**: complex flows like contact submission use
   `ContactOrchestrator` which composes validation, notification, and analytics
   services.
@@ -81,7 +91,18 @@ framework.
 
 Tailwind CSS (generated via `tailwind.config.cjs`) plus custom CSS layers:
 `tokens.css` (semantic tokens), `motion.css` (animations), `style.css`
-(app-specific). Vanilla JS for progressive enhancement.
+(app-specific).
+
+### Frontend JS stack
+
+JS source lives in `app/static/js/src/` and is bundled by esbuild into a
+single IIFE at `app/static/js/main.js`.
+
+| Framework   | Role                          | Components                                |
+| ----------- | ----------------------------- | ----------------------------------------- |
+| Alpine.js   | Reactive state and toggles    | `navbar`, `palette`, `carousel`           |
+| Stimulus    | Lifecycle-bound controllers   | `toc-controller`, `reading-progress`      |
+| htmx        | Fragment swaps and SSR forms  | Contact form, blog tags, projects filter  |
 
 Color tokens use RGB channels (`--accent-rgb`, `--warn-rgb`, `--danger-rgb`,
 `--accent-2-rgb`) so Tailwind opacity modifiers work: `bg-accent/10`,
@@ -103,8 +124,8 @@ prefix:
 | `ui/card/`   | `card`, `card-heading`                                       |
 | `ui/form/`   | `button`, `input`                                            |
 | `ui/` root   | `alert`, `avatar`, `content-shell`, `empty-state`, `icon`,   |
-|              | `meta-info`, `page-header`, `section-link`, `seo-head`,      |
-|              | `social-links`, `tag`                                        |
+|              | `meta-info`, `page-header`, `pagination`, `section-link`,    |
+|              | `seo-head`, `social-links`, `tag`                            |
 
 Import with the full subfolder path:
 `{#import "@ui/form/button.jinja" as Button #}`
@@ -115,7 +136,8 @@ Import with the full subfolder path:
 2. Put business logic in services; use orchestrator classes for multi-step
    flows (e.g. `ContactOrchestrator`).
 3. Keep templates typed through context models in `app/services/types.py`.
-4. Render pages via `render_page()` and `PageRenderData`.
+4. Render pages via `render_page()` and `PageRenderData`. For htmx
+   fragment responses, use `render_fragment()` with `is_htmx()` detection.
 5. Do not bypass the content pipeline in `app/infrastructure/markdown.py`.
 6. Reuse existing dependencies from `app/core/dependencies.py`.
 7. Write new middleware as pure ASGI (`__init__(self, app: ASGIApp)` +

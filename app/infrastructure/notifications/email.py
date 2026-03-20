@@ -93,7 +93,14 @@ class WebhookNotificationChannel:
         self._request_id_header = request_id_header
         self._timeout_seconds = timeout_seconds
 
-    _PLACEHOLDER_PATTERNS = ("...", "xxx", "your-webhook", "placeholder", "example.com", "todo")
+    _PLACEHOLDER_PATTERNS = (
+        "...",
+        "xxx",
+        "your-webhook",
+        "placeholder",
+        "example.com",
+        "todo",
+    )
 
     @staticmethod
     def _is_placeholder(url: str) -> bool:

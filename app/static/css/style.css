@@ -180,6 +180,27 @@ textarea:focus-visible {
     position: relative;
 }
 
+/* Spotlight — radial glow that follows the cursor */
+.snap-section::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: var(--spotlight-opacity, 0);
+    background: radial-gradient(
+        400px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%),
+        rgb(var(--accent-rgb) / 0.15),
+        transparent 70%
+    );
+    transition: opacity 0.4s ease;
+}
+
+.snap-section > * {
+    position: relative;
+    z-index: 1;
+}
+
 .home-hero-section {
     padding-top: calc(var(--header-height) + 2rem);
 }
@@ -959,16 +980,14 @@ textarea:focus-visible {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
-    color: var(--text-3);
-    opacity: 0.5;
+    color: rgb(var(--accent-rgb) / 0.5);
     animation: scrollBounce 2s infinite;
     cursor: pointer;
-    transition: color 0.2s ease, opacity 0.2s ease;
+    transition: color 0.2s ease;
 }
 
 .scroll-indicator:hover {
-    opacity: 1;
-    color: var(--interactive);
+    color: var(--accent);
 }
 
 .scroll-indicator svg {

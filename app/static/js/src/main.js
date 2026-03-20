@@ -101,7 +101,55 @@ const initScrollSnap = () => {
     mq.addEventListener("change", apply);
 };
 
+/**
+ * Spotlight effect: radial accent glow follows the cursor inside snap-sections.
+ * Uses CSS custom properties (--spotlight-x/y/opacity) updated via mousemove.
+ * Disabled when prefers-reduced-motion is set.
+ */
+const initSpotlight = () => {
+    const container = $(".scroll-snap-container");
+    if (!container) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const sections = $$(".snap-section", container);
+    if (!sections.length) return;
+
+    let active = null;
+    let rafId = 0;
+    let mx = 0;
+    let my = 0;
+
+    const paint = () => {
+        rafId = 0;
+        if (!active) return;
+        active.style.setProperty("--spotlight-x", mx + "px");
+        active.style.setProperty("--spotlight-y", my + "px");
+    };
+
+    container.addEventListener("mousemove", (e) => {
+        const section = e.target.closest(".snap-section");
+        if (section !== active) {
+            if (active) active.style.setProperty("--spotlight-opacity", "0");
+            active = section;
+            if (active) active.style.setProperty("--spotlight-opacity", "1");
+        }
+        if (!active) return;
+
+        const rect = active.getBoundingClientRect();
+        mx = e.clientX - rect.left;
+        my = e.clientY - rect.top;
+
+        if (!rafId) rafId = requestAnimationFrame(paint);
+    });
+
+    container.addEventListener("mouseleave", () => {
+        if (active) active.style.setProperty("--spotlight-opacity", "0");
+        active = null;
+    });
+};
+
 onReady(() => {
     initCurrentYear();
     initScrollSnap();
+    initSpotlight();
 });

@@ -20,7 +20,7 @@ from app.core.dependencies import (
     render_template,
 )
 from app.core.logger import configure_logging
-from app.core.rendering import render_page
+from app.core.rendering import is_htmx, render_fragment, render_page
 from app.core.security import (
     RequestBodySizeLimitMiddleware,
     RequestTracingMiddleware,
@@ -85,12 +85,26 @@ def create_app() -> FastAPI:
         if request.method == "POST" and request.url.path == CONTACT_PATH:
             user_agent = request.headers.get("user-agent", "")
             page_service = get_contact_page_service()
+            errors = {
+                "form": "Invalid form submission. Please fill in all fields and try again."
+            }
             page = page_service.build_page(
                 user_agent=user_agent,
-                errors={
-                    "form": "Invalid form submission. Please fill in all fields and try again."
-                },
+                errors=errors,
             )
+            if is_htmx(request):
+                from app.services.types import ContactPageContext
+
+                ctx = page.context
+                assert isinstance(ctx, ContactPageContext)
+                return render_fragment(
+                    "@features/contact/fragment.jinja",
+                    status_code=422,
+                    csrf_token=ctx.csrf_token,
+                    success=ctx.success,
+                    errors=ctx.errors,
+                    form_data=ctx.form_data,
+                )
             return render_page(page, status_code=422)
         return JSONResponse(
             status_code=422,

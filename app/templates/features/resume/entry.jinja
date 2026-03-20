@@ -1,8 +1,9 @@
 {#def title, subtitle="", date_text="", chip="", size="base" #}
 
+{% set sizes = {"base": "text-base", "lg": "text-lg", "sm": "text-sm"} %}
 <div class="resume-entry-header">
     <div class="resume-entry-header__main">
-        <p class="text-{{ size }} font-semibold text-foreground">{{ title }}</p>
+        <p class="{{ sizes.get(size, sizes.base) }} font-semibold text-foreground">{{ title }}</p>
         {% if chip %}
         <div class="resume-entry-subline">
             {% if subtitle %}

@@ -15,3 +15,12 @@ def _reset_rate_limiter() -> Iterator[None]:
     limiter.reset()
     yield
     limiter.reset()
+
+
+@pytest.fixture(autouse=True)
+def _clear_content_caches() -> Iterator[None]:
+    from app.infrastructure.markdown import _content_cache
+
+    _content_cache.clear()
+    yield
+    _content_cache.clear()

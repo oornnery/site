@@ -44,3 +44,25 @@ def test_seo_for_project_uses_article_type_and_project_path() -> None:
     assert seo.canonical_url == "http://localhost:8000/projects/secure-contact-pipeline"
     assert seo.og_image == "http://localhost:8000/static/images/secure-contact.png"
     assert seo.keywords == ["fastapi", "security"]
+
+
+def test_seo_for_page_handles_empty_description() -> None:
+    seo = seo_for_page(title="Test", description="", path="/test")
+    assert seo.description == ""
+
+
+def test_seo_for_page_truncates_exactly_at_160() -> None:
+    desc = "a" * 160
+    seo = seo_for_page(title="Test", description=desc, path="/test")
+    assert len(seo.description) == 160
+    assert seo.description == desc
+
+
+def test_seo_for_page_with_empty_keywords() -> None:
+    seo = seo_for_page(title="Test", description="desc", path="/test", keywords=[])
+    assert seo.keywords == []
+
+
+def test_seo_for_page_default_og_type() -> None:
+    seo = seo_for_page(title="Test", description="desc", path="/test")
+    assert seo.og_type == "website"

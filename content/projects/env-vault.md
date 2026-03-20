@@ -5,7 +5,7 @@ description: "A team-friendly secrets manager that encrypts .env files with age 
 tags: ["python", "tooling", "infra"]
 tech_stack: ["Python", "age", "Typer"]
 github_url: "https://github.com/oornnery/env-vault"
-date: 2025-07-18
+date: "2025-07-18"
 featured: false
 ---
 

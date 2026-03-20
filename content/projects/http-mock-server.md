@@ -5,7 +5,7 @@ description: "A zero-dependency local HTTP mock server for integration tests. De
 tags: ["python", "testing", "tooling"]
 tech_stack: ["Python", "asyncio", "PyYAML"]
 github_url: "https://github.com/oornnery/http-mock-server"
-date: 2025-09-10
+date: "2025-09-10"
 featured: false
 ---
 

@@ -9,7 +9,7 @@ tags: ["markdown", "jinja", "content"]
 tech_stack: ["Python", "Jinja2", "Jx", "YAML"]
 github_url: "https://github.com/oornnery/markdown-knowledge-base"
 live_url: ""
-date: 2024-12-21
+date: "2024-12-21"
 featured: false
 ---
 

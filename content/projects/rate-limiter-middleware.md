@@ -5,7 +5,7 @@ description: "A pure ASGI rate limiting middleware with sliding window and token
 tags: ["python", "backend", "infra"]
 tech_stack: ["Python", "Redis", "asyncio"]
 github_url: "https://github.com/oornnery/rate-limiter-middleware"
-date: 2025-05-08
+date: "2025-05-08"
 featured: false
 ---
 

@@ -5,7 +5,7 @@ description: "Production-ready FastAPI starter with JWT authentication, refresh 
 tags: ["python", "fastapi", "auth"]
 tech_stack: ["Python", "FastAPI", "SQLAlchemy", "PostgreSQL", "pytest"]
 github_url: "https://github.com/oornnery/fastapi-auth-boilerplate"
-date: 2025-11-15
+date: "2025-11-15"
 featured: false
 ---
 

@@ -9,7 +9,7 @@ tags: ["python", "distributed-systems", "queues"]
 tech_stack: ["Python", "FastAPI", "Redis", "PostgreSQL"]
 github_url: "https://github.com/oornnery/distributed-task-orchestrator"
 live_url: ""
-date: 2025-02-14
+date: "2025-02-14"
 featured: false
 ---
 

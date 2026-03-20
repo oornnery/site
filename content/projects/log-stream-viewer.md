@@ -5,7 +5,7 @@ description: "A terminal UI for tailing and filtering structured JSON logs in re
 tags: ["python", "cli", "devx"]
 tech_stack: ["Python", "Textual", "Rich"]
 github_url: "https://github.com/oornnery/log-stream-viewer"
-date: 2025-06-12
+date: "2025-06-12"
 featured: false
 ---
 

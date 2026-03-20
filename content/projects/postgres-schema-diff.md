@@ -5,7 +5,7 @@ description: "A CLI tool that compares two PostgreSQL schemas and generates safe
 tags: ["python", "postgres", "tooling"]
 tech_stack: ["Python", "psycopg", "Typer", "Rich"]
 github_url: "https://github.com/oornnery/pg-schema-diff"
-date: 2025-10-20
+date: "2025-10-20"
 featured: false
 ---
 

@@ -9,7 +9,7 @@ tags: ["python", "fastapi", "observability"]
 tech_stack: ["Python", "FastAPI", "Pydantic", "Uvicorn"]
 github_url: "https://github.com/oornnery/api-observability-hub"
 live_url: "https://example.dev/api-observability-hub"
-date: 2025-11-10
+date: "2025-11-10"
 featured: true
 ---
 

@@ -5,7 +5,7 @@ description: "A production-ready Python CLI skeleton with Typer, rich output, st
 tags: ["python", "cli", "tooling"]
 tech_stack: ["Python", "Typer", "Rich", "pytest"]
 github_url: "https://github.com/oornnery/cli-tool-template"
-date: 2025-12-01
+date: "2025-12-01"
 featured: false
 ---
 

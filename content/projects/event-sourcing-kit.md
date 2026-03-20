@@ -5,7 +5,7 @@ description: "Lightweight Python library for event sourcing and CQRS — aggrega
 tags: ["python", "architecture", "postgres"]
 tech_stack: ["Python", "PostgreSQL", "pydantic", "asyncpg"]
 github_url: "https://github.com/oornnery/event-sourcing-kit"
-date: 2025-08-05
+date: "2025-08-05"
 featured: false
 ---
 

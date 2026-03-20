@@ -9,7 +9,7 @@ tags: ["security", "fastapi", "webhooks"]
 tech_stack: ["FastAPI", "Pydantic", "SlowAPI", "HTTPX"]
 github_url: "https://github.com/oornnery/secure-contact-pipeline"
 live_url: "https://example.dev/secure-contact-pipeline"
-date: 2025-08-03
+date: "2025-08-03"
 featured: true
 ---
 

@@ -65,6 +65,14 @@ class EmailNotificationConfig:
     subject_prefix: str
     request_id_header: str
 
+    def __repr__(self) -> str:
+        masked = "***" if self.smtp_password else ""
+        return (
+            f"EmailNotificationConfig(smtp_host={self.smtp_host!r}, "
+            f"smtp_port={self.smtp_port}, smtp_password={masked!r}, "
+            f"smtp_from={self.smtp_from!r}, to_email={self.to_email!r})"
+        )
+
 
 class ContactNotificationChannel(Protocol):
     async def send(
@@ -85,9 +93,12 @@ class WebhookNotificationChannel:
         self._request_id_header = request_id_header
         self._timeout_seconds = timeout_seconds
 
+    _PLACEHOLDER_PATTERNS = ("...", "xxx", "your-webhook", "placeholder", "example.com", "todo")
+
     @staticmethod
     def _is_placeholder(url: str) -> bool:
-        return "..." in url
+        lower = url.lower()
+        return any(p in lower for p in WebhookNotificationChannel._PLACEHOLDER_PATTERNS)
 
     def _is_configured(self) -> bool:
         if not self._webhook_url:
@@ -152,6 +163,10 @@ class WebhookNotificationChannel:
 class EmailNotificationChannel:
     def __init__(self, config: EmailNotificationConfig) -> None:
         self._config = config
+
+    @staticmethod
+    def _sanitize_header_value(value: str) -> str:
+        return value.replace("\r", "").replace("\n", "").replace("\x00", "").strip()
 
     def _is_configured(self) -> bool:
         is_complete = bool(
@@ -221,7 +236,9 @@ class EmailNotificationChannel:
         message["To"] = self._config.to_email
         message["Subject"] = self._build_subject(contact)
         message["Reply-To"] = str(contact.email)
-        message[self._config.request_id_header] = context.request_id
+        message[self._config.request_id_header] = self._sanitize_header_value(
+            context.request_id
+        )
         message.set_content(self._build_body(contact, context))
 
         try:

@@ -1,9 +1,10 @@
+# Replace example.com with your actual domain in PROD_TRUSTED_HOSTS
 http:
   routers:
     site-contact:
       entryPoints:
         - web
-      rule: Path(`/contact`) && Method(`POST`)
+      rule: Host(`example.com`) && Path(`/contact`) && Method(`POST`)
       priority: 90
       service: site-app
       middlewares:
@@ -15,7 +16,7 @@ http:
     site-web:
       entryPoints:
         - web
-      rule: PathPrefix(`/`)
+      rule: Host(`example.com`) && PathPrefix(`/`)
       priority: 1
       service: site-app
       middlewares:

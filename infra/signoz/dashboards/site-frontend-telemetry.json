@@ -1336,7 +1336,7 @@
             "disabled": false,
             "legend": "{{status_code}}",
             "name": "A",
-            "query": "sum(rate({\"site.http.requests_total\",\"path\"=\"/otel/v1/traces\"}[5m])) by (\"status_code\")"
+            "query": "sum(rate({\"site.http.server.request.count\",\"path\"=\"/otel/v1/traces\"}[5m])) by (\"status_code\")"
           }
         ],
         "queryType": "promql",
@@ -1441,7 +1441,7 @@
             "disabled": false,
             "legend": "",
             "name": "A",
-            "query": "histogram_quantile(0.95, sum by (le) (rate({\"site.http.request_duration_ms.bucket\",\"path\"=\"/otel/v1/traces\"}[5m])))"
+            "query": "histogram_quantile(0.95, sum by (le) (rate({\"site.http.server.request.duration.bucket\",\"path\"=\"/otel/v1/traces\"}[5m])))"
           }
         ],
         "queryType": "promql",
@@ -1546,7 +1546,7 @@
             "disabled": false,
             "legend": "",
             "name": "A",
-            "query": "sum(rate({\"site.http.requests_total\",\"path\"=\"/otel/v1/traces\",\"status_code\"=~\"5..\"}[5m])) / clamp_min(sum(rate({\"site.http.requests_total\",\"path\"=\"/otel/v1/traces\"}[5m])), 1) * 100"
+            "query": "sum(rate({\"site.http.server.request.count\",\"path\"=\"/otel/v1/traces\",\"status_code\"=~\"5..\"}[5m])) / clamp_min(sum(rate({\"site.http.server.request.count\",\"path\"=\"/otel/v1/traces\"}[5m])), 1) * 100"
           }
         ],
         "queryType": "promql",

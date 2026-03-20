@@ -165,7 +165,7 @@
             "disabled": false,
             "legend": "",
             "name": "A",
-            "query": "sum(rate({\"site.http.requests_total\"}[5m]))"
+            "query": "sum(rate({\"site.http.server.request.count\"}[5m]))"
           }
         ],
         "queryType": "promql",
@@ -270,7 +270,7 @@
             "disabled": false,
             "legend": "",
             "name": "A",
-            "query": "histogram_quantile(0.95, sum by (le) (rate({\"site.http.request_duration_ms.bucket\"}[5m])))"
+            "query": "histogram_quantile(0.95, sum by (le) (rate({\"site.http.server.request.duration.bucket\"}[5m])))"
           }
         ],
         "queryType": "promql",
@@ -375,7 +375,7 @@
             "disabled": false,
             "legend": "",
             "name": "A",
-            "query": "sum(rate({\"site.http.requests_total\",\"status_code\"=~\"5..\"}[5m])) / clamp_min(sum(rate({\"site.http.requests_total\"}[5m])), 1) * 100"
+            "query": "sum(rate({\"site.http.server.request.count\",\"status_code\"=~\"5..\"}[5m])) / clamp_min(sum(rate({\"site.http.server.request.count\"}[5m])), 1) * 100"
           }
         ],
         "queryType": "promql",
@@ -480,7 +480,7 @@
             "disabled": false,
             "legend": "{{path}}",
             "name": "A",
-            "query": "topk(8, sum(rate({\"site.http.requests_total\"}[5m])) by (\"path\"))"
+            "query": "topk(8, sum(rate({\"site.http.server.request.count\"}[5m])) by (\"path\"))"
           }
         ],
         "queryType": "promql",
@@ -1005,7 +1005,7 @@
             "disabled": false,
             "legend": "{{outcome}}",
             "name": "A",
-            "query": "sum(rate({\"site.contact.submissions_total\"}[5m])) by (\"outcome\")"
+            "query": "sum(rate({\"site.contact.submission.count\"}[5m])) by (\"outcome\")"
           }
         ],
         "queryType": "promql",
@@ -1110,7 +1110,7 @@
             "disabled": false,
             "legend": "{{channel}} \u00b7 {{outcome}}",
             "name": "A",
-            "query": "sum(rate({\"site.contact.notification_total\"}[5m])) by (\"channel\", \"outcome\")"
+            "query": "sum(rate({\"site.contact.notification.count\"}[5m])) by (\"channel\", \"outcome\")"
           }
         ],
         "queryType": "promql",
@@ -1215,7 +1215,7 @@
             "disabled": false,
             "legend": "{{status_code}}",
             "name": "A",
-            "query": "sum(rate({\"site.http.requests_total\",\"path\"=\"/otel/v1/traces\"}[5m])) by (\"status_code\")"
+            "query": "sum(rate({\"site.http.server.request.count\",\"path\"=\"/otel/v1/traces\"}[5m])) by (\"status_code\")"
           }
         ],
         "queryType": "promql",
@@ -1320,7 +1320,7 @@
             "disabled": false,
             "legend": "",
             "name": "A",
-            "query": "histogram_quantile(0.95, sum by (le) (rate({\"site.http.request_duration_ms.bucket\",\"path\"=\"/otel/v1/traces\"}[5m])))"
+            "query": "histogram_quantile(0.95, sum by (le) (rate({\"site.http.server.request.duration.bucket\",\"path\"=\"/otel/v1/traces\"}[5m])))"
           }
         ],
         "queryType": "promql",

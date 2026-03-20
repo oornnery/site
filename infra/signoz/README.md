@@ -80,12 +80,12 @@ Included rules:
 
 Backend metrics come from the app meter:
 
-- `site.http.requests_total`
-- `site.http.request_duration_ms`
-- `site.http.requests_in_flight`
-- `site.contact.submissions_total`
-- `site.contact.notification_total`
-- `site.contact.notification_duration_ms`
+- `site.http.server.request.count`
+- `site.http.server.request.duration`
+- `site.http.server.active_requests`
+- `site.contact.submission.count`
+- `site.contact.notification.count`
+- `site.contact.notification.duration`
 
 Frontend panels and alerts use SigNoz trace-derived metrics:
 

@@ -24,6 +24,10 @@ from app.services.types import (
 
 logger = logging.getLogger(__name__)
 
+_FEATURED_LIMIT = 3
+_RECENT_LIMIT = 3
+_TAG_DISPLAY_LIMIT = 10
+
 
 class BlogPageService:
     @staticmethod
@@ -39,7 +43,7 @@ class BlogPageService:
         counter: Counter[str] = Counter()
         for post in posts:
             for tag in post.tags:
-                normalized = tag.strip()
+                normalized = tag.strip().lower()
                 if normalized:
                     counter[normalized] += 1
 
@@ -79,9 +83,11 @@ class BlogPageService:
         posts = load_all_blog_posts()
         featured_candidates = [post for post in posts if post.featured]
         non_featured_candidates = [post for post in posts if not post.featured]
-        featured_posts = tuple((featured_candidates + non_featured_candidates)[:3])
-        recent_posts = posts[:3]
-        tags = self._build_tag_stats(posts)[:10]
+        featured_posts = tuple(
+            (featured_candidates + non_featured_candidates)[:_FEATURED_LIMIT]
+        )
+        recent_posts = posts[:_RECENT_LIMIT]
+        tags = self._build_tag_stats(posts)[:_TAG_DISPLAY_LIMIT]
 
         seo = seo_for_page(
             title="Blog",

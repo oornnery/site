@@ -32,7 +32,7 @@ def _csrf_user_agent_hash(user_agent: str) -> str:
 def _anonymize_identifier(value: str, *, namespace: str) -> str:
     normalized = value.strip().lower()
     if not normalized:
-        return "unknown"
+        normalized = "__empty__"
     digest = hmac.new(
         settings.secret_key.encode(),
         f"{namespace}:{normalized}".encode(),
@@ -110,7 +110,7 @@ def extract_source_ip(request: Request) -> str:
             return x_real_ip
     if request.client and request.client.host:
         return request.client.host
-    return "unknown"
+    return _anonymize_identifier("no-client", namespace="ip")
 
 
 def _frontend_telemetry_connect_sources() -> tuple[str, ...]:

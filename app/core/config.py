@@ -1,8 +1,17 @@
 from typing import TYPE_CHECKING, cast
 from urllib.parse import SplitResult, urlsplit, urlunsplit
 
-from pydantic import AnyHttpUrl, Field
+from pydantic import AnyHttpUrl, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_WEAK_SECRET_KEY_PATTERNS = (
+    "please-change",
+    "changeme",
+    "change-me",
+    "placeholder",
+    "your-secret",
+    "replace-me",
+)
 
 
 class Settings(BaseSettings):
@@ -50,7 +59,7 @@ class Settings(BaseSettings):
     rate_limit: str = "10/minute"
     trust_forwarded_ip_headers: bool = False
     trusted_hosts: str = "localhost,127.0.0.1,testserver"
-    cors_allow_origins: str = ""
+    cors_allow_origins: str | None = None
     cors_allow_methods: str = "GET,POST,OPTIONS"
     cors_allow_headers: str = "Content-Type,X-Request-ID"
     cors_allow_credentials: bool = False
@@ -76,6 +85,20 @@ class Settings(BaseSettings):
     smtp_use_tls: bool = True
     smtp_use_ssl: bool = False
     smtp_timeout_seconds: int = Field(default=10, ge=1, le=120)
+
+    @model_validator(mode="after")
+    def _check_secret_key_strength(self) -> "Settings":
+        if not self.debug:
+            key_lower = self.secret_key.lower()
+            for pattern in _WEAK_SECRET_KEY_PATTERNS:
+                if pattern in key_lower:
+                    msg = (
+                        f"secret_key contains weak pattern '{pattern}'. "
+                        "Use a strong random key in production "
+                        '(e.g. python -c "import secrets; print(secrets.token_urlsafe(32))").'
+                    )
+                    raise ValueError(msg)
+        return self
 
     @staticmethod
     def _netloc_with_port(parsed: SplitResult, port: int) -> str:
@@ -144,8 +167,10 @@ class Settings(BaseSettings):
         )
 
 
-def split_csv(value: str) -> tuple[str, ...]:
+def split_csv(value: str | None) -> tuple[str, ...]:
     """Split a comma-separated string, stripping whitespace and dropping empties."""
+    if not value:
+        return ()
     return tuple(item.strip() for item in value.split(",") if item.strip())
 
 

@@ -56,13 +56,15 @@ def create_app() -> FastAPI:
     app.add_middleware(RequestBodySizeLimitMiddleware)  # type: ignore[arg-type]
     app.add_middleware(SecurityHeadersMiddleware)  # type: ignore[arg-type]
     app.add_middleware(SlowAPIMiddleware)  # type: ignore[arg-type]
-    app.add_middleware(
-        CORSMiddleware,  # type: ignore[arg-type]
-        allow_origins=split_csv(settings.cors_allow_origins),
-        allow_methods=split_csv(settings.cors_allow_methods) or ["GET"],
-        allow_headers=split_csv(settings.cors_allow_headers),
-        allow_credentials=settings.cors_allow_credentials,
-    )
+    cors_origins = split_csv(settings.cors_allow_origins)
+    if cors_origins:
+        app.add_middleware(
+            CORSMiddleware,  # type: ignore[arg-type]
+            allow_origins=cors_origins,
+            allow_methods=split_csv(settings.cors_allow_methods) or ["GET"],
+            allow_headers=split_csv(settings.cors_allow_headers),
+            allow_credentials=settings.cors_allow_credentials,
+        )
     app.add_middleware(
         TrustedHostMiddleware,  # type: ignore[arg-type]
         allowed_hosts=split_csv(settings.trusted_hosts) or ["localhost"],

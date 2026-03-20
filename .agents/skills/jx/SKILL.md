@@ -8,6 +8,11 @@ description: JX patterns for Jinja-based server-rendered Python apps. Use when b
 Official JX skill to write Jinja-based server-rendered components with best
 practices, keeping up to date with the JX API.
 
+When a JX page needs client-side interactivity beyond small HTML sprinkles,
+load `../frontend/references/solid-islands-jinja.md` and prefer Solid islands
+mounted into specific server-rendered slots instead of rewriting the whole page
+as a client app.
+
 ## Shared `Catalog` Singleton
 
 Create one shared `Catalog` in a dedicated module and import it everywhere.
@@ -327,14 +332,27 @@ Render them from the layout using the `assets` global (injected by `catalog.rend
 </head>
 ```
 
-Available helpers: `assets.render()`, `assets.render_css()`, `assets.render_js()`,
-`assets.collect_css()`, `assets.collect_js()`.
+In JX 0.10, `assets` is exposed as a **dict** with callable values, not a
+Component object. Available dict keys:
+
+- `assets.render_css()` — generate `<link>` tags
+- `assets.render_js()` — generate `<script>` tags (module by default)
+- `assets.render()` — generate both CSS and JS tags
+- `assets.collect_css()` — list of CSS URLs
+- `assets.collect_js()` — list of JS URLs
 
 CSS is emitted before JS. JS is `<script type="module">` by default. Repeated
 declarations are deduplicated. Assets from imported children are collected
 recursively.
 
 Do this:
+
+```jinja
+{{ assets.render_css() }}
+{{ assets.render_js() }}
+```
+
+or this:
 
 ```jinja
 {{ assets.render() }}
@@ -346,6 +364,9 @@ instead of this:
 {# DO NOT DO THIS — catalog is not available in templates #}
 {{ catalog.render_assets() }}
 ```
+
+**Important**: `assets` is a dict, so `assets.render_assets()` does NOT exist.
+Use `assets.render()` (the dict key) or the separate `render_css()`/`render_js()` helpers.
 
 ## Jinja Environment
 
@@ -381,9 +402,16 @@ catalog = Catalog(
 - **Escaping content**: use `{{ content }}`, not `{{ content | e }}`.
 - **Globals as dict**: use `Catalog("c", key=val)`, not `Catalog("c", globals={...})`.
 - **Assets in templates**: use `{{ assets.render() }}`, not
-  `{{ catalog.render_assets() }}`.
+  `{{ catalog.render_assets() }}`. Note: `assets` is a dict in JX 0.10, so
+  `assets.render_assets()` does not exist.
 - **Catalog per request**: create one singleton, not a new `Catalog()` per handler.
 - **Adding folders late**: register all folders before the first `render()` call.
+- **Typed params with quotes**: when a `{# def #}` declares a typed param like
+  `rows: int = 4`, the caller must pass `rows=5` (no quotes), not `rows="5"`.
+  Quoted values are strings and will raise `InvalidPropType` at runtime.
+- **Params that accept mixed types**: if a param can receive both `str` and
+  `int` (e.g., a form `value`), omit the type hint to skip validation:
+  `{# def value="" #}` instead of `{# def value: str = "" #}`.
 - **Hardcoded colors**: never use raw hex or Tailwind palette names (`blue-500`,
   `#7c7cff`) in components — always use semantic tokens (`accent`, `success`,
   `warn`, `danger`) so components respond to theme and palette changes.

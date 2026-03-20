@@ -12,6 +12,9 @@ from app.services.types import (
 
 logger = logging.getLogger(__name__)
 
+_MAX_QUERY_LENGTH = 200
+_MAX_TAG_LENGTH = 100
+
 
 class ProjectsPageService:
     def build_list_page(
@@ -23,6 +26,9 @@ class ProjectsPageService:
         page: int = 1,
         page_size: int = 10,
     ) -> PageRenderData:
+        q = q[:_MAX_QUERY_LENGTH]
+        tag = tag[:_MAX_TAG_LENGTH]
+
         all_projects = load_all_projects()
         all_tags = tuple(sorted({t for p in all_projects for t in p.tags}))
 

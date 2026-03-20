@@ -109,6 +109,23 @@ From `docker/docker-compose.prod.yml`:
 - Grafana and Prometheus rule assets are no longer maintained in this repo;
   SigNoz is the supported observability target
 
+### OTel metric names
+
+Application metrics emitted by `app/observability/metrics.py`:
+
+| Metric name                            | Description                                  |
+| -------------------------------------- | -------------------------------------------- |
+| `site.http.server.request.count`       | Total HTTP requests (by method, path, status)|
+| `site.http.server.request.duration`    | Request duration histogram                   |
+| `site.http.server.active_requests`     | In-flight request gauge                      |
+| `site.contact.submission.count`        | Contact form submissions (by outcome)        |
+| `site.contact.notification.count`      | Notification channel attempts (by outcome)   |
+| `site.contact.notification.duration`   | Notification channel latency histogram       |
+
+**Path normalization**: the `path` label is normalized before recording
+(e.g. `/blog/posts/my-post` → `/blog/posts/{slug}`) to prevent high
+cardinality from per-resource paths blowing up the metric series count.
+
 ## CI/Quality Automation
 
 `.github/workflows/ci.yml` runs:

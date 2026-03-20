@@ -93,6 +93,25 @@ From `motion.css`:
 - Home snap behavior adapts by viewport size and height.
 - Containers and spacing scale down at mobile breakpoints.
 
+## CSS Methodology
+
+Custom styles are split across three layers that load in order:
+
+- `tokens.css` — semantic design tokens: color channels, spacing, radius,
+  and theme/palette variants. This is the single source of truth for all
+  design values.
+- `motion.css` — animation utilities with a `prefers-reduced-motion` guard
+  so all entrance/hover/loading animations are disabled for users who opt out.
+- `style.css` — app-specific component and layout rules that build on top of
+  the tokens.
+
+Tailwind utilities reference the token variables via `tailwind.config.cjs`;
+never hardcode raw color values in templates or style rules.
+
+**Adding a palette**: define a `:root[data-palette="name"]` block in
+`tokens.css`. It must appear **after** the `data-theme` blocks in the file so
+palette overrides win the cascade correctly.
+
 ## Notes on Token Consistency
 
 `tokens.css` is the single source of truth for semantic tokens (`--bg`, `--surface`,

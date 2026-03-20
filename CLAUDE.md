@@ -178,6 +178,16 @@ When adding or changing behavior:
 Security scenarios expected in coverage: CSRF misuse, input validation bypass,
 size/flood abuse, host/CORS misconfiguration, traversal/injection payloads.
 
+### Testing Philosophy
+
+Integration tests spin up the real application via `TestClient` — no mocking
+of the database, services, or infrastructure layers. This means tests exercise
+the full request/response cycle including middleware, routing, and rendering.
+Security tests send hostile inputs (injection strings, oversized payloads,
+replayed CSRF tokens, spoofed headers) and assert the correct rejection
+behavior. API route coverage is gated at 100% and enforced in CI via
+`uv run task test_routes`; every public route must have at least one test.
+
 ## Documentation Policy
 
 When architecture, security, infra, or design changes — update docs in the

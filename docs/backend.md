@@ -132,6 +132,19 @@ the loader fetches gist markdown content from GitHub API/raw endpoints.
 When `gist_url` is provided, gist comments are also fetched and rendered
 in the post detail page.
 
+**Gist integration details:**
+
+- **Rate limits**: GitHub API requests count against the unauthenticated
+  rate limit (60 req/hr). Set `GITHUB_TOKEN` in `.env` to raise this to
+  5 000 req/hr for authenticated requests.
+- **Fallback behavior**: if the GitHub API request fails (network error,
+  rate limit, 404), the loader falls back gracefully — the post renders
+  with an empty body rather than raising an unhandled exception. An error
+  is logged with the failure reason.
+- **Security**: fetched gist content passes through the same nh3
+  sanitization step as local markdown (strict tag/attribute allowlists,
+  URL scheme restriction). Raw HTML from GitHub is never rendered directly.
+
 ## Notifications
 
 `ContactNotificationService` dispatches channel sends in parallel:

@@ -62,6 +62,19 @@ overhead and no request/response buffering.
 - Request/client identifiers hashed before logging
 - Contact workflow emits only hashed client identifiers into trace attributes/events
 
+## Rate Limiting
+
+Two layers enforce rate limits. Keep them aligned to avoid bypass gaps.
+
+| Layer   | Mechanism                                      | Scope / Notes                                                                                                  |
+| ------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Traefik | Rate limit middleware in `dynamic/routing.yml` | Global limit applied at the edge before requests reach the app                                                 |
+| SlowAPI | `slowapi` decorator in `app/main.py`           | Per-route Python limits; default from settings applied to all routes; contact form has a stricter per-IP limit |
+
+The SlowAPI key function is `extract_source_ip`, which is proxy-aware
+(honours `X-Forwarded-For` only when `TRUST_FORWARDED_IP_HEADERS=true`).
+The `/health` endpoint is exempt from SlowAPI limits.
+
 ## Edge Controls (Traefik)
 
 From `docker/traefik/dynamic/routing.yml`:

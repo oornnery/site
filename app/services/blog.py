@@ -109,8 +109,22 @@ class BlogPageService:
             ),
         )
 
-    def build_posts_page(self, page: int = 1, page_size: int = 10) -> PageRenderData:
+    def build_posts_page(
+        self, q: str = "", page: int = 1, page_size: int = 10
+    ) -> PageRenderData:
         all_posts = load_all_blog_posts()
+
+        query = q.strip()[:200]
+        if query:
+            query_lower = query.lower()
+            all_posts = tuple(
+                post
+                for post in all_posts
+                if query_lower in post.title.lower()
+                or query_lower in (post.description or "").lower()
+                or any(query_lower in tag.lower() for tag in post.tags)
+            )
+
         total = len(all_posts)
         total_pages = max(1, math.ceil(total / page_size))
         page = max(1, min(page, total_pages))
@@ -127,6 +141,7 @@ class BlogPageService:
             context=BlogPostsPageContext(
                 seo=seo,
                 posts=posts,
+                q=query,
                 page=page,
                 total_pages=total_pages,
             ),
@@ -156,7 +171,9 @@ class BlogPageService:
             ),
         )
 
-    def build_tags_page(self, tag: str | None = None) -> PageRenderData:
+    def build_tags_page(
+        self, tag: str | None = None, page: int = 1, page_size: int = 10
+    ) -> PageRenderData:
         posts = load_all_blog_posts()
         tags = self._build_tag_stats(posts)
         selected_tag = tag.strip() if tag else ""
@@ -178,6 +195,12 @@ class BlogPageService:
             description = "Browse posts by tag."
             path = "/blog/tags"
 
+        total = len(filtered_posts)
+        total_pages = max(1, math.ceil(total / page_size))
+        page = max(1, min(page, total_pages))
+        start = (page - 1) * page_size
+        paginated_posts = filtered_posts[start : start + page_size]
+
         seo = seo_for_page(
             title=title,
             description=description,
@@ -188,8 +211,10 @@ class BlogPageService:
             context=BlogTagsPageContext(
                 seo=seo,
                 tags=tags,
-                posts=filtered_posts,
+                posts=paginated_posts,
                 selected_tag=selected_tag,
+                page=page,
+                total_pages=total_pages,
             ),
         )
 

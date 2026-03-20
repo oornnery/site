@@ -1,0 +1,17 @@
+{#import "@features/blog/card.jinja" as PostCard #}
+{#import "@ui/feedback/empty.jinja" as EmptyState #}
+{#import "@ui/nav/pagination.jinja" as Pagination #}
+{#def posts=(), q="", page=1, total_pages=1 #}
+
+<div id="posts-results" class="space-y-6 sm:space-y-8">
+    <div class="space-y-3 sm:space-y-4">
+        {% for post in posts %}
+        <PostCard post={{ post }} tight={{ true }} />
+        {% else %}
+        <EmptyState message={{ "No posts found for \"" ~ q ~ "\"." if q else "No posts published yet." }} />
+        {% endfor %}
+    </div>
+
+    {% set pagination_base = "/blog/posts?q=" ~ (q | urlencode) ~ "&" if q else "/blog/posts?" %}
+    <Pagination page={{ page }} total_pages={{ total_pages }} base_url={{ pagination_base }} />
+</div>

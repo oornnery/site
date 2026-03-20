@@ -2,10 +2,8 @@
 {#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
 {#import "@ui/content/header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
-{#import "@ui/feedback/empty.jinja" as EmptyState #}
-{#import "@ui/nav/pagination.jinja" as Pagination #}
-{#import "@features/blog/card.jinja" as PostCard #}
-{#def seo, posts=(), page=1, total_pages=1, current_path="/blog" #}
+{#import "@features/blog/posts-fragment.jinja" as PostsResults #}
+{#def seo, posts=(), q="", page=1, total_pages=1, current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% set breadcrumb_items = (
@@ -24,14 +22,25 @@
             />
         </Stack>
 
-        <Stack gap="3" class_name="sm:space-y-4">
-            {% for post in posts %}
-            <PostCard post={{ post }} tight={{ true }} />
-            {% else %}
-            <EmptyState message="No posts published yet." />
-            {% endfor %}
-        </Stack>
+        <div class="relative">
+            <input
+                type="search"
+                name="q"
+                value="{{ q }}"
+                placeholder="Search posts by title, description, or tag..."
+                class="w-full rounded-lg border border-border bg-surface px-4 py-2.5 pr-10 text-sm text-foreground placeholder-foreground/40 transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+                autocomplete="off"
+                hx-get="/blog/posts"
+                hx-trigger="input changed delay:300ms, search"
+                hx-target="#posts-results"
+                hx-swap="outerHTML"
+                hx-push-url="true"
+            />
+            <span class="absolute inset-y-0 right-0 flex items-center pr-3 text-foreground/40 pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+            </span>
+        </div>
 
-        <Pagination page={{ page }} total_pages={{ total_pages }} base_url="/blog/posts?" />
+        <PostsResults posts={{ posts }} q={{ q }} page={{ page }} total_pages={{ total_pages }} />
     </Stack>
 </PublicLayout>

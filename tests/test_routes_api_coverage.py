@@ -135,8 +135,10 @@ class StubTelemetryAsyncClient:
 
 
 class WrongBlogTagsPageService:
-    def build_tags_page(self, tag: str | None = None) -> PageRenderData:
-        del tag
+    def build_tags_page(
+        self, tag: str | None = None, page: int = 1, page_size: int = 10
+    ) -> PageRenderData:
+        del tag, page, page_size
         return PageRenderData(
             template="pages/blog/tags.jinja",
             context=BlogPostsPageContext(seo=_seo(), posts=()),

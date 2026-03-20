@@ -1,7 +1,8 @@
 {#import "@ui/tag.jinja" as Tag #}
 {#import "@features/blog/card.jinja" as PostCard #}
 {#import "@ui/feedback/empty.jinja" as EmptyState #}
-{#def tags=(), posts=(), selected_tag="" #}
+{#import "@ui/nav/pagination.jinja" as Pagination #}
+{#def tags=(), posts=(), selected_tag="", page=1, total_pages=1 #}
 
 <div id="tag-posts">
     <div class="flex flex-wrap gap-2 mb-6">
@@ -34,4 +35,7 @@
         <EmptyState message="No posts found for this tag." />
         {% endfor %}
     </div>
+
+    {% set base = "/blog/tags/" ~ (selected_tag | urlencode) ~ "?" if selected_tag else "/blog/tags?" %}
+    <Pagination page={{ page }} total_pages={{ total_pages }} base_url={{ base }} />
 </div>

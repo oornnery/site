@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, Response
 from app.core.dependencies import get_blog_page_service
 from app.core.rendering import is_htmx, render_fragment, render_page
 from app.services import BlogPageService
-from app.services.types import BlogTagsPageContext
+from app.services.types import BlogPostsPageContext, BlogTagsPageContext
 
 router = APIRouter(prefix="/blog", tags=["blog"])
 logger = logging.getLogger(__name__)
@@ -24,11 +24,24 @@ async def blog_home(page_service: BlogPageServiceDep) -> HTMLResponse:
 
 @router.get("/posts", response_class=HTMLResponse)
 async def blog_posts(
+    request: Request,
     page_service: BlogPageServiceDep,
     page: Annotated[int, Query(ge=1)] = 1,
+    q: Annotated[str, Query(max_length=200)] = "",
 ) -> HTMLResponse:
-    page_data = page_service.build_posts_page(page=page)
+    page_data = page_service.build_posts_page(q=q, page=page)
     logger.debug("Blog posts page rendered.")
+    if is_htmx(request):
+        ctx = page_data.context
+        if not isinstance(ctx, BlogPostsPageContext):
+            raise TypeError(f"Expected BlogPostsPageContext, got {type(ctx).__name__}")
+        return render_fragment(
+            "@features/blog/posts-fragment.jinja",
+            posts=ctx.posts,
+            q=ctx.q,
+            page=ctx.page,
+            total_pages=ctx.total_pages,
+        )
     return render_page(page_data)
 
 
@@ -47,11 +60,15 @@ async def blog_post_detail(
 
 
 @router.get("/tags", response_class=HTMLResponse)
-async def blog_tags(request: Request, page_service: BlogPageServiceDep) -> HTMLResponse:
-    page = page_service.build_tags_page()
+async def blog_tags(
+    request: Request,
+    page_service: BlogPageServiceDep,
+    page: Annotated[int, Query(ge=1)] = 1,
+) -> HTMLResponse:
+    page_data = page_service.build_tags_page(page=page)
     logger.debug("Blog tags page rendered.")
     if is_htmx(request):
-        ctx = page.context
+        ctx = page_data.context
         if not isinstance(ctx, BlogTagsPageContext):
             raise TypeError(f"Expected BlogTagsPageContext, got {type(ctx).__name__}")
         return render_fragment(
@@ -59,8 +76,10 @@ async def blog_tags(request: Request, page_service: BlogPageServiceDep) -> HTMLR
             tags=ctx.tags,
             posts=ctx.posts,
             selected_tag=ctx.selected_tag,
+            page=ctx.page,
+            total_pages=ctx.total_pages,
         )
-    return render_page(page)
+    return render_page(page_data)
 
 
 @router.get("/tags/{tag}", response_class=HTMLResponse)
@@ -68,11 +87,12 @@ async def blog_tag_detail(
     tag: Annotated[str, Path()],
     request: Request,
     page_service: BlogPageServiceDep,
+    page: Annotated[int, Query(ge=1)] = 1,
 ) -> HTMLResponse:
-    page = page_service.build_tags_page(tag=tag)
+    page_data = page_service.build_tags_page(tag=tag, page=page)
     logger.debug(f"Blog tag page rendered for tag={tag}.")
     if is_htmx(request):
-        ctx = page.context
+        ctx = page_data.context
         if not isinstance(ctx, BlogTagsPageContext):
             raise TypeError(f"Expected BlogTagsPageContext, got {type(ctx).__name__}")
         return render_fragment(
@@ -80,8 +100,10 @@ async def blog_tag_detail(
             tags=ctx.tags,
             posts=ctx.posts,
             selected_tag=ctx.selected_tag,
+            page=ctx.page,
+            total_pages=ctx.total_pages,
         )
-    return render_page(page)
+    return render_page(page_data)
 
 
 @router.get("/feed.xml")

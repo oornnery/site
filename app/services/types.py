@@ -86,6 +86,7 @@ class BlogPostsPageContext(BaseModel):
 
     seo: SEOMeta
     posts: tuple[BlogPost, ...]
+    q: str = ""
     page: int = 1
     total_pages: int = 1
     current_path: str = "/blog"
@@ -109,6 +110,8 @@ class BlogTagsPageContext(BaseModel):
     tags: tuple[BlogTag, ...]
     posts: tuple[BlogPost, ...]
     selected_tag: str = ""
+    page: int = 1
+    total_pages: int = 1
     current_path: str = "/blog"
 
 

@@ -3,7 +3,7 @@
 {#import "@ui/content/header.jinja" as PageHeader #}
 {#import "@ui/layout/stack.jinja" as Stack #}
 {#import "@features/blog/tags-fragment.jinja" as TagPosts #}
-{#def seo, tags=(), posts=(), selected_tag="", current_path="/blog" #}
+{#def seo, tags=(), posts=(), selected_tag="", page=1, total_pages=1, current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% if selected_tag %}
@@ -30,6 +30,6 @@
             />
         </Stack>
 
-        <TagPosts tags={{ tags }} posts={{ posts }} selected_tag={{ selected_tag }} />
+        <TagPosts tags={{ tags }} posts={{ posts }} selected_tag={{ selected_tag }} page={{ page }} total_pages={{ total_pages }} />
     </Stack>
 </PublicLayout>

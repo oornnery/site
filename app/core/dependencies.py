@@ -36,7 +36,14 @@ def get_profile_service() -> ProfileService:
 @lru_cache(maxsize=1)
 def get_catalog() -> Catalog:
     logger.info("Initializing Jx catalog.")
-    profile_globals = get_profile_service().get_profile_globals()
+    try:
+        profile_globals = get_profile_service().get_profile_globals()
+    except Exception:
+        logger.exception(
+            "Failed to load profile globals from content/about.md "
+            "during catalog initialization."
+        )
+        raise
     components_root = Path(__file__).resolve().parents[1] / "templates"
     catalog = Catalog(
         auto_reload=settings.debug,

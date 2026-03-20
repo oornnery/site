@@ -4,7 +4,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
@@ -12,16 +12,23 @@ from slowapi.middleware import SlowAPIMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.router import api_router
-from app.core.config import settings
+from app.core.config import settings, split_csv
+from app.core.dependencies import (
+    get_catalog,
+    get_contact_page_service,
+    limiter,
+    render_template,
+)
 from app.core.logger import configure_logging
-from app.core.dependencies import limiter, render_template
-from app.core.config import split_csv
+from app.core.rendering import render_page
 from app.core.security import (
     RequestBodySizeLimitMiddleware,
     RequestTracingMiddleware,
     SecurityHeadersMiddleware,
 )
 from app.services.seo import seo_for_page
+
+CONTACT_PATH = "/contact"
 
 logger = logging.getLogger(__name__)
 
@@ -75,10 +82,7 @@ def create_app() -> FastAPI:
     async def validation_error_handler(
         request: Request, exc: RequestValidationError
     ) -> Response:
-        if request.method == "POST" and request.url.path == "/contact":
-            from app.core.dependencies import get_contact_page_service
-            from app.core.rendering import render_page
-
+        if request.method == "POST" and request.url.path == CONTACT_PATH:
             user_agent = request.headers.get("user-agent", "")
             page_service = get_contact_page_service()
             page = page_service.build_page(
@@ -88,8 +92,6 @@ def create_app() -> FastAPI:
                 },
             )
             return render_page(page, status_code=422)
-        from fastapi.responses import JSONResponse
-
         return JSONResponse(
             status_code=422,
             content={"detail": exc.errors()},
@@ -97,6 +99,8 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router)
     logger.info("Routers registered from app.api.router.")
+
+    get_catalog()  # Fail fast if templates or content/about.md are misconfigured
 
     @app.exception_handler(404)
     async def not_found_handler(request: Request, exc: Exception) -> HTMLResponse:

@@ -1,0 +1,21 @@
+{#def text="", variant="default", size="default", removable=False, href="" #}
+
+{% set variants = {
+    "default": "bg-surface-2 text-foreground/70 border border-accent/15",
+    "primary": "bg-foreground/10 text-foreground",
+    "accent": "bg-accent/10 text-accent border border-accent/20",
+    "secondary": "bg-accent-secondary/10 text-accent-glow border border-accent-secondary/20",
+    "success": "bg-success/10 text-success border border-success/20",
+    "warning": "bg-warn/10 text-warn border border-warn/20",
+    "danger": "bg-danger/10 text-danger border border-danger/20",
+    "outline": "bg-transparent text-foreground/60 border border-accent/15"
+} %}
+{% set sizes = {"xs": "px-2 py-0.5 text-[10px]", "sm": "px-2.5 py-0.5 text-xs", "default": "px-3 py-1 text-xs"} %}
+{% set cls = "inline-flex items-center gap-1 font-medium rounded-full transition-colors " ~ variants[variant] ~ " " ~ sizes[size] %}
+{% set hover = "hover:text-accent hover:border-accent/50 hover:bg-surface-2/80" %}
+
+{% if href %}
+<a href="{{ href }}" class="{{ cls }} {{ hover }}" {{ attrs.render() }}>{{ text or content }}</a>
+{% else %}
+<span class="{{ cls }} cursor-pointer {{ hover }}" {{ attrs.render() }}>{{ text or content }}</span>
+{% endif %}

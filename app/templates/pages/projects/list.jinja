@@ -1,0 +1,32 @@
+{#import "@layouts/public.jinja" as PublicLayout #}
+{#import "@features/projects/list-fragment.jinja" as ProjectsList #}
+{#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
+{#import "@ui/content/header.jinja" as PageHeader #}
+{#import "@ui/layout/stack.jinja" as Stack #}
+{#import "@ui/nav/pagination.jinja" as Pagination #}
+{#def seo, projects=(), q="", selected_tag="", page=1, total_pages=1, current_path="/projects" #}
+
+<PublicLayout seo={{ seo }} current_path={{ current_path }}>
+    {% set breadcrumb_items = (
+        {"label": "Home", "href": "/"},
+        {"label": "Projects", "current": true},
+    ) %}
+    {% set pagination_base = "/projects?" %}
+    {% if q %}
+    {% set pagination_base = pagination_base ~ "q=" ~ (q | urlencode) ~ "&" %}
+    {% endif %}
+    {% if selected_tag %}
+    {% set pagination_base = pagination_base ~ "tag=" ~ (selected_tag | urlencode) ~ "&" %}
+    {% endif %}
+
+    <Stack gap="6" class_name="sm:space-y-8">
+        <Stack gap="4" class_name="sm:space-y-6">
+            <Breadcrumb items={{ breadcrumb_items }} />
+            <PageHeader title="Projects" subtitle="A collection of projects I've worked on." />
+        </Stack>
+
+        <ProjectsList projects={{ projects }} />
+
+        <Pagination page={{ page }} total_pages={{ total_pages }} base_url={{ pagination_base }} />
+    </Stack>
+</PublicLayout>

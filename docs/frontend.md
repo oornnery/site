@@ -1,0 +1,213 @@
+# Frontend
+
+## Rendering Model
+
+The frontend is SSR-first using Jx/Jinja templates.
+
+- No SPA framework — HTML rendered on server for every route
+- Progressive enhancement via Alpine.js, Stimulus controllers, and htmx
+- htmx handles fragment swaps for forms and in-page filtering
+- Alpine.js manages reactive client state (theme, carousel, navbar)
+- Stimulus provides lifecycle-bound controllers (TOC, reading progress)
+
+## Template Organization
+
+| Group    | Path                       | Role                                       |
+| -------- | -------------------------- | ------------------------------------------ |
+| Layouts  | `app/templates/layouts/*`  | Global shell and page wrappers             |
+| Pages    | `app/templates/pages/*`    | Route-level templates                      |
+| Features | `app/templates/features/*` | Domain page sections                       |
+| UI       | `app/templates/ui/*`       | Reusable components, split into subfolders |
+
+The `ui/` folder is organized into subfolders:
+
+| Subfolder      | Contents                                                                      |
+| -------------- | ----------------------------------------------------------------------------- |
+| `ui/layout/`   | `center`, `grid`, `row`, `section`, `stack`                                   |
+| `ui/nav/`      | `breadcrumb`, `footer`, `navbar`, `pagination`, `scroll`, `section`, `social` |
+| `ui/card/`     | `card`, `card/heading`                                                        |
+| `ui/content/`  | `header`, `meta`, `shell`                                                     |
+| `ui/feedback/` | `alert`, `empty`                                                              |
+| `ui/form/`     | `button`, `input`                                                             |
+| `ui/` root     | `avatar`, `icon`, `seo`, `tag`                                                |
+
+## Jx Catalog
+
+Registered in `app/core/dependencies.py` with prefixes:
+
+- `@ui/*` (recursive — subfolders use full path, e.g. `@ui/form/button.jinja`)
+- `@layouts/*`
+- `@features/*`
+- `@pages/*`
+
+This enables consistent imports and composable templates.
+
+## Page Composition
+
+### Home (`/`)
+
+- Full-screen snap sections
+- Profile summary
+- Projects preview + latest blog posts preview
+- Contact preview
+
+### About (`/about`)
+
+- Breadcrumb-first intro with the shared compact spacing rhythm
+- Stronger profile hero with summary lines and CTA row
+- Reuses the same right-side `On this page` minimap pattern as blog/project
+  detail pages
+- Frontmatter is limited to profile metadata; authored content comes from
+  markdown sections in `content/about.md`
+- Resume-style sections are parsed from markdown `##` / `###` headings with a
+  highlighted experience timeline
+- Education and certificates render as stacked resume entries with aligned dates
+- Skills are grouped by category in lighter stacked groups
+
+### Projects (`/projects`, `/projects/{slug}`)
+
+- Project cards list with breadcrumb-first intro rhythm:
+  breadcrumb, `8px-16px` gap, then title/subtitle block
+- Detail page with breadcrumb-first header rhythm:
+  breadcrumb, `8px-16px` gap, compact metadata row, `16px-24px` gap to title,
+  then subtitle/tags/actions
+- Detail page reuses the same right-side `On this page` minimap pattern as blog
+  detail pages when markdown includes headings
+
+### Blog (`/blog`, `/blog/posts`, `/blog/posts/{slug}`, `/blog/tags`)
+
+- Blog home with breadcrumb-first intro rhythm, featured posts carousel
+  (up to 3, prev/next, autoplay)
+- Latest posts preview (up to 3) with shortcut to full list
+- Tags preview (up to 10) with shortcut to full tags page
+- Posts listing page with the same breadcrumb-first intro rhythm
+- Post detail page with breadcrumb-first header rhythm:
+  breadcrumb, `8px-16px` gap, compact metadata row, `16px-24px` gap to title,
+  then subtitle/tags
+- Post detail page with reading metadata, improved prose layout, right-side
+  `On this page` minimap, and GitHub/Gist discussion CTA
+- Tags index and filtered tag pages with the same breadcrumb-first intro rhythm
+- RSS feed endpoint at `/blog/feed.xml`
+
+### Contact (`/contact`)
+
+- Breadcrumb-first intro with the shared compact spacing rhythm
+- Social links
+- Contact form with inline validation messages
+
+## Build System
+
+JS source lives in `app/static/js/src/` and is bundled by esbuild into a
+single IIFE at `app/static/js/main.js`. CSS is compiled by Tailwind CLI.
+
+| Command                 | Action                         |
+| ----------------------- | ------------------------------ |
+| `uv run task build`     | Build JS + CSS (production)    |
+| `uv run task build_js`  | esbuild IIFE bundle (minified) |
+| `uv run task build_css` | Tailwind CSS (minified)        |
+| `uv run task watch_js`  | esbuild watch mode for dev     |
+
+Config files: `esbuild.config.mjs` (JS), `tailwind.config.cjs` (CSS).
+
+## JavaScript Frameworks
+
+### Alpine.js (CSP-safe)
+
+Reactive client state via `x-data` factories registered in `main.js`.
+
+| Factory       | File                     | Responsibility                            |
+| ------------- | ------------------------ | ----------------------------------------- |
+| `navbar`      | `alpine/navbar.js`       | Mobile menu toggle                        |
+| `palette`     | `alpine/palette.js`      | Theme/palette switching with localStorage |
+| `carousel`    | `alpine/carousel.js`     | Featured posts carousel with autoplay     |
+| `contactForm` | `alpine/contact-form.js` | Client-side validation + htmx submit      |
+
+### Stimulus
+
+Lifecycle-bound controllers for complex behavior.
+
+| Controller         | File                                         | Responsibility                      |
+| ------------------ | -------------------------------------------- | ----------------------------------- |
+| `toc`              | `controllers/toc-controller.js`              | Auto-generated TOC with scroll sync |
+| `reading-progress` | `controllers/reading-progress-controller.js` | Scroll progress bar                 |
+
+### htmx
+
+Server-driven fragment swaps for progressive enhancement.
+
+| Feature         | Trigger                     | Target                  | Notes                                                 |
+| --------------- | --------------------------- | ----------------------- | ----------------------------------------------------- |
+| Contact form    | `hx-post="/contact"`        | `#contact-form-section` | Alpine validates locally, valid submits swap via htmx |
+| Blog tag filter | `hx-get="/blog/tags/{tag}"` | `#tag-posts`            | Pills + posts swap together                           |
+| Projects filter | `hx-get` (htmx request)     | `#projects-list`        | Fragment response                                     |
+
+htmx config in `main.js` enables fragment swaps on 4xx/5xx responses so
+inline validation errors display correctly.
+
+### Bootstrap Utilities
+
+Vanilla JS utilities that run on `DOMContentLoaded`:
+
+- `initCurrentYear()` — updates `[data-current-year]` elements
+- `initScrollSnap()` — responsive scroll-snap switching (proximity on mobile,
+  mandatory on desktop)
+
+### Frontend Telemetry
+
+`app/static/js/src/telemetry.js` initializes OpenTelemetry Web tracing when
+`FRONTEND_TELEMETRY_ENABLED=true`.
+
+The browser sends spans to the same-origin proxy route `POST /otel/v1/traces`.
+The app forwards those OTLP HTTP payloads to the collector configured on the
+server side.
+
+It provides:
+
+- Document load instrumentation
+- `fetch` and `XMLHttpRequest` tracing for same-origin requests
+- Manual UI spans for elements marked with `data-telemetry-event`
+- Manual section visibility spans for elements marked with `data-telemetry-section`
+- Manual contact-form spans via `recordTelemetryEvent()`
+
+## Pagination
+
+SSR pagination via `?page=N` query parameter, rendered by
+`@ui/nav/pagination.jinja`. Used on `/blog/posts` and `/projects`.
+
+Services accept `page` and `page_size` (default 10), clamp to valid range,
+and pass `page` + `total_pages` to the template context.
+
+## Styling Stack
+
+| Layer         | File                          | Notes                                |
+| ------------- | ----------------------------- | ------------------------------------ |
+| Utility CSS   | `app/static/css/tailwind.css` | Generated from Tailwind config       |
+| Base tokens   | `app/static/css/tokens.css`   | Semantic tokens and palette variants |
+| Motion        | `app/static/css/motion.css`   | Animations and interaction utilities |
+| System/custom | `app/static/css/style.css`    | App-specific styles and layouts      |
+
+### Color and palette system
+
+Theme is controlled via two `<html>` attributes:
+
+- `data-theme` — `dark` or `light`
+- `data-palette` — `default`, `ocean`, `sunset`, `rose`, `forest`, or `mono`
+
+All color tokens use RGB channel variables (`--accent-rgb`, `--warn-rgb`,
+`--danger-rgb`, `--accent-2-rgb`) so Tailwind opacity modifiers work:
+`bg-accent/10`, `border-accent/20`. Palette overrides in `tokens.css` use
+`:root[data-palette="..."]` selectors that come **after** the `data-theme`
+block — cascade order is critical.
+
+The Tailwind config maps semantic tokens as
+`rgb(var(--accent-rgb) / <alpha-value>)` so all opacity variants are available.
+Do not use plain `var(--accent)` in `tailwind.config.cjs` for colors that need
+opacity modifiers — it breaks Tailwind's alpha injection.
+
+## Responsive Strategy
+
+- Mobile menu below `md`
+- Containerized content widths
+- Scroll-snap tuned for desktop and softened on mobile
+- Small-screen fallback disables hard snap for short viewports
+- Shared navbar now exposes `Home`, `About`, `Projects`, `Blog`, and `Contact`

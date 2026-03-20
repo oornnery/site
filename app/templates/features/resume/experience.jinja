@@ -1,0 +1,33 @@
+{#import "@ui/layout/section.jinja" as Section #}
+{#import "@features/resume/entry.jinja" as EntryHeader #}
+{#def items #}
+
+<Section title="Work Experience" heading_id="work-experience" visible={{ items | length > 0 }} class_name="gap-y-6">
+    <div class="resume-timeline">
+        {% for item in items %}
+        <article class="resume-timeline-item">
+            <div class="flex flex-col gap-3">
+                <EntryHeader title={{ item.title }} subtitle={{ item.company }} chip={{ item.location }} date_text={{ item.period }} size="lg" />
+
+                {% if item.content_html %}
+                <div class="resume-richtext text-sm sm:text-base text-foreground/60 leading-relaxed">
+                    {{ item.content_html | safe }}
+                </div>
+                {% elif item.description or item.highlights %}
+                    {% if item.description %}
+                    <p class="text-sm sm:text-base text-foreground/60 leading-relaxed">{{ item.description }}</p>
+                    {% endif %}
+
+                    {% if item.highlights %}
+                    <ul class="space-y-2 text-sm text-foreground/70">
+                        {% for highlight in item.highlights %}
+                        <li class="resume-impact-item">{{ highlight }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</Section>

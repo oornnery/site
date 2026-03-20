@@ -1,0 +1,17 @@
+{#def title, date=None, featured=False, title_class="", featured_class="", label="" #}
+
+<div class="card-heading-row" {{ attrs.render() }}>
+    <div class="card-heading-main">
+        <span class="card-heading-title {{ title_class }}">
+            {{ title }}
+        </span>
+        {% if date %}
+        <span class="card-heading-date">{{ date.strftime("%b %d, %Y") }}</span>
+        {% endif %}
+    </div>
+    {% if featured %}
+    <span class="card-featured-label {{ featured_class }}">&#9733; Featured</span>
+    {% elif label %}
+    <span class="resume-meta-label">{{ label }}</span>
+    {% endif %}
+</div>

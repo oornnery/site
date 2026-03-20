@@ -1,0 +1,12 @@
+{#def padding="lg", class_name="" #}
+
+{% set paddings = {
+    "sm": "py-8 sm:py-12",
+    "default": "py-12 sm:py-16",
+    "lg": "py-16 sm:py-20"
+} %}
+{% set cls = ("text-center " ~ paddings.get(padding, paddings.default) ~ " " ~ class_name).strip() %}
+
+<section class="{{ cls }}" {{ attrs.render() }}>
+    {{ content }}
+</section>

@@ -1,0 +1,18 @@
+{#import "@ui/layout/section.jinja" as Section #}
+{#import "@features/resume/entry.jinja" as EntryHeader #}
+{#def items #}
+
+<Section title="Education" heading_id="education" visible={{ items | length > 0 }} class_name="gap-y-6">
+    <div class="resume-list">
+        {% for item in items %}
+        <article class="resume-list-item">
+            <EntryHeader title={{ item.school }} subtitle={{ item.degree }} date_text={{ item.period }} />
+            {% if item.details_html %}
+            <div class="resume-richtext mt-3 text-sm text-foreground/60 leading-relaxed">
+                {{ item.details_html | safe }}
+            </div>
+            {% endif %}
+        </article>
+        {% endfor %}
+    </div>
+</Section>

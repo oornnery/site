@@ -1,0 +1,52 @@
+{#import "@ui/seo.jinja" as SeoHead #}
+{#def seo #}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/static/js/theme-bootstrap.js"></script>
+    <SeoHead
+        title={{ seo.title }}
+        description={{ seo.description }}
+        canonical_url={{ seo.canonical_url }}
+        og_image={{ seo.og_image }}
+        og_type={{ seo.og_type }}
+        keywords={{ seo.keywords }}
+    />
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="shortcut icon" href="/static/favicon.svg">
+    <meta
+        name="frontend-telemetry-enabled"
+        content="{{ 'true' if frontend_telemetry_enabled and frontend_telemetry_otlp_endpoint else 'false' }}"
+    >
+    <meta name="frontend-telemetry-service-name" content="{{ frontend_telemetry_service_name }}">
+    <meta
+        name="frontend-telemetry-service-namespace"
+        content="{{ frontend_telemetry_service_namespace }}"
+    >
+    <meta
+        name="frontend-telemetry-otlp-endpoint"
+        content="{{ frontend_telemetry_otlp_endpoint }}"
+    >
+    <meta
+        name="frontend-telemetry-sample-ratio"
+        content="{{ frontend_telemetry_sample_ratio }}"
+    >
+    <meta
+        name="frontend-telemetry-environment"
+        content="{{ frontend_telemetry_environment }}"
+    >
+    <link rel="stylesheet" href="/static/css/tailwind.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    {{ assets.render_css() }}
+</head>
+<body class="bg-background text-foreground font-sans antialiased selection:bg-accent/20 selection:text-accent min-h-screen">
+    {{ content }}
+
+    <script defer src="/static/js/main.js"></script>
+    {{ assets.render_js() }}
+</body>
+</html>

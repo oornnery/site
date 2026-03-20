@@ -1,28 +1,30 @@
-dist
-.wrangler
-.output
-.vercel
-.netlify
-.vinxi
-app.config.timestamp_*.js
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
 
-# Environment
+# Virtual environments
+.venv
 .env
-.env*.local
 
-# dependencies
-/node_modules
+# Cache and coverage
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+.rumdl_cache/
+.coverage
+htmlcov/
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-*.launch
-.settings/
+# Logs and databases
+*.log
+*.bd
 
-# Temp
-gitignore
+# IDE and editor configs
+.vscode/
+.idea/
+.claude/
 
-# System Files
-.DS_Store
-Thumbs.db
+node_modules/

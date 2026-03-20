@@ -1,0 +1,54 @@
+# Replace example.com with your actual domain in PROD_TRUSTED_HOSTS
+http:
+  routers:
+    site-contact:
+      entryPoints:
+        - web
+      rule: Host(`example.com`) && Path(`/contact`) && Method(`POST`)
+      priority: 90
+      service: site-app
+      middlewares:
+        - site-rate-limit-global
+        - site-inflight-global
+        - site-body-limit-contact
+        - site-compress
+
+    site-web:
+      entryPoints:
+        - web
+      rule: Host(`example.com`) && PathPrefix(`/`)
+      priority: 1
+      service: site-app
+      middlewares:
+        - site-rate-limit-global
+        - site-inflight-global
+        - site-body-limit-web
+        - site-compress
+
+  middlewares:
+    site-compress:
+      compress: {}
+
+    site-rate-limit-global:
+      rateLimit:
+        average: 60
+        burst: 120
+        period: 1m
+
+    site-inflight-global:
+      inFlightReq:
+        amount: 200
+
+    site-body-limit-web:
+      buffering:
+        maxRequestBodyBytes: 1048576
+
+    site-body-limit-contact:
+      buffering:
+        maxRequestBodyBytes: 65536
+
+  services:
+    site-app:
+      loadBalancer:
+        servers:
+          - url: http://app:8000

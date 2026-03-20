@@ -1,0 +1,21 @@
+{#def items=(), class_name="text-sm text-foreground/50 -mt-2 sm:-mt-3 fade-in flex items-center", current_class="text-foreground/70", link_class="hover:text-accent transition-colors", separator_class="fill-current w-3 h-3 mx-2 text-foreground/40" #}
+
+{% if items %}
+<nav class="flex {{ class_name }}" aria-label="Breadcrumb">
+    <ol class="inline-flex items-center space-x-1 md:space-x-2 rtl:space-x-reverse">
+        {% for item in items %}
+        {% set is_current = item.get("current", False) or loop.last %}
+        <li {% if is_current %}aria-current="page"{% endif %} class="inline-flex items-center">
+            {% if not loop.first %}
+            <svg class="{{ separator_class }}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 6 10" aria-hidden="true"><path d="M1.707.293a1 1 0 0 0 0 1.414L4 4l-2.293 2.293a1 1 0 1 0 1.414 1.414l3-3a1 1 0 0 0 0-1.414l-3-3a1 1 0 0 0-1.414 0Z"/></svg>
+            {% endif %}
+            {% if item.get("href") and not is_current %}
+            <a href="{{ item.get('href') }}" class="inline-flex items-center text-sm font-medium {{ link_class }}">{{ item.get("label", "") }}</a>
+            {% else %}
+            <span class="text-sm font-medium {{ current_class }}{% if is_current %} truncate max-w-[240px] sm:max-w-[420px]{% endif %}">{{ item.get("label", "") }}</span>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ol>
+</nav>
+{% endif %}

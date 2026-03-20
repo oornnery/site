@@ -1,0 +1,134 @@
+from __future__ import annotations
+
+from datetime import date
+
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, HttpUrl, computed_field
+
+
+class SEOMeta(BaseModel):
+    title: str
+    description: str = Field(max_length=160)
+    og_image: str = ""
+    og_type: str = "website"
+    canonical_url: str = ""
+    keywords: list[str] = Field(default_factory=list)
+
+
+class ContactForm(BaseModel):
+    name: str = Field(min_length=2, max_length=100)
+    email: EmailStr
+    subject: str = Field(min_length=3, max_length=200)
+    message: str = Field(min_length=10, max_length=5000)
+    csrf_token: str
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ContactResponse(BaseModel):
+    success: bool
+    message: str
+    errors: dict[str, str] = Field(default_factory=dict)
+
+
+def _format_period(start: str, end: str) -> str:
+    if start and end:
+        return f"{start} - {end}"
+    return start or end
+
+
+class WorkExperienceItem(BaseModel):
+    title: str = ""
+    company: str = ""
+    location: str = ""
+    start_date: str = ""
+    end_date: str = ""
+    description: str = ""
+    highlights: list[str] = Field(default_factory=list)
+    content_html: str = ""
+
+    @computed_field
+    @property
+    def period(self) -> str:
+        return _format_period(self.start_date, self.end_date)
+
+
+class EducationItem(BaseModel):
+    school: str = ""
+    degree: str = ""
+    start_date: str = ""
+    end_date: str = ""
+    details_html: str = ""
+
+    @computed_field
+    @property
+    def period(self) -> str:
+        return _format_period(self.start_date, self.end_date)
+
+
+class CertificateItem(BaseModel):
+    name: str = ""
+    issuer: str = ""
+    date: str = ""
+    credential_id: str = ""
+    details_html: str = ""
+
+
+class SkillGroupItem(BaseModel):
+    title: str = ""
+    skills: list[str] = Field(default_factory=list)
+
+
+class AboutFrontmatter(BaseModel):
+    description: str = ""
+    name: str = ""
+    role: str = ""
+    location: str = ""
+    avatar_url: str = ""
+    social_links: dict[str, HttpUrl] = Field(default_factory=dict)
+
+    model_config = ConfigDict(extra="ignore")
+
+
+class AboutContent(BaseModel):
+    frontmatter: AboutFrontmatter
+    body_markdown: str
+    body_html: str
+    hero_markdown: str = ""
+    hero_html: str = ""
+    about_markdown: str = ""
+    about_html: str = ""
+    work_experience: list[WorkExperienceItem] = Field(default_factory=list)
+    education: list[EducationItem] = Field(default_factory=list)
+    certificates: list[CertificateItem] = Field(default_factory=list)
+    skill_groups: list[SkillGroupItem] = Field(default_factory=list)
+
+
+class ProjectFrontmatter(BaseModel):
+    title: str = ""
+    slug: str = ""
+    description: str = ""
+    thumbnail: str = ""
+    tags: list[str] = Field(default_factory=list)
+    tech_stack: list[str] = Field(default_factory=list)
+    github_url: str = ""
+    live_url: str = ""
+    published_date: date | None = Field(default=None, alias="date")
+    featured: bool = False
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)
+
+
+class BlogPostFrontmatter(BaseModel):
+    title: str = ""
+    slug: str = ""
+    description: str = ""
+    author: str = ""
+    tags: list[str] = Field(default_factory=list)
+    discussion_url: str = ""
+    gist_url: str = ""
+    gist_file: str = ""
+    published_date: date | None = Field(default=None, alias="date")
+    featured: bool = False
+    draft: bool = False
+
+    model_config = ConfigDict(extra="ignore", populate_by_name=True)

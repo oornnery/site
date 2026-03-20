@@ -1,0 +1,46 @@
+{#def seo, featured=(), latest_posts=(), csrf_token="", current_path="/" #}
+{#import "@layouts/home.jinja" as HomeLayout #}
+{#import "@ui/avatar.jinja" as Avatar #}
+{#import "@ui/nav/scroll.jinja" as ScrollIndicator #}
+{#import "@features/home/profile.jinja" as ProfileSummary #}
+{#import "@features/home/projects.jinja" as ProjectsPreview #}
+{#import "@features/home/blog.jinja" as BlogPreview #}
+{#import "@features/home/contact.jinja" as ContactPreview #}
+
+<HomeLayout seo={{ seo }} current_path={{ current_path }}>
+    <section class="snap-section home-hero-section" data-telemetry-section="home-hero">
+        <div class="snap-section-content home-hero-content">
+            <header class="flex flex-col lg:flex-row lg:items-start items-center gap-5 lg:gap-8">
+                <Avatar name={{ site_name }} />
+
+                <ProfileSummary
+                    profile_name={{ profile_name }}
+                    site_name={{ site_name }}
+                    profile_role={{ profile_role }}
+                    profile_location={{ profile_location }}
+                    profile_summary={{ profile_summary }}
+                    social_links={{ social_links }}
+                />
+            </header>
+        </div>
+
+        <ScrollIndicator />
+    </section>
+
+    <section class="snap-section" data-telemetry-section="home-projects">
+        <div class="snap-section-content">
+            <div class="home-projects-grid">
+                <ProjectsPreview featured={{ featured }} />
+                <BlogPreview latest_posts={{ latest_posts }} />
+            </div>
+        </div>
+
+        <ScrollIndicator />
+    </section>
+
+    <section class="snap-section home-contact-section" data-telemetry-section="home-contact">
+        <div class="snap-section-content home-contact-content">
+            <ContactPreview social_links={{ social_links }} csrf_token={{ csrf_token }} />
+        </div>
+    </section>
+</HomeLayout>

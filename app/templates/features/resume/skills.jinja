@@ -1,0 +1,23 @@
+{#import "@ui/layout/section.jinja" as Section #}
+{#import "@ui/tag.jinja" as Tag #}
+{#def skill_groups=(), skills=() #}
+
+{% set groups = skill_groups if skill_groups else ({"title": "Core", "skills": skills},) %}
+{% set all_skills = [] %}
+{% for group in groups %}
+    {% for skill in group.skills %}
+        {% if skill not in all_skills %}
+            {% do all_skills.append(skill) %}
+        {% endif %}
+    {% endfor %}
+{% endfor %}
+
+<Section title="Skills" heading_id="skills" visible={{ all_skills | length > 0 }} class_name="gap-y-6">
+    <ul class="flex list-none flex-wrap gap-2 p-0" aria-label="Skills">
+        {% for skill in all_skills %}
+        <li>
+            <Tag text={{ skill }} variant="outline" />
+        </li>
+        {% endfor %}
+    </ul>
+</Section>

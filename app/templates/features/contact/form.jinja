@@ -1,0 +1,81 @@
+{#import "@ui/form/input.jinja" as Input #}
+{#import "@ui/form/button.jinja" as Button #}
+{#import "@ui/feedback/alert.jinja" as Alert #}
+{#def csrf_token, success="", errors={}, form_data={} #}
+
+{% if success %}
+<Alert message={{ success }} tone="success" />
+{% endif %}
+
+{% if errors.get('csrf') %}
+<Alert message={{ errors.get('csrf') }} tone="danger" />
+{% endif %}
+
+{% if errors.get('form') %}
+<Alert message={{ errors.get('form') }} tone="danger" />
+{% endif %}
+
+<form
+    {{ attrs.render(class="space-y-4") }}
+    x-data="contactForm()"
+    @submit.prevent="submit"
+    method="post"
+    action="/contact"
+    novalidate
+>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="subject" value="{{ form_data.get('subject', 'Contact form submission') }}">
+
+    <Input
+        name="name"
+        label="Name"
+        placeholder="Your Name"
+        value={{ form_data.get('name', '') }}
+        required={{ true }}
+        error={{ errors.get('name', '') }}
+        client_error="clientErrors.name"
+        client_dirty="dirty.name"
+        @input="onFieldInput"
+        @blur="onFieldBlur"
+        minlength="2"
+        maxlength="100"
+    />
+
+    <Input
+        name="email"
+        type="email"
+        label="Email"
+        placeholder="your@email.com"
+        value={{ form_data.get('email', '') }}
+        required={{ true }}
+        error={{ errors.get('email', '') }}
+        client_error="clientErrors.email"
+        client_dirty="dirty.email"
+        @input="onFieldInput"
+        @blur="onFieldBlur"
+    />
+
+    <Input
+        name="message"
+        type="textarea"
+        label="Message"
+        placeholder="Your message..."
+        value={{ form_data.get('message', '') }}
+        rows={{ 4 }}
+        required={{ true }}
+        error={{ errors.get('message', '') }}
+        client_error="clientErrors.message"
+        client_dirty="dirty.message"
+        @input="onFieldInput"
+        @blur="onFieldBlur"
+        minlength="10"
+        maxlength="5000"
+    />
+
+    <Button
+        type="submit"
+        variant="primary"
+    >
+        Send Message
+    </Button>
+</form>

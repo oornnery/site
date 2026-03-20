@@ -1,0 +1,35 @@
+{#import "@layouts/public.jinja" as PublicLayout #}
+{#import "@ui/nav/breadcrumb.jinja" as Breadcrumb #}
+{#import "@ui/content/header.jinja" as PageHeader #}
+{#import "@ui/layout/stack.jinja" as Stack #}
+{#import "@features/blog/tags-fragment.jinja" as TagPosts #}
+{#def seo, tags=(), posts=(), selected_tag="", current_path="/blog" #}
+
+<PublicLayout seo={{ seo }} current_path={{ current_path }}>
+    {% if selected_tag %}
+    {% set breadcrumb_items = (
+        {"label": "Home", "href": "/"},
+        {"label": "Blog", "href": "/blog"},
+        {"label": "Tags", "href": "/blog/tags"},
+        {"label": selected_tag, "current": true},
+    ) %}
+    {% else %}
+    {% set breadcrumb_items = (
+        {"label": "Home", "href": "/"},
+        {"label": "Blog", "href": "/blog"},
+        {"label": "Tags", "current": true},
+    ) %}
+    {% endif %}
+
+    <Stack gap="6" class_name="sm:space-y-8">
+        <Stack gap="4" class_name="sm:space-y-6">
+            <Breadcrumb items={{ breadcrumb_items }} />
+            <PageHeader
+                title={{ ("Tag: " ~ selected_tag) if selected_tag else "Tags" }}
+                subtitle="Browse posts by topic."
+            />
+        </Stack>
+
+        <TagPosts tags={{ tags }} posts={{ posts }} selected_tag={{ selected_tag }} />
+    </Stack>
+</PublicLayout>

@@ -1,0 +1,93 @@
+import logging
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Form, Request
+from fastapi.responses import HTMLResponse
+
+from app.core.config import settings
+from app.core.dependencies import (
+    get_contact_orchestrator,
+    get_contact_page_service,
+    limiter,
+)
+from app.core.logger import event_message
+from app.core.security import _anonymize_identifier
+from app.observability.events import LogEvent
+from app.core.rendering import is_htmx, render_fragment, render_page
+from app.services.types import ContactPageContext
+from app.services import ContactPageService
+from app.services.contact import ContactOrchestrator
+
+router = APIRouter(prefix="/contact", tags=["contact"])
+logger = logging.getLogger(__name__)
+
+ContactPageServiceDep = Annotated[ContactPageService, Depends(get_contact_page_service)]
+ContactOrchestratorDep = Annotated[
+    ContactOrchestrator, Depends(get_contact_orchestrator)
+]
+
+
+@router.get("", response_class=HTMLResponse)
+async def contact_get(
+    request: Request,
+    page_service: ContactPageServiceDep,
+) -> HTMLResponse:
+    logger.info(
+        event_message(
+            LogEvent.CONTACT_PAGE_RENDERED,
+            path=request.url.path,
+        )
+    )
+    user_agent = request.headers.get("user-agent", "")
+    page = page_service.build_page(user_agent=user_agent)
+    return render_page(page)
+
+
+@router.post("", response_class=HTMLResponse)
+@limiter.limit(settings.rate_limit)
+async def contact_post(
+    request: Request,
+    name: Annotated[str, Form()],
+    email: Annotated[str, Form()],
+    subject: Annotated[str, Form()],
+    message: Annotated[str, Form()],
+    csrf_token: Annotated[str, Form()],
+    orchestrator: ContactOrchestratorDep,
+) -> HTMLResponse:
+    raw_ip = request.client.host if request.client else "unknown"
+    client_ip = _anonymize_identifier(raw_ip, namespace="ip")
+    user_agent = request.headers.get("user-agent", "")
+    request_id = getattr(request.state, "request_id", "unknown")
+    content_type = request.headers.get("content-type", "")
+
+    logger.info(
+        event_message(
+            LogEvent.CONTACT_SUBMISSION_RECEIVED,
+            path=request.url.path,
+        )
+    )
+
+    result = await orchestrator.handle_submission(
+        name=name,
+        email=email,
+        subject=subject,
+        message=message,
+        csrf_token=csrf_token,
+        content_type=content_type,
+        client_ip=client_ip,
+        user_agent=user_agent,
+        request_id=request_id,
+    )
+    if is_htmx(request):
+        ctx = result.page.context
+        if not isinstance(ctx, ContactPageContext):
+            raise TypeError(f"Expected ContactPageContext, got {type(ctx).__name__}")
+        return render_fragment(
+            "@features/contact/fragment.jinja",
+            status_code=result.status_code,
+            csrf_token=ctx.csrf_token,
+            success=ctx.success,
+            errors=ctx.errors,
+            form_data=ctx.form_data,
+        )
+    return render_page(result.page, status_code=result.status_code)

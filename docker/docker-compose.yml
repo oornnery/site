@@ -1,0 +1,39 @@
+services:
+  app:
+    container_name: site-app-dev
+    image: site-app-dev:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    ports:
+      - "8000:8000"
+    env_file:
+      - ../.env
+    environment:
+      DEBUG: "true"
+      LOG_LEVEL: "DEBUG"
+      OTEL_SERVICE_NAME: "${DEV_OTEL_SERVICE_NAME:-site-backend}"
+      OTEL_RESOURCE_ATTRIBUTES: "${DEV_OTEL_RESOURCE_ATTRIBUTES:-service.namespace=site,deployment.environment=development}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${DEV_OTEL_EXPORTER_OTLP_ENDPOINT:-http://host.docker.internal:4317}"
+      OTEL_EXPORTER_OTLP_INSECURE: "${DEV_OTEL_EXPORTER_OTLP_INSECURE:-true}"
+      OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: "${DEV_OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED:-true}"
+      FRONTEND_TELEMETRY_ENABLED: "${DEV_FRONTEND_TELEMETRY_ENABLED:-true}"
+      FRONTEND_TELEMETRY_OTLP_ENDPOINT: "${DEV_FRONTEND_TELEMETRY_OTLP_ENDPOINT:-}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ../app:/app/app
+      - ../content:/app/content
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s

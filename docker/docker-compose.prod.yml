@@ -1,0 +1,96 @@
+services:
+  traefik:
+    container_name: site-traefik
+    image: traefik:v3.3
+    command:
+      - "--configFile=/etc/traefik/traefik.yml"
+    ports:
+      - "${PROD_PUBLIC_HTTP_PORT:-80}:8000"
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: "0.5"
+    networks:
+      - edge
+
+  app:
+    container_name: site-app
+    image: site-app:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+    env_file:
+      - ../.env
+    environment:
+      DEBUG: "false"
+      LOG_LEVEL: "INFO"
+      OTEL_SERVICE_NAME: "${PROD_OTEL_SERVICE_NAME:-site-backend}"
+      OTEL_RESOURCE_ATTRIBUTES: "${PROD_OTEL_RESOURCE_ATTRIBUTES:-service.namespace=site,deployment.environment=production}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${PROD_OTEL_EXPORTER_OTLP_ENDPOINT:-http://host.docker.internal:4317}"
+      OTEL_EXPORTER_OTLP_INSECURE: "${PROD_OTEL_EXPORTER_OTLP_INSECURE:-true}"
+      OTEL_EXPORTER_OTLP_HEADERS: "${PROD_OTEL_EXPORTER_OTLP_HEADERS:-}"
+      OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED: "${PROD_OTEL_PYTHON_LOGGING_AUTO_INSTRUMENTATION_ENABLED:-true}"
+      TRUST_FORWARDED_IP_HEADERS: "true"
+      BASE_URL: "${PROD_BASE_URL:-https://example.com}"
+      TRUSTED_HOSTS: "${PROD_TRUSTED_HOSTS:-example.com,www.example.com}"
+      CORS_ALLOW_ORIGINS: "${PROD_CORS_ALLOW_ORIGINS:-https://example.com}"
+      FRONTEND_TELEMETRY_ENABLED: "${PROD_FRONTEND_TELEMETRY_ENABLED:-true}"
+      FRONTEND_TELEMETRY_OTLP_ENDPOINT: "${PROD_FRONTEND_TELEMETRY_OTLP_ENDPOINT:-}"
+      FRONTEND_TELEMETRY_SAMPLE_RATIO: "${PROD_FRONTEND_TELEMETRY_SAMPLE_RATIO:-1.0}"
+    command:
+      [
+        "opentelemetry-instrument",
+        "uvicorn",
+        "app.main:app",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "8000",
+        "--workers",
+        "2",
+        "--proxy-headers",
+        "--forwarded-allow-ips=172.28.0.0/16",
+      ]
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: "1.0"
+    depends_on:
+      - traefik
+    networks:
+      - edge
+
+networks:
+  edge:
+    name: site-edge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

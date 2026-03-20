@@ -1,0 +1,29 @@
+{#def variant="default", size="default", href="", type="button", disabled=False, loading=False, full_width=False #}
+
+{% set base = "inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all duration-200 focus:ring-4 focus:outline-none disabled:pointer-events-none disabled:opacity-50" %}
+{% set variants = {
+    "default": "border border-accent/15 text-foreground/80 hover:bg-surface-2 hover:text-accent hover:border-accent/30 focus:ring-accent/20",
+    "primary": "bg-accent text-background hover:bg-accent/85 shadow-sm shadow-accent/15 focus:ring-accent/30",
+    "secondary": "bg-surface-2 text-foreground/80 border border-accent/15 hover:bg-surface-2/80 hover:text-accent hover:border-accent/30 focus:ring-accent/20",
+    "ghost": "text-foreground/60 hover:bg-surface-2/50 hover:text-accent focus:ring-accent/20",
+    "link": "text-foreground/60 hover:text-accent underline-offset-4 hover:underline p-0 h-auto focus:ring-0",
+    "accent": "bg-accent text-background hover:bg-accent/90 shadow-sm shadow-accent/20 focus:ring-accent/50",
+    "danger": "bg-danger/10 text-danger border border-danger/20 hover:bg-danger/20 focus:ring-danger/30",
+    "outline": "border border-accent/50 text-accent hover:bg-accent/10 hover:border-accent focus:ring-accent/30"
+} %}
+{% set sizes = {"xs": "h-7 px-2 text-xs", "sm": "h-8 px-3 text-xs", "default": "h-9 px-4 py-2 text-sm", "lg": "h-11 px-6 text-base", "icon": "h-9 w-9 p-0"} %}
+{% set cls = base ~ " " ~ variants[variant] ~ " " ~ sizes[size] ~ (" w-full" if full_width else "") ~ (" cursor-wait" if loading else "") %}
+
+{% macro spinner() %}
+<svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+{% endmacro %}
+
+{% if href and not disabled %}
+<a href="{{ href }}" class="{{ cls }}" {% if loading %}aria-busy="true"{% endif %} {{ attrs.render() }}>
+    {% if loading %}{{ spinner() }}{% endif %}{{ content }}
+</a>
+{% else %}
+<button type="{{ type }}" {% if disabled or loading %}disabled{% endif %} class="{{ cls }}" {% if loading %}aria-busy="true"{% endif %} {{ attrs.render() }}>
+    {% if loading %}{{ spinner() }}{% endif %}{{ content }}
+</button>
+{% endif %}

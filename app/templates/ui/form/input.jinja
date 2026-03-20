@@ -25,13 +25,13 @@
     {% endif %}
 
     {% if type == "textarea" %}
-    <textarea id="{{ name }}" name="{{ name }}" rows="{{ rows }}" placeholder="{{ placeholder }}" {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} class="{{ cls }} resize-y min-h-[100px]" {% if client_error %}:class="{ 'border-danger/50 focus:border-danger focus:ring-danger/30': {{ show_error_expr }} }"{% endif %} {{ attrs.render() }}>{{ value }}</textarea>
+    <textarea id="{{ name }}" name="{{ name }}" rows="{{ rows }}" placeholder="{{ placeholder }}" {% if required %}required aria-required="true"{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} aria-describedby="{{ name }}-error" class="{{ cls }} resize-y min-h-[100px]" {% if client_error %}:class="{ 'border-danger/50 focus:border-danger focus:ring-danger/30': {{ show_error_expr }} }"{% endif %} {{ attrs.render() }}>{{ value }}</textarea>
     {% else %}
-    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value }}" placeholder="{{ placeholder }}" {% if required %}required{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} class="{{ cls }}" {% if client_error %}:class="{ 'border-danger/50 focus:border-danger focus:ring-danger/30': {{ show_error_expr }} }"{% endif %} {{ attrs.render() }}>
+    <input type="{{ type }}" id="{{ name }}" name="{{ name }}" value="{{ value }}" placeholder="{{ placeholder }}" {% if required %}required aria-required="true"{% endif %} {% if disabled %}disabled{% endif %} {% if readonly %}readonly{% endif %} aria-describedby="{{ name }}-error" class="{{ cls }}" {% if client_error %}:class="{ 'border-danger/50 focus:border-danger focus:ring-danger/30': {{ show_error_expr }} }"{% endif %} {{ attrs.render() }}>
     {% endif %}
 
     {% if error or client_error %}
-    <p class="mt-1 text-sm text-danger" {% if client_error %}{% if not error %}x-cloak {% endif %}x-show="{{ show_error_expr }}" x-text="{{ error_text_expr }}"{% endif %}>{{ error }}</p>
+    <p id="{{ name }}-error" class="mt-1 text-sm text-danger" {% if client_error %}{% if not error %}x-cloak {% endif %}x-show="{{ show_error_expr }}" x-text="{{ error_text_expr }}"{% endif %}>{{ error }}</p>
     {% elif hint %}
     <p class="mt-1 text-sm text-foreground/50">{{ hint }}</p>
     {% endif %}

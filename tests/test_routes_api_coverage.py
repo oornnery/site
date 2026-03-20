@@ -243,6 +243,7 @@ def test_frontend_telemetry_route_forwards_payload_to_collector(
         "frontend_telemetry_otlp_endpoint",
         "http://collector.test:4318/v1/traces",
     )
+    monkeypatch.setattr(telemetry_api_module.settings, "debug", True)
 
     for client in _build_client():
         response = client.post(
@@ -309,11 +310,97 @@ def test_frontend_telemetry_route_returns_bad_gateway_on_upstream_error(
         "frontend_telemetry_otlp_endpoint",
         "http://collector.test:4318/v1/traces",
     )
+    monkeypatch.setattr(telemetry_api_module.settings, "debug", True)
 
     for client in _build_client():
         response = client.post("/otel/v1/traces", content=b"trace-payload")
 
         assert response.status_code == 502
+
+
+def _enable_telemetry(monkeypatch: pytest.MonkeyPatch) -> StubTelemetryAsyncClient:
+    """Shared helper to enable telemetry with a stub client for origin tests."""
+    telemetry_client = StubTelemetryAsyncClient(
+        response=httpx.Response(
+            status_code=202,
+            content=b"accepted",
+            headers={"content-type": "application/x-protobuf"},
+        )
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.httpx,
+        "AsyncClient",
+        lambda *args, **kwargs: telemetry_client,
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.settings, "frontend_telemetry_enabled", True
+    )
+    monkeypatch.setattr(
+        telemetry_api_module.settings,
+        "frontend_telemetry_otlp_endpoint",
+        "http://collector.test:4318/v1/traces",
+    )
+    return telemetry_client
+
+
+def test_telemetry_proxy_accepts_matching_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _enable_telemetry(monkeypatch)
+    monkeypatch.setattr(telemetry_api_module.settings, "debug", False)
+
+    for client in _build_client():
+        response = client.post(
+            "/otel/v1/traces",
+            content=b"trace-payload",
+            headers={"origin": "http://localhost:8000"},
+        )
+
+        assert response.status_code == 202
+
+
+def test_telemetry_proxy_accepts_referer_fallback(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _enable_telemetry(monkeypatch)
+    monkeypatch.setattr(telemetry_api_module.settings, "debug", False)
+
+    for client in _build_client():
+        response = client.post(
+            "/otel/v1/traces",
+            content=b"trace-payload",
+            headers={"referer": "http://localhost:8000/some-page"},
+        )
+
+        assert response.status_code == 202
+
+
+def test_telemetry_proxy_rejects_foreign_origin(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _enable_telemetry(monkeypatch)
+    monkeypatch.setattr(telemetry_api_module.settings, "debug", False)
+
+    for client in _build_client():
+        response = client.post(
+            "/otel/v1/traces",
+            content=b"trace-payload",
+            headers={"origin": "https://evil.example.com"},
+        )
+
+        assert response.status_code == 403
+
+
+def test_telemetry_proxy_rejects_missing_origin_in_production(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _enable_telemetry(monkeypatch)
+    monkeypatch.setattr(telemetry_api_module.settings, "debug", False)
+
+    for client in _build_client():
+        response = client.post("/otel/v1/traces", content=b"trace-payload")
+
+        assert response.status_code == 403
 
 
 def test_contact_route_rejects_unsupported_content_type() -> None:

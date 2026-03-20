@@ -11,6 +11,7 @@ _path_ctx: ContextVar[str] = ContextVar("path", default="-")
 _client_ip_ctx: ContextVar[str] = ContextVar("client_ip", default="-")
 
 _configured = False
+_SUPPRESSED_LOGGERS = ("httpx", "httpcore", "watchfiles")
 
 
 class RequestContextFilter(logging.Filter):
@@ -72,9 +73,8 @@ def configure_logging(level: str) -> None:
         force=True,
     )
 
-    logging.getLogger("httpx").setLevel(logging.WARNING)
-    logging.getLogger("httpcore").setLevel(logging.WARNING)
-    logging.getLogger("watchfiles").setLevel(logging.WARNING)
+    for name in _SUPPRESSED_LOGGERS:
+        logging.getLogger(name).setLevel(logging.WARNING)
     _configured = True
 
 

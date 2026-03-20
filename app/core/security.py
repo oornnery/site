@@ -20,13 +20,14 @@ from app.observability.metrics import get_app_metrics
 logger = logging.getLogger(__name__)
 
 _TRACING_SKIP_PATHS = frozenset({"/health"})
+_HASH_PREFIX_LENGTH = 16
 
 
 def _csrf_user_agent_hash(user_agent: str) -> str:
     normalized = user_agent.strip().lower()
     if not normalized:
         return "na"
-    return hashlib.sha256(normalized.encode()).hexdigest()[:16]
+    return hashlib.sha256(normalized.encode()).hexdigest()[:_HASH_PREFIX_LENGTH]
 
 
 def _anonymize_identifier(value: str, *, namespace: str) -> str:
@@ -38,7 +39,7 @@ def _anonymize_identifier(value: str, *, namespace: str) -> str:
         f"{namespace}:{normalized}".encode(),
         hashlib.sha256,
     ).hexdigest()
-    return digest[:16]
+    return digest[:_HASH_PREFIX_LENGTH]
 
 
 def generate_csrf_token(*, user_agent: str = "") -> str:

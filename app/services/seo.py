@@ -7,6 +7,8 @@ from app.models.schemas import SEOMeta
 
 logger = logging.getLogger(__name__)
 
+_MAX_DESCRIPTION_LENGTH = 160
+
 
 def _join_url(base: str, path: str) -> str:
     return f"{base.rstrip('/')}/{path.lstrip('/')}"
@@ -48,7 +50,7 @@ def seo_for_page(
     resolved_site_name = _resolve_site_name(site_name)
     seo = SEOMeta(
         title=f"{title} | {resolved_site_name}",
-        description=description[:160],
+        description=description[:_MAX_DESCRIPTION_LENGTH],
         canonical_url=_join_url(str(settings.base_url), path),
         og_image=_absolute_asset_url(resolved_og_image),
         og_type=og_type,

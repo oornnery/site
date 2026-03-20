@@ -8,6 +8,9 @@ from app.services.types import HomePageContext, PageRenderData
 
 logger = logging.getLogger(__name__)
 
+_FEATURED_LIMIT = 3
+_LATEST_POSTS_LIMIT = 3
+
 
 class HomePageService:
     def __init__(
@@ -22,8 +25,8 @@ class HomePageService:
         non_featured_projects = [
             project for project in all_projects if not project.featured
         ]
-        featured = (featured_projects + non_featured_projects)[:3]
-        latest_posts = all_posts[:3]
+        featured = (featured_projects + non_featured_projects)[:_FEATURED_LIMIT]
+        latest_posts = all_posts[:_LATEST_POSTS_LIMIT]
         csrf_token = self._csrf_token_factory(user_agent=user_agent)
         seo = seo_for_page(
             title="Home",

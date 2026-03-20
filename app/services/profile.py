@@ -39,10 +39,10 @@ class ProfileService:
         about_content = load_about()
         frontmatter = about_content.frontmatter
 
-        profile_name = str(frontmatter.name or settings.site_name).strip()
-        profile_role = str(frontmatter.role or "").strip()
-        profile_location = str(frontmatter.location or "").strip()
-        profile_summary = str(
+        profile_name = (frontmatter.name or settings.site_name).strip()
+        profile_role = (frontmatter.role or "").strip()
+        profile_location = (frontmatter.location or "").strip()
+        profile_summary = (
             frontmatter.description
             or "I build reliable backend systems with Python, FastAPI, and PostgreSQL."
         ).strip()

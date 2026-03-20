@@ -38,22 +38,10 @@
 }
 
 /* ==========================================
-   CSS Variables - Legacy Aliases
+   CSS Variables
    ========================================== */
 
 :root {
-    /* Legacy palette — aliases to semantic tokens from tokens.css.
-       These exist for backward compat; prefer --bg, --surface, etc. */
-    --bg-primary: var(--bg);
-    --bg-secondary: var(--surface);
-    --bg-tertiary: var(--surface-2);
-
-    --text-primary: var(--text);
-    --text-secondary: var(--text-2);
-    --text-muted: var(--text-3);
-
-    --accent-primary: var(--accent);
-
     /* Layout */
     --container-width: 896px;
     --header-height: 64px;
@@ -149,19 +137,6 @@ textarea:focus-visible {
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--border) var(--surface);
-}
-
-/* ==========================================
-   Animations
-   ========================================== */
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.fade-in {
-    animation: fadeIn 0.4s ease forwards;
 }
 
 .navbar-toggle {
@@ -986,7 +961,7 @@ textarea:focus-visible {
     gap: 0.5rem;
     color: var(--text-3);
     opacity: 0.5;
-    animation: bounce 2s infinite;
+    animation: scrollBounce 2s infinite;
     cursor: pointer;
     transition: color 0.2s ease, opacity 0.2s ease;
 }
@@ -1001,7 +976,7 @@ textarea:focus-visible {
     height: 1rem;
 }
 
-@keyframes bounce {
+@keyframes scrollBounce {
     0%, 100% { transform: translateX(-50%) translateY(0); }
     50% { transform: translateX(-50%) translateY(8px); }
 }

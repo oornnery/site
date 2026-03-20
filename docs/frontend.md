@@ -46,7 +46,8 @@ This enables consistent imports and composable templates.
 
 ### Home (`/`)
 
-- Full-screen snap sections
+- Full-screen snap sections with spotlight effect (radial accent glow follows
+  cursor via CSS custom properties, disabled for `prefers-reduced-motion`)
 - Profile summary
 - Projects preview + latest blog posts preview
 - Contact preview
@@ -151,6 +152,10 @@ Vanilla JS utilities that run on `DOMContentLoaded`:
 - `initCurrentYear()` — updates `[data-current-year]` elements
 - `initScrollSnap()` — responsive scroll-snap switching (proximity on mobile,
   mandatory on desktop)
+- `initSpotlight()` — radial accent glow that follows the cursor inside home
+  snap-sections; uses `--spotlight-x`, `--spotlight-y`, and `--spotlight-opacity`
+  CSS custom properties with `requestAnimationFrame` throttling; respects
+  `prefers-reduced-motion`
 
 ### Frontend Telemetry
 

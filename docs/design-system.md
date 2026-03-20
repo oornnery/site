@@ -61,7 +61,8 @@ Core UI components in `app/templates/ui`, organized by subfolder:
 
 ## Page Design Patterns
 
-- Home uses full-screen snap sections and guided scroll indicator.
+- Home uses full-screen snap sections, guided scroll indicator, and a
+  spotlight effect (radial accent glow that tracks the cursor on each section).
 - Public pages share a centered container with fixed top navigation.
 - Public list/index pages use a shared intro rhythm:
   breadcrumb first, `8px-16px` gap, then title/subtitle.
@@ -86,6 +87,14 @@ From `motion.css`:
 - Hover effects (`hover-lift`, `hover-scale`, `hover-glow`)
 - Loading states (`pulse`, `bounce`, `spin`)
 - Tokenized timing (`--dur-*`) and easing (`--ease-out`)
+
+### Spotlight Effect
+
+The home page snap-sections use a CSS `::before` pseudo-element with a radial
+gradient that follows the cursor. JS sets `--spotlight-x`, `--spotlight-y`, and
+`--spotlight-opacity` on the active section. The gradient uses
+`rgb(var(--accent-rgb) / 0.15)` so it adapts to the active palette. The effect
+is disabled when `prefers-reduced-motion` is set.
 
 ## Responsive Principles
 
@@ -128,8 +137,8 @@ palette is stored in `localStorage` and applied as `data-palette` on `<html>`.
 Palette overrides in `tokens.css` use `:root[data-palette="..."]` blocks that
 must come **after** the `data-theme` block in the cascade.
 
-All visual accent uses (borders, timeline dots, featured badges, minimap dots)
-must reference `--accent-rgb` or `--accent`. Use `--interactive` only for text
-link hover colors.
+All visual accent uses (borders, timeline dots, featured badges, minimap dots,
+spotlight glow) must reference `--accent-rgb` or `--accent`. Use `--interactive`
+only for text link hover colors.
 
 For detailed handoff values, see [Figma Tokens and Handoff](figma-tokens.md).

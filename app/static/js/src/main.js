@@ -80,6 +80,9 @@ const initScrollSnap = () => {
     if (!container) return;
 
     for (const indicator of $$(".scroll-indicator", container)) {
+        if (!indicator.hasAttribute("aria-label")) {
+            indicator.setAttribute("aria-label", "Scroll to next section");
+        }
         indicator.addEventListener("click", () => {
             const sections = $$(".snap-section", container);
             if (!sections.length) return;

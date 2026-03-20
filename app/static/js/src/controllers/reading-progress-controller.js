@@ -31,7 +31,15 @@ export default class ReadingProgressController extends Controller {
         this._content = document.querySelector(this.contentSelectorValue);
         if (!this._content || !this.hasBarTarget) return;
 
-        this._update = () => this._tick();
+        this._raf = false;
+        this._update = () => {
+            if (this._raf) return;
+            this._raf = true;
+            requestAnimationFrame(() => {
+                this._raf = false;
+                this._tick();
+            });
+        };
         addEventListener("scroll", this._update, { passive: true });
         addEventListener("resize", this._update);
         this._tick();

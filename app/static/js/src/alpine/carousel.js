@@ -124,7 +124,11 @@ export default (autoplayMs = 3000) => ({
         this._dotButtons.forEach((button, i) => {
             const isActive = i === this.current;
             button.classList.toggle("is-active", isActive);
-            button.setAttribute("aria-current", isActive ? "true" : "false");
+            if (isActive) {
+                button.setAttribute("aria-current", "step");
+            } else {
+                button.removeAttribute("aria-current");
+            }
         });
     },
 });

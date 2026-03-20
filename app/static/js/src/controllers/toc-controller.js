@@ -62,6 +62,9 @@ export default class TocController extends Controller {
         if (this._onScroll) removeEventListener("scroll", this._onScroll);
         if (this._onResize) removeEventListener("resize", this._onResize);
         if (this._onHashChange) removeEventListener("hashchange", this._onHashChange);
+        for (const { link, handler } of this._links || []) {
+            link.removeEventListener("click", handler);
+        }
     }
 
     _slugify(text) {
@@ -101,9 +104,10 @@ export default class TocController extends Controller {
             link.textContent = heading.textContent.trim();
             link.className = "blog-post-toc-link";
             if (heading.tagName === "H3") link.classList.add("is-subheading");
-            link.addEventListener("click", () => this._setActive(heading.id));
+            const handler = () => this._setActive(heading.id);
+            link.addEventListener("click", handler);
             this.containerTarget.appendChild(link);
-            this._links.push({ heading, link });
+            this._links.push({ heading, link, handler });
         }
     }
 

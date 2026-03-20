@@ -21,7 +21,11 @@ export default () => ({
     init() {
         const root = document.documentElement;
         this.mode = root.dataset.theme || "dark";
-        this.current = localStorage.getItem("palette") || "default";
+        try {
+            this.current = localStorage.getItem("palette") || "default";
+        } catch {
+            this.current = "default";
+        }
     },
 
     toggleMode() {
@@ -30,7 +34,7 @@ export default () => ({
         const root = document.documentElement;
         root.dataset.theme = next;
         root.classList.toggle("dark", next === "dark");
-        localStorage.setItem("theme", next);
+        try { localStorage.setItem("theme", next); } catch { /* private browsing */ }
     },
 
     toggleMenu() {
@@ -50,7 +54,7 @@ export default () => ({
         } else {
             delete root.dataset.palette;
         }
-        localStorage.setItem("palette", id || "default");
+        try { localStorage.setItem("palette", id || "default"); } catch { /* private browsing */ }
     },
 
     isActive(id) {

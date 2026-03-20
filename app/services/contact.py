@@ -218,6 +218,46 @@ class ContactOrchestrator:
             form_data=form_data,
         )
 
+    def _reject(
+        self,
+        *,
+        outcome: str,
+        reason: str,
+        status_code: int,
+        error_message: str = "",
+        errors: dict[str, str] | None = None,
+        form_data: dict[str, str],
+        user_agent: str,
+        request_id: str,
+        client_ip: str,
+        log_level: str = "warning",
+    ) -> ContactFormResult:
+        app_metrics = get_app_metrics()
+        app_metrics.record_contact_submission(outcome=outcome)
+        log_fn = getattr(logger, log_level)
+        log_fn(
+            event_message(
+                LogEvent.CONTACT_SUBMISSION_REJECTED,
+                reason=reason,
+                request_id=request_id,
+            )
+        )
+        self._record_submission_event(
+            "contact.submit.rejected",
+            request_id=request_id,
+            client_ip=client_ip,
+            user_agent=user_agent,
+            outcome=outcome,
+            reason=reason,
+        )
+        resolved_errors = errors if errors is not None else {"form": error_message}
+        page = self._error_page(
+            user_agent=user_agent,
+            errors=resolved_errors,
+            form_data=form_data,
+        )
+        return ContactFormResult(page=page, status_code=status_code, outcome=outcome)
+
     async def handle_submission(
         self,
         *,
@@ -253,30 +293,15 @@ class ContactOrchestrator:
         )
 
         if not is_allowed_form_content_type(content_type):
-            app_metrics.record_contact_submission(outcome="unsupported_content_type")
-            logger.warning(
-                event_message(
-                    LogEvent.CONTACT_SUBMISSION_REJECTED,
-                    reason="unsupported_content_type",
-                    content_type=content_type,
-                    request_id=request_id,
-                )
-            )
-            self._record_submission_event(
-                "contact.submit.rejected",
-                request_id=request_id,
-                client_ip=client_ip,
-                user_agent=user_agent,
+            return self._reject(
                 outcome="unsupported_content_type",
                 reason="unsupported_content_type",
-            )
-            page = self._error_page(
-                user_agent=user_agent,
-                errors={"form": "Unsupported content type."},
+                status_code=415,
+                error_message="Unsupported content type.",
                 form_data=form_data,
-            )
-            return ContactFormResult(
-                page=page, status_code=415, outcome="unsupported_content_type"
+                user_agent=user_agent,
+                request_id=request_id,
+                client_ip=client_ip,
             )
 
         submission = self._submission_service.process(
@@ -291,55 +316,29 @@ class ContactOrchestrator:
 
         if not submission.is_valid:
             reason = "csrf" if "csrf" in submission.errors else "validation_error"
-            app_metrics.record_contact_submission(outcome=reason)
-            logger.info(
-                event_message(
-                    LogEvent.CONTACT_SUBMISSION_REJECTED,
-                    reason=reason,
-                    request_id=request_id,
-                )
-            )
-            self._record_submission_event(
-                "contact.submit.rejected",
-                request_id=request_id,
-                client_ip=client_ip,
-                user_agent=user_agent,
+            return self._reject(
                 outcome=reason,
                 reason=reason,
-            )
-            page = self._error_page(
-                user_agent=user_agent,
+                status_code=submission.status_code,
                 errors=submission.errors,
                 form_data=submission.form_data,
-            )
-            return ContactFormResult(
-                page=page, status_code=submission.status_code, outcome=reason
+                user_agent=user_agent,
+                request_id=request_id,
+                client_ip=client_ip,
+                log_level="info",
             )
 
         if submission.contact is None:
-            app_metrics.record_contact_submission(outcome="unexpected_submission_state")
-            logger.error(
-                event_message(
-                    LogEvent.CONTACT_SUBMISSION_REJECTED,
-                    reason="unexpected_submission_state",
-                    request_id=request_id,
-                )
-            )
-            self._record_submission_event(
-                "contact.submit.rejected",
-                request_id=request_id,
-                client_ip=client_ip,
-                user_agent=user_agent,
+            return self._reject(
                 outcome="unexpected_submission_state",
                 reason="unexpected_submission_state",
-            )
-            page = self._error_page(
-                user_agent=user_agent,
-                errors={"form": "Unexpected contact submission state."},
+                status_code=500,
+                error_message="Unexpected contact submission state.",
                 form_data=submission.form_data,
-            )
-            return ContactFormResult(
-                page=page, status_code=500, outcome="unexpected_submission_state"
+                user_agent=user_agent,
+                request_id=request_id,
+                client_ip=client_ip,
+                log_level="error",
             )
 
         notification_context = ContactNotificationContext(
@@ -356,34 +355,19 @@ class ContactOrchestrator:
             and dispatch_result.all_failed
             and not dispatch_result.all_skipped
         ):
-            app_metrics.record_contact_submission(outcome="notification_failed")
-            logger.error(
-                event_message(
-                    LogEvent.CONTACT_SUBMISSION_REJECTED,
-                    reason="notification_all_failed",
-                    request_id=request_id,
-                )
-            )
-            self._record_submission_event(
-                "contact.submit.rejected",
-                request_id=request_id,
-                client_ip=client_ip,
-                user_agent=user_agent,
+            return self._reject(
                 outcome="notification_failed",
                 reason="notification_all_failed",
-            )
-            page = self._error_page(
-                user_agent=user_agent,
-                errors={
-                    "form": (
-                        "Your message could not be delivered right now. "
-                        "Please try again in a few minutes."
-                    )
-                },
+                status_code=503,
+                error_message=(
+                    "Your message could not be delivered right now. "
+                    "Please try again in a few minutes."
+                ),
                 form_data=submission.form_data,
-            )
-            return ContactFormResult(
-                page=page, status_code=503, outcome="notification_failed"
+                user_agent=user_agent,
+                request_id=request_id,
+                client_ip=client_ip,
+                log_level="error",
             )
 
         if not dispatch_result.has_channels or dispatch_result.all_skipped:

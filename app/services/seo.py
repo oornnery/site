@@ -1,6 +1,7 @@
 import logging
 
 from app.core.config import settings
+from app.infrastructure.markdown import load_about
 from app.models.models import Project
 from app.models.schemas import SEOMeta
 
@@ -24,8 +25,6 @@ def _resolve_site_name(raw_site_name: str = "") -> str:
         return raw_site_name
 
     try:
-        from app.infrastructure.markdown import load_about
-
         content_site_name = str(load_about().frontmatter.name).strip()
         if content_site_name:
             return content_site_name

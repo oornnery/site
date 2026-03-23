@@ -61,7 +61,7 @@ def test_contact_page_renders_htmx_and_alpine_form_enhancement() -> None:
     for client in _build_client():
         response = client.get("/contact", headers={"user-agent": "pytest-agent"})
         assert response.status_code == 200
-        assert 'hx-post="/contact"' in response.text
+        assert 'hx-post="/en/contact"' in response.text
         assert 'hx-target="#contact-form-section"' in response.text
         assert 'x-data="contactForm()"' in response.text
         assert '@submit.prevent="submit"' in response.text

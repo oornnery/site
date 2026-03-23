@@ -7,7 +7,7 @@ from app.infrastructure.notifications.email import (
     NotificationChannelResult,
     NotificationDispatchResult,
 )
-from app.models.schemas import ContactForm
+from app.models.contact import ContactForm
 from app.observability.metrics import AppMetrics
 
 

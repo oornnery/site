@@ -9,20 +9,20 @@ from fastapi.testclient import TestClient
 
 import app.api.telemetry as telemetry_api_module
 import app.services.contact as contact_service_module
-from app.core.dependencies import (
+from app.core.deps import (
     get_blog_page_service,
     get_contact_orchestrator,
     get_projects_page_service,
 )
-from app.models.schemas import SEOMeta
-from app.models.schemas import ContactForm
+from app.models.seo import SEOMeta
+from app.models.contact import ContactForm
 from app.infrastructure.notifications.email import (
     NotificationChannelResult,
     NotificationDispatchResult,
 )
 from app.main import create_app
 from app.services.contact import ContactOrchestrator, ContactPageService
-from app.services.types import BlogPostsPageContext, ContactFormResult, PageRenderData
+from app.models.contexts import BlogPostsPageContext, ContactFormResult, PageRenderData
 
 
 def _build_client(
@@ -79,8 +79,9 @@ class StubSubmissionService:
         csrf_token: str,
         client_ip: str,
         user_agent: str,
+        lang: str | None = None,
     ) -> StubSubmissionResult:
-        del name, email, subject, message, csrf_token, client_ip, user_agent
+        del name, email, subject, message, csrf_token, client_ip, user_agent, lang
         return self._result
 
 
@@ -136,9 +137,13 @@ class StubTelemetryAsyncClient:
 
 class WrongBlogTagsPageService:
     def build_tags_page(
-        self, tag: str | None = None, page: int = 1, page_size: int = 10
+        self,
+        tag: str | None = None,
+        page: int = 1,
+        page_size: int = 10,
+        lang: str | None = None,
     ) -> PageRenderData:
-        del tag, page, page_size
+        del tag, page, page_size, lang
         return PageRenderData(
             template="pages/blog/tags.jinja",
             context=BlogPostsPageContext(seo=_seo(), posts=()),
@@ -152,8 +157,9 @@ class WrongProjectsPageService:
         q: str = "",
         tag: str = "",
         page: int = 1,
+        lang: str | None = None,
     ) -> PageRenderData:
-        del q, tag, page
+        del q, tag, page, lang
         return PageRenderData(
             template="pages/projects/list.jinja",
             context=BlogPostsPageContext(seo=_seo(), posts=()),
@@ -173,6 +179,7 @@ class WrongContactOrchestrator:
         client_ip: str,
         user_agent: str,
         request_id: str,
+        lang: str | None = None,
     ) -> ContactFormResult:
         del (
             name,
@@ -184,6 +191,7 @@ class WrongContactOrchestrator:
             client_ip,
             user_agent,
             request_id,
+            lang,
         )
         return ContactFormResult(
             page=PageRenderData(

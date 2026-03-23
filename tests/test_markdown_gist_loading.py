@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from textwrap import dedent
 
-from app.models.models import BlogComment
+from app.models.blog import BlogComment
 from app.infrastructure import markdown as markdown_infra
 
 
@@ -46,6 +46,7 @@ def test_blog_loader_prefers_local_markdown_over_gist_content(
             }
         }
 
+    monkeypatch.setattr(markdown_infra, "CONTENT_DIR", tmp_path)
     monkeypatch.setattr(markdown_infra, "BLOG_DIR", blog_dir)
     monkeypatch.setattr(markdown_infra, "_fetch_gist_payload", _fake_payload)
     monkeypatch.setattr(
@@ -94,6 +95,7 @@ def test_blog_loader_uses_gist_content_when_markdown_body_is_empty(
         body="",
     )
 
+    monkeypatch.setattr(markdown_infra, "CONTENT_DIR", tmp_path)
     monkeypatch.setattr(markdown_infra, "BLOG_DIR", blog_dir)
     monkeypatch.setattr(
         markdown_infra,

@@ -10,7 +10,7 @@ os.environ["FRONTEND_TELEMETRY_ENABLED"] = "false"
 
 @pytest.fixture(autouse=True)
 def _reset_rate_limiter() -> Iterator[None]:
-    from app.core.dependencies import limiter
+    from app.core.deps import limiter
 
     limiter.reset()
     yield

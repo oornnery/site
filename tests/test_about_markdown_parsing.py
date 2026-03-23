@@ -21,52 +21,36 @@ def test_about_loader_parses_frontmatter_and_markdown_sections(
             location: "Sao Paulo, Brazil"
             social_links:
               github: "https://github.com/example"
+            work_experience:
+              - title: "Senior Engineer"
+                company: "Example Co"
+                location: "Remote"
+                start_date: "2020"
+                end_date: "Present"
+                highlights:
+                  - "improved observability"
+                  - "simplified validation contracts"
+            education:
+              - school: "University of Technology"
+                degree: "B.S. in Computer Science"
+                start_date: "2014"
+                end_date: "2018"
+            certificates:
+              - name: "AWS Certified Solutions Architect"
+                issuer: "Amazon Web Services"
+                date: "2023"
+                credential_id: "AWS-SAA-123456"
+            skill_groups:
+              - title: "Backend"
+                skills: ["Python", "FastAPI"]
+              - title: "Infra"
+                skills: ["Docker", "Linux"]
             ---
             I build **reliable** backend systems.
 
             ## About
 
             I care about [maintainable delivery](https://example.com).
-
-            ## Work Experience
-
-            ### Senior Engineer
-
-            **Company:** Example Co
-            **Location:** Remote
-            **Period:** 2020 - Present
-
-            Built APIs with strong delivery defaults.
-
-            - improved observability
-            - simplified validation contracts
-
-            ## Education
-
-            ### University of Technology
-
-            **Degree:** B.S. in Computer Science
-            **Period:** 2014 - 2018
-
-            ## Certificates
-
-            ### AWS Certified Solutions Architect
-
-            **Issuer:** Amazon Web Services
-            **Date:** 2023
-            **Credential ID:** AWS-SAA-123456
-
-            ## Skills
-
-            ### Backend
-
-            - Python
-            - FastAPI
-
-            ### Infra
-
-            - Docker
-            - Linux
             """
         ).strip(),
         encoding="utf-8",
@@ -88,7 +72,7 @@ def test_about_loader_parses_frontmatter_and_markdown_sections(
     assert experience.location == "Remote"
     assert experience.start_date == "2020"
     assert experience.end_date == "Present"
-    assert "<ul>" in experience.content_html
+    assert "improved observability" in experience.highlights
 
     assert len(about.education) == 1
     education = about.education[0]
@@ -126,30 +110,18 @@ def test_about_loader_allows_missing_optional_fields(
             description: "Backend engineer focused on reliable systems."
             social_links:
               github: "https://github.com/example"
+            work_experience:
+              - title: "Senior Engineer"
+                company: "Example Co"
+            education:
+              - school: "University of Technology"
+            certificates:
+              - name: "AWS Certified Solutions Architect"
+            skill_groups:
+              - title: "Backend"
+                skills: ["Python"]
             ---
             Intro paragraph.
-
-            ## Work Experience
-
-            ### Senior Engineer
-
-            **Company:** Example Co
-
-            Did useful work.
-
-            ## Education
-
-            ### University of Technology
-
-            ## Certificates
-
-            ### AWS Certified Solutions Architect
-
-            ## Skills
-
-            ### Backend
-
-            - Python
             """
         ).strip(),
         encoding="utf-8",

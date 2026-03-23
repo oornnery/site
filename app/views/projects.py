@@ -4,10 +4,10 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Path, Query, Request
 from fastapi.responses import HTMLResponse
 
-from app.core.dependencies import get_projects_page_service
-from app.core.rendering import is_htmx, render_fragment, render_page
+from app.core.deps import get_projects_page_service
+from app.core.rendering import get_lang, is_htmx, render_fragment, render_page
 from app.services import ProjectsPageService
-from app.services.types import ProjectsListPageContext
+from app.models.contexts import ProjectsListPageContext
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 logger = logging.getLogger(__name__)
@@ -25,7 +25,8 @@ async def projects_list(
     tag: Annotated[str, Query()] = "",
     page: Annotated[int, Query(ge=1)] = 1,
 ) -> HTMLResponse:
-    page_data = page_service.build_list_page(q=q, tag=tag, page=page)
+    lang = get_lang(request)
+    page_data = page_service.build_list_page(q=q, tag=tag, page=page, lang=lang)
     logger.debug("Projects list page rendered.")
     if is_htmx(request):
         ctx = page_data.context
@@ -35,20 +36,23 @@ async def projects_list(
             )
         return render_fragment(
             "@features/projects/list-fragment.jinja",
+            lang=lang,
             projects=ctx.projects,
         )
-    return render_page(page_data)
+    return render_page(page_data, lang=lang)
 
 
 @router.get("/{slug}", response_class=HTMLResponse)
 async def project_detail(
+    request: Request,
     slug: Annotated[str, Path()],
     page_service: ProjectsPageServiceDep,
 ) -> HTMLResponse:
-    project = page_service.get_project(slug)
+    lang = get_lang(request)
+    project = page_service.get_project(slug, lang=lang)
     if project is None:
         logger.info(f"Project detail not found for slug={slug}.")
         raise HTTPException(status_code=404, detail="Project not found")
     page = page_service.build_detail_page(project)
     logger.debug(f"Project detail page rendered for slug={slug}.")
-    return render_page(page)
+    return render_page(page, lang=lang)

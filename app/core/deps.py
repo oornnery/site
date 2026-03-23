@@ -7,6 +7,7 @@ from jx import Catalog
 from slowapi import Limiter
 
 from app.core.config import settings
+from app.core.i18n import get_translations
 from app.core.security import extract_source_ip
 from app.infrastructure.notifications.email import (
     ContactNotificationService,
@@ -49,13 +50,7 @@ def get_catalog() -> Catalog:
         auto_reload=settings.debug,
         site_name=profile_globals.site_name,
         base_url=str(settings.base_url),
-        nav_links=[
-            {"href": "/", "label": "Home"},
-            {"href": "/about", "label": "About"},
-            {"href": "/projects", "label": "Projects"},
-            {"href": "/blog", "label": "Blog"},
-            {"href": "/contact", "label": "Contact"},
-        ],
+        nav_links=[],  # populated per-request via render globals
         social_links=profile_globals.social_links,
         profile_name=profile_globals.profile_name,
         profile_role=profile_globals.profile_role,
@@ -162,11 +157,19 @@ def get_contact_orchestrator() -> ContactOrchestrator:
 
 def render_template(template: str, **context: Any) -> str:
     """Render a Jx template without silent fallback behavior."""
+    t = context.pop("t", None) or get_translations()
+    current_lang = context.pop("current_lang", None) or settings.default_language
     catalog = get_catalog()
     resolved_template = template
     if template.startswith("pages/"):
         resolved_template = f"@pages/{template.split('/', 1)[1]}"
-    rendered = catalog.render(resolved_template, **context)
+    render_globals = {
+        "t": t,
+        "current_lang": current_lang,
+        "supported_languages": settings.supported_languages,
+        "nav_links": [link.model_dump() for link in t.nav_links],
+    }
+    rendered = catalog.render(resolved_template, globals=render_globals, **context)
     logger.debug(
         f"Template rendered successfully: template={template} resolved={resolved_template}"
     )

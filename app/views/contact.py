@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
 
 from app.core.config import settings
-from app.core.dependencies import (
+from app.core.deps import (
     get_contact_orchestrator,
     get_contact_page_service,
     limiter,
@@ -13,8 +13,8 @@ from app.core.dependencies import (
 from app.core.logger import event_message
 from app.core.security import _anonymize_identifier
 from app.observability.events import LogEvent
-from app.core.rendering import is_htmx, render_fragment, render_page
-from app.services.types import ContactPageContext
+from app.core.rendering import get_lang, is_htmx, render_fragment, render_page
+from app.models.contexts import ContactPageContext
 from app.services import ContactPageService
 from app.services.contact import ContactOrchestrator
 
@@ -39,8 +39,9 @@ async def contact_get(
         )
     )
     user_agent = request.headers.get("user-agent", "")
-    page = page_service.build_page(user_agent=user_agent)
-    return render_page(page)
+    lang = get_lang(request)
+    page = page_service.build_page(user_agent=user_agent, lang=lang)
+    return render_page(page, lang=lang)
 
 
 @router.post("", response_class=HTMLResponse)
@@ -59,6 +60,7 @@ async def contact_post(
     user_agent = request.headers.get("user-agent", "")
     request_id = getattr(request.state, "request_id", "unknown")
     content_type = request.headers.get("content-type", "")
+    lang = get_lang(request)
 
     logger.info(
         event_message(
@@ -77,6 +79,7 @@ async def contact_post(
         client_ip=client_ip,
         user_agent=user_agent,
         request_id=request_id,
+        lang=lang,
     )
     if is_htmx(request):
         ctx = result.page.context
@@ -85,9 +88,10 @@ async def contact_post(
         return render_fragment(
             "@features/contact/fragment.jinja",
             status_code=result.status_code,
+            lang=lang,
             csrf_token=ctx.csrf_token,
             success=ctx.success,
             errors=ctx.errors,
             form_data=ctx.form_data,
         )
-    return render_page(result.page, status_code=result.status_code)
+    return render_page(result.page, status_code=result.status_code, lang=lang)

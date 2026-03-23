@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
 
-from app.core.dependencies import limiter
+from app.core.deps import limiter
 
 router = APIRouter(prefix="/health", tags=["health"])
 

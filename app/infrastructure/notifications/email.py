@@ -9,7 +9,7 @@ from typing import Protocol, Sequence
 import httpx
 
 from app.observability.metrics import AppMetrics, get_app_metrics
-from app.models.schemas import ContactForm
+from app.models.contact import ContactForm
 
 logger = logging.getLogger(__name__)
 

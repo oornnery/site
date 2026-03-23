@@ -3,6 +3,7 @@ from typing import Callable
 
 from pydantic import ValidationError
 
+from app.core.i18n import get_translations
 from app.core.logger import event_message
 from app.core.security import (
     _anonymize_identifier,
@@ -10,7 +11,7 @@ from app.core.security import (
     is_allowed_form_content_type,
     validate_csrf_token,
 )
-from app.models.schemas import ContactForm
+from app.models.contact import ContactForm
 from app.infrastructure.notifications.email import (
     ContactNotificationContext,
     ContactNotificationService,
@@ -22,7 +23,7 @@ from app.observability.telemetry import (
     set_current_span_attributes,
 )
 from app.services.seo import seo_for_page
-from app.services.types import (
+from app.models.contexts import (
     ContactFormResult,
     ContactPageContext,
     ContactSubmissionResult,
@@ -46,11 +47,14 @@ class ContactPageService:
         success: str = "",
         errors: dict[str, str] | None = None,
         form_data: dict[str, str] | None = None,
+        lang: str | None = None,
     ) -> PageRenderData:
+        t = get_translations(lang)
         seo = seo_for_page(
-            title="Contact",
-            description="Get in touch with me.",
+            title=t.pages.contact.seo_title,
+            description=t.pages.contact.seo_description,
             path="/contact",
+            lang=lang or "",
         )
         csrf_token = current_csrf or self._csrf_token_factory(user_agent=user_agent)
         return PageRenderData(
@@ -97,7 +101,9 @@ class ContactSubmissionService:
         csrf_token: str,
         client_ip: str,
         user_agent: str,
+        lang: str | None = None,
     ) -> ContactSubmissionResult:
+        t = get_translations(lang)
         form_data = self._normalize_input(
             name=name,
             email=email,
@@ -112,9 +118,7 @@ class ContactSubmissionService:
             return ContactSubmissionResult(
                 contact=None,
                 form_data=form_data,
-                errors={
-                    "csrf": "Invalid or expired security token. Please reload the page."
-                },
+                errors={"csrf": t.errors.csrf_invalid},
                 status_code=403,
             )
 
@@ -211,11 +215,13 @@ class ContactOrchestrator:
         user_agent: str,
         errors: dict[str, str],
         form_data: dict[str, str],
+        lang: str | None = None,
     ) -> PageRenderData:
         return self._page_service.build_page(
             user_agent=user_agent,
             errors=errors,
             form_data=form_data,
+            lang=lang,
         )
 
     def _reject(
@@ -231,6 +237,7 @@ class ContactOrchestrator:
         request_id: str,
         client_ip: str,
         log_level: str = "warning",
+        lang: str | None = None,
     ) -> ContactFormResult:
         app_metrics = get_app_metrics()
         app_metrics.record_contact_submission(outcome=outcome)
@@ -255,6 +262,7 @@ class ContactOrchestrator:
             user_agent=user_agent,
             errors=resolved_errors,
             form_data=form_data,
+            lang=lang,
         )
         return ContactFormResult(page=page, status_code=status_code, outcome=outcome)
 
@@ -270,7 +278,9 @@ class ContactOrchestrator:
         client_ip: str,
         user_agent: str,
         request_id: str,
+        lang: str | None = None,
     ) -> ContactFormResult:
+        t = get_translations(lang)
         app_metrics = get_app_metrics()
         form_data = {
             "name": name,
@@ -297,11 +307,12 @@ class ContactOrchestrator:
                 outcome="unsupported_content_type",
                 reason="unsupported_content_type",
                 status_code=415,
-                error_message="Unsupported content type.",
+                error_message=t.errors.content_type_unsupported,
                 form_data=form_data,
                 user_agent=user_agent,
                 request_id=request_id,
                 client_ip=client_ip,
+                lang=lang,
             )
 
         submission = self._submission_service.process(
@@ -312,6 +323,7 @@ class ContactOrchestrator:
             csrf_token=csrf_token,
             client_ip=client_ip,
             user_agent=user_agent,
+            lang=lang,
         )
 
         if not submission.is_valid:
@@ -326,6 +338,7 @@ class ContactOrchestrator:
                 request_id=request_id,
                 client_ip=client_ip,
                 log_level="info",
+                lang=lang,
             )
 
         if submission.contact is None:
@@ -333,12 +346,13 @@ class ContactOrchestrator:
                 outcome="unexpected_submission_state",
                 reason="unexpected_submission_state",
                 status_code=500,
-                error_message="Unexpected contact submission state.",
+                error_message=t.errors.unexpected_state,
                 form_data=submission.form_data,
                 user_agent=user_agent,
                 request_id=request_id,
                 client_ip=client_ip,
                 log_level="error",
+                lang=lang,
             )
 
         notification_context = ContactNotificationContext(
@@ -359,15 +373,13 @@ class ContactOrchestrator:
                 outcome="notification_failed",
                 reason="notification_all_failed",
                 status_code=503,
-                error_message=(
-                    "Your message could not be delivered right now. "
-                    "Please try again in a few minutes."
-                ),
+                error_message=t.errors.notification_failed,
                 form_data=submission.form_data,
                 user_agent=user_agent,
                 request_id=request_id,
                 client_ip=client_ip,
                 log_level="error",
+                lang=lang,
             )
 
         if not dispatch_result.has_channels or dispatch_result.all_skipped:
@@ -395,6 +407,7 @@ class ContactOrchestrator:
         )
         page = self._page_service.build_page(
             user_agent=user_agent,
-            success="Message sent successfully. Thank you for reaching out.",
+            success=t.messages.contact_success,
+            lang=lang,
         )
         return ContactFormResult(page=page, status_code=200, outcome=outcome)

@@ -9,7 +9,7 @@ from app.services.home import HomePageService
 from app.services.profile import ProfileService
 from app.services.projects import ProjectsPageService
 from app.services.seo import seo_for_page, seo_for_project
-from app.services.types import ContactSubmissionResult, PageRenderData
+from app.models.contexts import ContactSubmissionResult, PageRenderData
 
 __all__ = [
     "AboutPageService",

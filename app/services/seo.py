@@ -2,8 +2,8 @@ import logging
 
 from app.core.config import settings
 from app.infrastructure.markdown import load_about
-from app.models.models import Project
-from app.models.schemas import SEOMeta
+from app.models.project import Project
+from app.models.seo import SEOMeta
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +22,12 @@ def _absolute_asset_url(path_or_url: str | None) -> str:
     return _join_url(str(settings.base_url), path_or_url)
 
 
-def _resolve_site_name(raw_site_name: str = "") -> str:
+def _resolve_site_name(raw_site_name: str = "", lang: str = "") -> str:
     if raw_site_name:
         return raw_site_name
 
     try:
-        content_site_name = str(load_about().frontmatter.name).strip()
+        content_site_name = str(load_about(lang=lang or None).frontmatter.name).strip()
         if content_site_name:
             return content_site_name
     except Exception:
@@ -45,9 +45,10 @@ def seo_for_page(
     og_type: str = "website",
     site_name: str = "",
     keywords: list[str] | tuple[str, ...] = (),
+    lang: str = "",
 ) -> SEOMeta:
     resolved_og_image = og_image or settings.default_og_image
-    resolved_site_name = _resolve_site_name(site_name)
+    resolved_site_name = _resolve_site_name(site_name, lang=lang)
     seo = SEOMeta(
         title=f"{title} | {resolved_site_name}",
         description=description[:_MAX_DESCRIPTION_LENGTH],

@@ -1,10 +1,11 @@
 import logging
 import math
 
-from app.models.models import Project
+from app.core.i18n import get_translations
+from app.models.project import Project
 from app.infrastructure.markdown import get_project_by_slug, load_all_projects
 from app.services.seo import seo_for_page, seo_for_project
-from app.services.types import (
+from app.models.contexts import (
     PageRenderData,
     ProjectDetailPageContext,
     ProjectsListPageContext,
@@ -25,12 +26,14 @@ class ProjectsPageService:
         featured: bool | None = None,
         page: int = 1,
         page_size: int = 10,
+        lang: str | None = None,
     ) -> PageRenderData:
+        t = get_translations(lang)
         q = q[:_MAX_QUERY_LENGTH]
         tag = tag[:_MAX_TAG_LENGTH]
 
-        all_projects = load_all_projects()
-        all_tags = tuple(sorted({t for p in all_projects for t in p.tags}))
+        all_projects = load_all_projects(lang)
+        all_tags = tuple(sorted({t_tag for p in all_projects for t_tag in p.tags}))
 
         filtered = all_projects
         if q:
@@ -43,7 +46,9 @@ class ProjectsPageService:
         if tag:
             tag_lower = tag.lower()
             filtered = tuple(
-                p for p in filtered if any(t.lower() == tag_lower for t in p.tags)
+                p
+                for p in filtered
+                if any(t_tag.lower() == tag_lower for t_tag in p.tags)
             )
         if featured is not None:
             filtered = tuple(p for p in filtered if p.featured == featured)
@@ -55,9 +60,10 @@ class ProjectsPageService:
         paginated = filtered[start : start + page_size]
 
         seo = seo_for_page(
-            title="Projects",
-            description="My projects and selected work.",
+            title=t.pages.projects.seo_title,
+            description=t.pages.projects.seo_description,
             path="/projects",
+            lang=lang or "",
         )
         logger.debug(
             f"Projects list use-case built with project_count={len(paginated)}"
@@ -76,8 +82,8 @@ class ProjectsPageService:
             ),
         )
 
-    def get_project(self, slug: str) -> Project | None:
-        return get_project_by_slug(slug)
+    def get_project(self, slug: str, lang: str | None = None) -> Project | None:
+        return get_project_by_slug(slug, lang)
 
     def build_detail_page(self, project: Project) -> PageRenderData:
         seo = seo_for_project(project)

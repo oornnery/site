@@ -7,14 +7,15 @@ from email.utils import format_datetime
 from xml.sax.saxutils import escape
 
 from app.core.config import settings
-from app.models.models import BlogPost, BlogTag
+from app.core.i18n import get_translations
+from app.models.blog import BlogPost, BlogTag
+from app.services.seo import _resolve_site_name
 from app.infrastructure.markdown import (
     get_blog_post_by_slug,
-    load_about,
     load_all_blog_posts,
 )
 from app.services.seo import seo_for_page
-from app.services.types import (
+from app.models.contexts import (
     BlogHomePageContext,
     BlogPostDetailPageContext,
     BlogPostsPageContext,
@@ -56,21 +57,15 @@ class BlogPageService:
         return tags
 
     @staticmethod
-    def _resolve_site_name() -> str:
-        about_content = load_about()
-        site_name = str(about_content.frontmatter.name or settings.site_name).strip()
-        return site_name or settings.site_name
-
-    @staticmethod
     def _estimate_read_time_minutes(content_html: str) -> int:
         plain_text = re.sub(r"<[^>]+>", " ", content_html)
         words = [word for word in plain_text.split() if word.strip()]
         return max(1, math.ceil(len(words) / 220))
 
     def _adjacent_posts(
-        self, post: BlogPost
+        self, post: BlogPost, lang: str | None = None
     ) -> tuple[BlogPost | None, BlogPost | None]:
-        posts = load_all_blog_posts()
+        posts = load_all_blog_posts(lang)
         for index, candidate in enumerate(posts):
             if candidate.slug != post.slug:
                 continue
@@ -79,8 +74,9 @@ class BlogPageService:
             return previous_post, next_post
         return None, None
 
-    def build_home_page(self) -> PageRenderData:
-        posts = load_all_blog_posts()
+    def build_home_page(self, lang: str | None = None) -> PageRenderData:
+        t = get_translations(lang)
+        posts = load_all_blog_posts(lang)
         featured_candidates = [post for post in posts if post.featured]
         non_featured_candidates = [post for post in posts if not post.featured]
         featured_posts = tuple(
@@ -90,9 +86,10 @@ class BlogPageService:
         tags = self._build_tag_stats(posts)[:_TAG_DISPLAY_LIMIT]
 
         seo = seo_for_page(
-            title="Blog",
-            description="Engineering notes, architecture decisions, and backend lessons learned.",
+            title=t.pages.blog.seo_title,
+            description=t.pages.blog.seo_description,
             path="/blog",
+            lang=lang or "",
         )
         logger.debug(
             "Blog home use-case built with post_count=%s featured_count=%s.",
@@ -110,9 +107,10 @@ class BlogPageService:
         )
 
     def build_posts_page(
-        self, q: str = "", page: int = 1, page_size: int = 10
+        self, q: str = "", page: int = 1, page_size: int = 10, lang: str | None = None
     ) -> PageRenderData:
-        all_posts = load_all_blog_posts()
+        t = get_translations(lang)
+        all_posts = load_all_blog_posts(lang)
 
         query = q.strip()[:200]
         if query:
@@ -132,9 +130,10 @@ class BlogPageService:
         posts = all_posts[start : start + page_size]
 
         seo = seo_for_page(
-            title="Blog Posts",
-            description="All published blog posts.",
+            title=t.pages.blog.posts_seo_title,
+            description=t.pages.blog.posts_seo_description,
             path="/blog/posts",
+            lang=lang or "",
         )
         return PageRenderData(
             template="pages/blog/posts.jinja",
@@ -147,18 +146,21 @@ class BlogPageService:
             ),
         )
 
-    def get_post(self, slug: str) -> BlogPost | None:
-        return get_blog_post_by_slug(slug)
+    def get_post(self, slug: str, lang: str | None = None) -> BlogPost | None:
+        return get_blog_post_by_slug(slug, lang)
 
-    def build_post_page(self, post: BlogPost) -> PageRenderData:
+    def build_post_page(
+        self, post: BlogPost, lang: str | None = None
+    ) -> PageRenderData:
         seo = seo_for_page(
             title=post.title,
             description=post.description,
             path=self._post_url(post.slug),
             og_type="article",
             keywords=post.tags,
+            lang=lang or "",
         )
-        previous_post, next_post = self._adjacent_posts(post)
+        previous_post, next_post = self._adjacent_posts(post, lang)
         read_time_minutes = self._estimate_read_time_minutes(post.content_html)
         return PageRenderData(
             template="pages/blog/detail.jinja",
@@ -172,9 +174,14 @@ class BlogPageService:
         )
 
     def build_tags_page(
-        self, tag: str | None = None, page: int = 1, page_size: int = 10
+        self,
+        tag: str | None = None,
+        page: int = 1,
+        page_size: int = 10,
+        lang: str | None = None,
     ) -> PageRenderData:
-        posts = load_all_blog_posts()
+        t = get_translations(lang)
+        posts = load_all_blog_posts(lang)
         tags = self._build_tag_stats(posts)
         selected_tag = tag.strip() if tag else ""
         selected_tag_normalized = self._normalize_tag(selected_tag)
@@ -186,13 +193,13 @@ class BlogPageService:
                 if selected_tag_normalized
                 in {self._normalize_tag(post_tag) for post_tag in post.tags}
             )
-            title = f"Tag: {selected_tag}"
-            description = f"Posts tagged with {selected_tag}."
+            title = t.pages.blog.tag_title_template.format(tag=selected_tag)
+            description = t.pages.blog.tag_description_template.format(tag=selected_tag)
             path = f"/blog/tags/{selected_tag}"
         else:
             filtered_posts = posts
-            title = "Blog Tags"
-            description = "Browse posts by tag."
+            title = t.pages.blog.tags_title
+            description = t.pages.blog.tags_description
             path = "/blog/tags"
 
         total = len(filtered_posts)
@@ -205,6 +212,7 @@ class BlogPageService:
             title=title,
             description=description,
             path=path,
+            lang=lang or "",
         )
         return PageRenderData(
             template="pages/blog/tags.jinja",
@@ -218,9 +226,10 @@ class BlogPageService:
             ),
         )
 
-    def build_rss_feed(self) -> str:
-        posts = load_all_blog_posts()
-        site_name = self._resolve_site_name()
+    def build_rss_feed(self, lang: str | None = None) -> str:
+        t = get_translations(lang)
+        posts = load_all_blog_posts(lang)
+        site_name = _resolve_site_name(lang=lang or "")
         base_url = str(settings.base_url).rstrip("/")
         blog_url = f"{base_url}/blog"
         feed_url = f"{base_url}/blog/feed.xml"
@@ -254,14 +263,15 @@ class BlogPageService:
                 "</item>"
             )
 
+        rss_lang = "pt-br" if lang and lang.startswith("pt") else "en-us"
         feed = (
             '<?xml version="1.0" encoding="UTF-8"?>'
             '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">'
             "<channel>"
             f"<title>{escape(site_name)} Blog</title>"
             f"<link>{escape(blog_url)}</link>"
-            "<description>Latest posts from the site blog.</description>"
-            "<language>en-us</language>"
+            f"<description>{escape(t.pages.blog.rss_description)}</description>"
+            f"<language>{rss_lang}</language>"
             f'<atom:link href="{escape(feed_url)}" rel="self" type="application/rss+xml"/>'
             f"{''.join(items)}"
             "</channel>"

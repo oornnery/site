@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import httpx
 
 from app.core.config import settings
-from app.models.models import BlogComment
+from app.models.blog import BlogComment
 
 logger = logging.getLogger(__name__)
 _GIST_ID_PATTERN = re.compile(r"^[0-9a-fA-F]{8,40}$")

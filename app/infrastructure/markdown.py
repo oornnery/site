@@ -4,35 +4,37 @@ import threading
 from pathlib import Path
 from typing import Any
 
-import markdown
+import mistune
 import nh3
 import yaml
 from cachetools import TTLCache, cached
 from cachetools.keys import hashkey
 from pydantic import ValidationError
 
-from app.core.config import settings
-from app.infrastructure.about_parser import _parse_about_body
-from app.infrastructure.gist_service import (
+from app.core.config import PROJECT_ROOT, settings
+from app.infrastructure.gist import (
     _extract_gist_id,
     _extract_gist_markdown,
     _fetch_gist_comments,
     _fetch_gist_payload,
     _gist_comments_url,
 )
-from app.models.models import BlogPost, Project
-from app.models.schemas import (
-    AboutContent,
-    AboutFrontmatter,
-    BlogPostFrontmatter,
-    ProjectFrontmatter,
-)
+from app.models.about import AboutContent, AboutFrontmatter
+from app.models.blog import BlogPost, BlogPostFrontmatter
+from app.models.project import Project, ProjectFrontmatter
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
 CONTENT_DIR = PROJECT_ROOT / "content"
 PROJECTS_DIR = CONTENT_DIR / "projects"
 BLOG_DIR = CONTENT_DIR / "blog"
 logger = logging.getLogger(__name__)
+
+
+def _content_dir_for_lang(lang: str) -> Path:
+    """Return the language-specific content directory, falling back to legacy paths."""
+    lang_dir = CONTENT_DIR / lang
+    if lang_dir.exists():
+        return lang_dir
+    return CONTENT_DIR
 
 
 def _parse_frontmatter(filepath: Path) -> tuple[dict[str, Any], str]:
@@ -58,13 +60,19 @@ def _parse_frontmatter(filepath: Path) -> tuple[dict[str, Any], str]:
     return {}, text.strip()
 
 
+_mistune_renderer = mistune.create_markdown(
+    plugins=[
+        "mistune.plugins.table.table",
+        "mistune.plugins.formatting.strikethrough",
+    ],
+)
+
+
 def _render_md(content: str) -> str:
     if not content:
         return ""
-    return markdown.markdown(
-        content,
-        extensions=["fenced_code", "codehilite", "tables", "toc", "attr_list"],
-    )
+    result = _mistune_renderer(content)
+    return str(result)
 
 
 _NH3_ALLOWED_TAGS = {
@@ -145,54 +153,72 @@ def render_sanitized_markdown(content: str) -> str:
     return _sanitize_html(_render_md(content))
 
 
-# Keep the private name as an alias for backward compatibility
-_render_sanitized_markdown = render_sanitized_markdown
-
-
 def _build_content_cache() -> TTLCache:
     ttl = settings.markdown_cache_ttl
     if ttl <= 0:
         ttl = 60 * 60 * 24 * 365
-    return TTLCache(maxsize=16, ttl=ttl)
+    return TTLCache(maxsize=64, ttl=ttl)
 
 
 _content_cache: TTLCache = _build_content_cache()
 _cache_lock = threading.Lock()
 
 
-@cached(cache=_content_cache, key=lambda: hashkey("about"), lock=_cache_lock)
-def load_about() -> AboutContent:
-    about_path = CONTENT_DIR / "about.md"
+@cached(
+    cache=_content_cache,
+    key=lambda lang=None: hashkey("about", lang or settings.default_language),
+    lock=_cache_lock,
+)
+def load_about(lang: str | None = None) -> AboutContent:
+    resolved_lang = lang or settings.default_language
+    base = _content_dir_for_lang(resolved_lang)
+    about_path = base / "about.md"
+    if not about_path.exists():
+        about_path = CONTENT_DIR / "about.md"
     meta, body = _parse_frontmatter(about_path)
     frontmatter = AboutFrontmatter.model_validate(meta)
     body_markdown = body or "Content coming soon."
-    parsed_about = _parse_about_body(body_markdown)
-    logger.info(f"About content loaded from {about_path}.")
+
+    hero_markdown, _, about_markdown = body_markdown.partition("## About")
+    hero_markdown = hero_markdown.strip()
+    about_markdown = about_markdown.strip()
+
+    hero_html = render_sanitized_markdown(hero_markdown)
+    logger.info(f"About content loaded from {about_path} (lang={resolved_lang}).")
     return AboutContent(
         frontmatter=frontmatter,
         body_markdown=body_markdown,
-        body_html=parsed_about["hero_html"],
-        hero_markdown=parsed_about["hero_markdown"],
-        hero_html=parsed_about["hero_html"],
-        about_markdown=parsed_about["about_markdown"],
-        about_html=parsed_about["about_html"],
-        work_experience=parsed_about["work_experience"],
-        education=parsed_about["education"],
-        certificates=parsed_about["certificates"],
-        skill_groups=parsed_about["skill_groups"],
+        body_html=render_sanitized_markdown(body_markdown),
+        hero_markdown=hero_markdown,
+        hero_html=hero_html,
+        about_markdown=about_markdown,
+        about_html=render_sanitized_markdown(about_markdown),
+        work_experience=frontmatter.work_experience,
+        education=frontmatter.education,
+        certificates=frontmatter.certificates,
+        skill_groups=frontmatter.skill_groups,
     )
 
 
-@cached(cache=_content_cache, key=lambda: hashkey("all_projects"), lock=_cache_lock)
-def load_all_projects() -> tuple[Project, ...]:
-    if not PROJECTS_DIR.exists():
+@cached(
+    cache=_content_cache,
+    key=lambda lang=None: hashkey("all_projects", lang or settings.default_language),
+    lock=_cache_lock,
+)
+def load_all_projects(lang: str | None = None) -> tuple[Project, ...]:
+    resolved_lang = lang or settings.default_language
+    base = _content_dir_for_lang(resolved_lang)
+    projects_dir = base / "projects"
+    if not projects_dir.exists():
+        projects_dir = CONTENT_DIR / "projects"
+    if not projects_dir.exists():
         logger.info(
-            f"Projects directory {PROJECTS_DIR} not found. Returning empty project list."
+            f"Projects directory {projects_dir} not found. Returning empty project list."
         )
         return ()
 
     projects: list[Project] = []
-    for md_file in PROJECTS_DIR.glob("*.md"):
+    for md_file in projects_dir.glob("*.md"):
         meta, body = _parse_frontmatter(md_file)
         try:
             frontmatter = ProjectFrontmatter.model_validate(meta)
@@ -223,27 +249,38 @@ def load_all_projects() -> tuple[Project, ...]:
         key=lambda p: (p.date is not None, p.date, p.slug),
         reverse=True,
     )
-    logger.info(f"Loaded {len(sorted_projects)} project(s) from {PROJECTS_DIR}.")
+    logger.info(
+        f"Loaded {len(sorted_projects)} project(s) from {projects_dir} (lang={resolved_lang})."
+    )
     return tuple(sorted_projects)
 
 
-def get_project_by_slug(slug: str) -> Project | None:
+def get_project_by_slug(slug: str, lang: str | None = None) -> Project | None:
     project = next(
-        (project for project in load_all_projects() if project.slug == slug), None
+        (project for project in load_all_projects(lang) if project.slug == slug), None
     )
     if project is None:
         logger.info(f"Project not found for slug={slug}.")
     return project
 
 
-@cached(cache=_content_cache, key=lambda: hashkey("all_blog_posts"), lock=_cache_lock)
-def load_all_blog_posts() -> tuple[BlogPost, ...]:
-    if not BLOG_DIR.exists():
-        logger.info(f"Blog directory {BLOG_DIR} not found. Returning empty post list.")
+@cached(
+    cache=_content_cache,
+    key=lambda lang=None: hashkey("all_blog_posts", lang or settings.default_language),
+    lock=_cache_lock,
+)
+def load_all_blog_posts(lang: str | None = None) -> tuple[BlogPost, ...]:
+    resolved_lang = lang or settings.default_language
+    base = _content_dir_for_lang(resolved_lang)
+    blog_dir = base / "blog"
+    if not blog_dir.exists():
+        blog_dir = CONTENT_DIR / "blog"
+    if not blog_dir.exists():
+        logger.info(f"Blog directory {blog_dir} not found. Returning empty post list.")
         return ()
 
     posts: list[BlogPost] = []
-    for md_file in sorted(BLOG_DIR.glob("*.md"), reverse=True):
+    for md_file in sorted(blog_dir.glob("*.md"), reverse=True):
         meta, body = _parse_frontmatter(md_file)
         try:
             frontmatter = BlogPostFrontmatter.model_validate(meta)
@@ -306,12 +343,14 @@ def load_all_blog_posts() -> tuple[BlogPost, ...]:
         key=lambda post: (post.date is not None, post.date, post.slug),
         reverse=True,
     )
-    logger.info(f"Loaded {len(sorted_posts)} blog post(s) from {BLOG_DIR}.")
+    logger.info(
+        f"Loaded {len(sorted_posts)} blog post(s) from {blog_dir} (lang={resolved_lang})."
+    )
     return tuple(sorted_posts)
 
 
-def get_blog_post_by_slug(slug: str) -> BlogPost | None:
-    post = next((post for post in load_all_blog_posts() if post.slug == slug), None)
+def get_blog_post_by_slug(slug: str, lang: str | None = None) -> BlogPost | None:
+    post = next((post for post in load_all_blog_posts(lang) if post.slug == slug), None)
     if post is None:
         logger.info(f"Blog post not found for slug={slug}.")
     return post

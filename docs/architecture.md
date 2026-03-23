@@ -17,9 +17,11 @@ The system is a server-side rendered personal site with:
 flowchart LR
     B[Browser] --> T[Traefik Edge Proxy\nprod only]
     T --> A[FastAPI App\napp.main:create_app]
-    A --> R[API Routers]
-    R --> S[Use-case Services]
-    S --> C[Markdown Content\ncontent/*.md]
+    A --> V[View Routes\napp/views/*]
+    A --> API[API Routes\napp/api/*]
+    V --> S[Use-case Services]
+    S --> I18n[i18n Translations\ncontent/i18n/*.yaml]
+    S --> C[Markdown Content\ncontent/{lang}/*.md]
     S --> J[Jx Catalog + Jinja Templates\napp/templates/*]
     S --> N[Notification Channels\nWebhook + SMTP]
     A --> O[OpenTelemetry Exporters\nOTLP endpoint]
@@ -30,27 +32,44 @@ flowchart LR
 ### Application Layer
 
 - App factory in `app/main.py` wires middleware, routes, and static files.
-- Routers in `app/api/*` stay thin and delegate to services.
+- Frontend view routes in `app/views/*` serve SSR HTML pages and delegate to services.
+- Infrastructure API routes in `app/api/*` handle JSON endpoints (health)
+  and proxies (telemetry).
 - Complex flows use orchestrator services (e.g. `ContactOrchestrator`).
 - Page rendering uses typed context models and `render_page`.
 - All custom middleware uses pure ASGI protocol (no `BaseHTTPMiddleware`).
 
 ### Domain and Content
 
-- Domain models and schemas are in `app/models/*`.
-- Content is file-based (`content/about.md`, `content/projects/*.md`,
-  and `content/blog/*.md`).
-- Markdown is parsed, sanitized with nh3, and transformed into structured data.
-- Content is cached with a configurable TTL (`MARKDOWN_CACHE_TTL`, default 300s).
+- Domain models are split per-domain in `app/models/*` (`about.py`, `blog.py`,
+  `project.py`, `contact.py`, `seo.py`).
+- Content is file-based and language-aware: `content/{lang}/about.md`,
+  `content/{lang}/projects/*.md`, and `content/{lang}/blog/*.md`.
+- UI strings are externalized in `content/i18n/{lang}.yaml` (en, pt-br).
+- Markdown is rendered with mistune, sanitized with nh3, and cached with
+  a configurable TTL (`MARKDOWN_CACHE_TTL`, default 300s).
+- `content/{lang}/about.md` uses YAML frontmatter for structured resume data
+  (work experience, education, certificates, skills) and markdown body for
+  hero/about prose sections.
 
 ### Rendering Layer
 
 - Jx `Catalog` is built in `app/core/dependencies.py`.
 - Components are organized in `app/templates/{layouts,pages,features,ui}`.
 - Templates are rendered with explicit context contracts (`PageRenderData`).
+- Translation object `t` is injected as a Jx render-time global so all child
+  components can access i18n strings without explicit prop drilling.
 - `render_fragment()` in `app/core/rendering.py` supports htmx partial
   responses — routes detect `HX-Request` header and return fragments instead
   of full pages for progressive enhancement.
+
+### i18n
+
+- `app/core/i18n.py` loads and caches YAML translation files per language.
+- `app/core/language.py` provides `LanguageMiddleware` that sets
+  `request.state.lang` from URL prefix or `Accept-Language` header.
+- Translations are validated via Pydantic models at load time.
+- Templates use `t.*` notation (e.g., `t.pages.blog.title`, `t.cta.view_all_projects`).
 
 ### Integrations
 

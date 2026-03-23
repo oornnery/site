@@ -50,17 +50,21 @@ framework. Progressive enhancement via Alpine.js (reactive state), Stimulus
 
 | Layer          | Path                       | Role                                                  |
 | -------------- | -------------------------- | ----------------------------------------------------- |
-| Entry point    | `app/main.py`              | App factory (`create_app`), middleware stack          |
-| Routing        | `app/api/*`                | Thin routers that delegate to services                |
+| Entry point    | `app/main.py`              | App factory (`create_app`), middleware stack           |
+| Views          | `app/views/*`              | SSR HTML routes (home, about, projects, blog, contact)|
+| API            | `app/api/*`                | Infrastructure API routes (health, telemetry)         |
 | Services       | `app/services/*`           | Page builders and orchestrators                       |
-| Models         | `app/models/*`             | Pydantic schemas and models                           |
-| Infrastructure | `app/infrastructure/*`     | Markdown IO, sanitization, notifications              |
+| Models         | `app/models/*`             | Per-domain Pydantic models and schemas                |
+| Infrastructure | `app/infrastructure/*`     | Markdown IO (mistune), sanitization, notifications    |
+| i18n           | `app/core/i18n.py`         | Translation loading and language utilities            |
+| Language       | `app/core/language.py`     | Language detection middleware                         |
 | Rendering      | `app/core/dependencies.py` | Jx Catalog setup and `render_template`                |
 | Rendering      | `app/core/rendering.py`    | `render_page`, `render_fragment`, `is_htmx`           |
 | Core           | `app/core/*`               | Settings, security middleware, logging                |
 | Observability  | `app/observability/*`      | OpenTelemetry bootstrap and app metrics               |
 | Templates      | `app/templates/`           | `ui/` (subfolders), `layouts/`, `features/`, `pages/` |
-| Content        | `content/`                 | Markdown files (about, projects, blog)                |
+| Content        | `content/{lang}/`          | Per-language markdown content (about, projects, blog) |
+| Translations   | `content/i18n/`            | UI translation files (`en.yaml`, `pt-br.yaml`)       |
 
 ### Key patterns
 

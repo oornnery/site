@@ -2,16 +2,18 @@
 
 ## Layered Structure
 
-| Layer          | Path                    | Responsibility                                       |
-| -------------- | ----------------------- | ---------------------------------------------------- |
-| Entry point    | `app/main.py`           | App factory, middleware, startup wiring              |
-| Routing        | `app/api/*`             | HTTP endpoints and dependency injection              |
-| Use-cases      | `app/services/*`        | Page building and business orchestration             |
-| Domain         | `app/models/*`          | Typed schemas and entities                           |
-| Infrastructure | `app/infrastructure/*`  | Markdown IO, sanitization, notifications             |
-| Rendering      | `app/core/rendering.py` | `render_page`, `render_fragment`, `is_htmx` helpers  |
-| Core           | `app/core/*`            | Settings, security, logging, dependencies, utilities |
-| Observability  | `app/observability/*`   | Span helpers and app metrics                         |
+| Layer          | Path                    | Responsibility                                                   |
+| -------------- | ----------------------- | ---------------------------------------------------------------- |
+| Entry point    | `app/main.py`           | App factory, middleware, startup wiring                          |
+| Views          | `app/views/*`           | SSR HTML routes (home, about, projects, blog, contact)           |
+| API            | `app/api/*`             | Infrastructure endpoints (health, telemetry)                     |
+| Use-cases      | `app/services/*`        | Page building and business orchestration                         |
+| Domain         | `app/models/*`          | Per-domain models (`about`, `blog`, `project`, `contact`, `seo`) |
+| Infrastructure | `app/infrastructure/*`  | Markdown IO, sanitization, notifications                         |
+| Rendering      | `app/core/rendering.py` | `render_page`, `render_fragment`, `is_htmx` helpers              |
+| i18n           | `app/core/i18n.py`      | Translation loading and language utilities                       |
+| Core           | `app/core/*`            | Settings, security, logging, dependencies, utilities             |
+| Observability  | `app/observability/*`   | Span helpers and app metrics                                     |
 
 ## App Factory
 
@@ -24,14 +26,14 @@
   host validation)
   - All custom middleware uses pure ASGI protocol
 - Rate-limit exception handler
-- Router inclusion via `app/api/router.py`
+- Router inclusion via `app/api/router.py` (API) and `app/views/router.py` (SSR)
 - Rendered 404 page handler
 - OpenTelemetry providers are expected to be supplied by
   `opentelemetry-instrument` at process startup
 
-## API Endpoints
+## Endpoints
 
-### Page routes
+### View routes (`app/views/*`)
 
 - `GET /` -> `HomePageService.build_page()`
 - `GET /about` -> `AboutPageService.build_page()`
@@ -45,14 +47,15 @@
 - `GET /blog/tags/{tag}` -> posts filtered by tag (htmx fragment support)
 - `GET /blog/feed.xml` -> RSS feed (`application/rss+xml`)
 - `GET /contact` -> `ContactPageService.build_page()`
+- `POST /contact` -> contact form submission
+
+### API routes (`app/api/*`)
+
 - `POST /otel/v1/traces` -> same-origin OTLP HTTP proxy for browser traces
-
-### Health check
-
 - `GET /health` returns `{"status": "ok"}`
-- Exempt from rate limiting
-- Skipped by request tracing middleware
-- Used by Docker healthcheck probes
+  - Exempt from rate limiting
+  - Skipped by request tracing middleware
+  - Used by Docker healthcheck probes
 
 ### Form route
 
@@ -80,15 +83,17 @@
 
 ## Domain Contracts
 
-Defined in `app/models/schemas.py`:
+Per-domain models in `app/models/`:
 
-- `ContactForm`: strict form schema (`extra="forbid"`)
-- `AboutFrontmatter` and content models
-- `ProjectFrontmatter` and normalized metadata
-- `BlogPostFrontmatter` and normalized blog metadata
+- `about.py`: `AboutFrontmatter`, `AboutContent`, `WorkExperienceItem`,
+  `EducationItem`, `CertificateItem`, `SkillGroupItem`
+- `blog.py`: `BlogPost`, `BlogPostFrontmatter`, `BlogTag`, `BlogComment`
   - Supports optional `gist_url` and `gist_file`
+- `project.py`: `Project`, `ProjectFrontmatter`
+- `contact.py`: `ContactForm` (strict, `extra="forbid"`), `ContactResponse`
+- `seo.py`: `SEOMeta`
 
-Typed page contexts in `app/services/types.py` ensure stable template contracts.
+Typed page contexts in `app/services/types/` ensure stable template contracts.
 
 ## Rendering Helpers
 
@@ -115,18 +120,18 @@ via `?page=N` query parameter. Services accept `page` and `page_size`
 `app/infrastructure/markdown.py`:
 
 1. Parse YAML frontmatter
-2. For `content/about.md`, parse authored body sections from markdown headings
-   (`##` section, `###` entry) into typed resume content
-3. Convert markdown to HTML
+2. For `content/{lang}/about.md`, structured resume data (work experience,
+   education, certificates, skills) lives in YAML frontmatter; the markdown
+   body contains hero and about prose sections split on `## About`
+3. Convert markdown to HTML with mistune (v3, plugins: table, strikethrough)
 4. Sanitize HTML with nh3 (Rust-based ammonia bindings) using strict allowlists
 5. Cache content with TTLCache (`MARKDOWN_CACHE_TTL`, default 300s, 0 = indefinite)
 
 Thread-safe caching with `threading.Lock` for safety under multi-worker Uvicorn.
+Cache keys include the language parameter for per-language content.
 This keeps content authoring simple while reducing XSS risk.
-The pipeline currently ingests `content/about.md`, `content/projects/*.md`,
-and `content/blog/*.md`.
-`content/about.md` now keeps only profile metadata in frontmatter; the resume
-body is authored in markdown sections and parsed into structured page content.
+The pipeline ingests `content/{lang}/about.md`, `content/{lang}/projects/*.md`,
+and `content/{lang}/blog/*.md` with fallback to `content/` for legacy paths.
 For blog posts, if body markdown is empty and `gist_url` is provided,
 the loader fetches gist markdown content from GitHub API/raw endpoints.
 When `gist_url` is provided, gist comments are also fetched and rendered

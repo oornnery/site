@@ -2,7 +2,7 @@
 {#import "@features/resume/entry.jinja" as EntryHeader #}
 {#def items #}
 
-<Section title="Certificates" heading_id="certificates" visible={{ items | length > 0 }} class_name="gap-y-6">
+<Section title={{ t.resume.certificates }} heading_id="certificates" visible={{ items | length > 0 }} class_name="gap-y-6">
     <div class="resume-list">
         {% for item in items %}
         <article class="resume-certificate-item">

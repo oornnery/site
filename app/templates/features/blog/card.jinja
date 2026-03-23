@@ -12,9 +12,9 @@
 {% set tag_gap = "gap-1.5" if dense or tight else "gap-2" %}
 {% set show_description = post.description and (dense or not compact) %}
 
-<Card href={{ '/blog/posts/' ~ post.slug }} padding={{ card_padding }}>
+<Card href={{ '/' ~ current_lang ~ '/blog/posts/' ~ post.slug }} padding={{ card_padding }}>
     <article class="{{ content_gap }}">
-        <CardHeading title={{ post.title }} date={{ post.date }} featured={{ post.featured }} title_class="{{ title_size }} {{ title_weight }} text-foreground group-hover:text-accent transition-colors" />
+        <CardHeading title={{ post.title }} date={{ post.date }} featured={{ post.featured }} featured_label={{ t.pages.blog.featured_label }} title_class="{{ title_size }} {{ title_weight }} text-foreground group-hover:text-accent transition-colors" />
 
         {% if show_description %}
         <p class="{{ description_class }}">

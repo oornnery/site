@@ -1,8 +1,11 @@
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from urllib.parse import SplitResult, urlsplit, urlunsplit
 
 from pydantic import AnyHttpUrl, Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 _WEAK_SECRET_KEY_PATTERNS = (
     "please-change",
@@ -44,7 +47,7 @@ class Settings(BaseSettings):
         }
     )
     default_language: str = "en"
-    supported_languages: list[str] = Field(default_factory=lambda: ["en", "pt"])
+    supported_languages: list[str] = Field(default_factory=lambda: ["en", "pt-br"])
     frontend_telemetry_enabled: bool = True
     frontend_telemetry_service_name: str = "site-frontend"
     frontend_telemetry_service_namespace: str = "site"

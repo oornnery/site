@@ -8,10 +8,10 @@
         {% for post in posts %}
         <PostCard post={{ post }} tight={{ true }} />
         {% else %}
-        <EmptyState message={{ "No posts found for \"" ~ q ~ "\"." if q else "No posts published yet." }} />
+        <EmptyState message={{ (t.pages.blog.no_posts_for_query.replace("{q}", q)) if q else t.pages.blog.no_posts_yet }} />
         {% endfor %}
     </div>
 
-    {% set pagination_base = "/blog/posts?q=" ~ (q | urlencode) ~ "&" if q else "/blog/posts?" %}
+    {% set pagination_base = "/" ~ current_lang ~ "/blog/posts?q=" ~ (q | urlencode) ~ "&" if q else "/" ~ current_lang ~ "/blog/posts?" %}
     <Pagination page={{ page }} total_pages={{ total_pages }} base_url={{ pagination_base }} />
 </div>

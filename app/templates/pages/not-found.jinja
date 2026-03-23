@@ -5,11 +5,11 @@
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     <Center>
-        <p class="text-sm text-foreground/50 mb-3">Error</p>
-        <h1 class="text-4xl sm:text-5xl font-bold text-foreground mb-3">404</h1>
-        <p class="text-base text-foreground/60 mb-6">The page you requested does not exist.</p>
+        <p class="text-sm text-foreground/50 mb-3">{{ t.error_pages.not_found.label }}</p>
+        <h1 class="text-4xl sm:text-5xl font-bold text-foreground mb-3">{{ t.error_pages.not_found.code }}</h1>
+        <p class="text-base text-foreground/60 mb-6">{{ t.error_pages.not_found.message }}</p>
         <Button href="/" variant="primary">
-            Return Home
+            {{ t.error_pages.not_found.action }}
         </Button>
     </Center>
 </PublicLayout>

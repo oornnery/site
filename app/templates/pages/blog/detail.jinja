@@ -9,10 +9,10 @@
 {#def seo, post, previous_post=None, next_post=None, read_time_minutes=1, current_path="/blog" #}
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
-    {% set comment_source_label = "Gist" if post.gist_id else "GitHub" %}
+    {% set comment_source_label = t.comments.source_gist if post.gist_id else t.comments.source_github %}
     {% set breadcrumb_items = (
-        {"label": "Home", "href": "/"},
-        {"label": "Blog", "href": "/blog"},
+        {"label": t.common.home, "href": "/" ~ current_lang ~ "/"},
+        {"label": t.pages.blog.title, "href": "/" ~ current_lang ~ "/blog"},
         {"label": post.title, "current": true},
     ) %}
 
@@ -41,10 +41,10 @@
                             <span>{{ post.author }}</span>
                             {% endif %}
                             <span>&bull;</span>
-                            <span>{{ read_time_minutes }} min read</span>
+                            <span>{{ read_time_minutes }} {{ t.pages.blog.min_read }}</span>
                             {% if post.featured %}
                             <span>&bull;</span>
-                            <span class="text-accent">Featured</span>
+                            <span class="text-accent">{{ t.pages.blog.featured_label }}</span>
                             {% endif %}
                         </MetaInfo>
 
@@ -57,7 +57,7 @@
                         {% if post.tags %}
                         <Row wrap={{ true }} gap="2" class_name="mt-4">
                             {% for tag in post.tags %}
-                            <Tag href={{ "/blog/tags/" ~ (tag | urlencode) }} text={{ tag }} variant="outline" />
+                            <Tag href={{ "/" ~ current_lang ~ "/blog/tags/" ~ (tag | urlencode) }} text={{ tag }} variant="outline" />
                             {% endfor %}
                         </Row>
                         {% endif %}
@@ -83,14 +83,14 @@
         {% if previous_post or next_post %}
         <section class="max-w-3xl section-divider-spacing border-t border-border/50">
             <div class="flex items-center justify-between mb-5">
-                <h2 class="text-xl sm:text-2xl font-bold text-foreground">Continue Reading</h2>
-                <a href="/blog/posts" class="text-sm link-hover">View all posts &rarr;</a>
+                <h2 class="text-xl sm:text-2xl font-bold text-foreground">{{ t.pages.blog.continue_reading }}</h2>
+                <a href="/{{ current_lang }}/blog/posts" class="text-sm link-hover">{{ t.pages.blog.view_all_posts_arrow }}</a>
             </div>
             <nav class="grid grid-cols-1 sm:grid-cols-2 gap-3" aria-label="Post navigation">
                 {% if previous_post %}
-                <Card href={{ '/blog/posts/' ~ previous_post.slug }} padding="sm">
+                <Card href={{ '/' ~ current_lang ~ '/blog/posts/' ~ previous_post.slug }} padding="sm">
                     <div class="space-y-1.5">
-                        <span class="text-xs text-foreground/50">&larr; Previous</span>
+                        <span class="text-xs text-foreground/50">{{ t.pages.blog.previous_post }}</span>
                         <p class="text-sm font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-1">{{ previous_post.title }}</p>
                         {% if previous_post.description %}
                         <p class="text-xs text-foreground/50 leading-relaxed line-clamp-1">{{ previous_post.description }}</p>
@@ -101,9 +101,9 @@
                 <div></div>
                 {% endif %}
                 {% if next_post %}
-                <Card href={{ '/blog/posts/' ~ next_post.slug }} padding="sm">
+                <Card href={{ '/' ~ current_lang ~ '/blog/posts/' ~ next_post.slug }} padding="sm">
                     <div class="space-y-1.5">
-                        <span class="text-xs text-foreground/50 block text-right">Next &rarr;</span>
+                        <span class="text-xs text-foreground/50 block text-right">{{ t.pages.blog.next_post }}</span>
                         <p class="text-sm font-semibold text-foreground group-hover:text-accent transition-colors line-clamp-1">{{ next_post.title }}</p>
                         {% if next_post.description %}
                         <p class="text-xs text-foreground/50 leading-relaxed line-clamp-1">{{ next_post.description }}</p>

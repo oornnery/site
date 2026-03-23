@@ -8,9 +8,9 @@
 
 <nav class="flex items-center justify-center gap-1 mt-10 pt-6 border-t border-border" aria-label="Pagination">
     {% if page > 1 %}
-    <a href="{{ base_url }}page={{ page - 1 }}" class="{{ cls_default }}" rel="prev">← Prev</a>
+    <a href="{{ base_url }}page={{ page - 1 }}" class="{{ cls_default }}" rel="prev">{{ t.pagination.prev }}</a>
     {% else %}
-    <span class="{{ cls_disabled }}" aria-disabled="true">← Prev</span>
+    <span class="{{ cls_disabled }}" aria-disabled="true">{{ t.pagination.prev }}</span>
     {% endif %}
 
     {% for p in range(1, total_pages + 1) %}
@@ -22,9 +22,9 @@
     {% endfor %}
 
     {% if page < total_pages %}
-    <a href="{{ base_url }}page={{ page + 1 }}" class="{{ cls_default }}" rel="next">Next →</a>
+    <a href="{{ base_url }}page={{ page + 1 }}" class="{{ cls_default }}" rel="next">{{ t.pagination.next }}</a>
     {% else %}
-    <span class="{{ cls_disabled }}" aria-disabled="true">Next →</span>
+    <span class="{{ cls_disabled }}" aria-disabled="true">{{ t.pagination.next }}</span>
     {% endif %}
 </nav>
 {% endif %}

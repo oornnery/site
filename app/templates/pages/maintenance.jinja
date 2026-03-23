@@ -7,15 +7,15 @@
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     <Center>
-        <p class="text-sm text-foreground/50 mb-3">Service Status</p>
+        <p class="text-sm text-foreground/50 mb-3">{{ t.error_pages.maintenance.label }}</p>
         <h1 class="text-4xl sm:text-5xl font-bold text-foreground mb-4 inline-flex items-center justify-center gap-2">
             <Icon name="check" size="lg" class_name="text-accent" />
-            Maintenance
+            {{ t.error_pages.maintenance.title }}
         </h1>
         <p class="text-base text-foreground/60 mb-8 max-w-xl mx-auto">{{ message }}</p>
         <Row gap="3" justify="center">
-            <Button href="/" variant="primary">Try Again</Button>
-            <Button href="/contact" variant="secondary">Contact</Button>
+            <Button href="/" variant="primary">{{ t.error_pages.maintenance.retry }}</Button>
+            <Button href={{ "/" ~ current_lang ~ "/contact" }} variant="secondary">{{ t.error_pages.maintenance.contact }}</Button>
         </Row>
     </Center>
 </PublicLayout>

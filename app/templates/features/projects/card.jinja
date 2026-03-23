@@ -9,9 +9,9 @@
 {% set chips_limit = 3 if tight else 4 %}
 {% set top_margin = "mb-2.5" if tight else "mb-3" %}
 
-<Card href={{ '/projects/' ~ project.slug }} padding={{ card_padding }}>
+<Card href={{ '/' ~ current_lang ~ '/projects/' ~ project.slug }} padding={{ card_padding }}>
     <article>
-        <CardHeading title={{ project.title }} date={{ project.date }} featured={{ project.featured }} title_class="{{ heading_class }} font-medium text-foreground group-hover:text-accent transition-colors" featured_class="text-accent" class="{{ top_margin }}" />
+        <CardHeading title={{ project.title }} date={{ project.date }} featured={{ project.featured }} featured_label={{ t.pages.projects.featured_label }} title_class="{{ heading_class }} font-medium text-foreground group-hover:text-accent transition-colors" featured_class="text-accent" class="{{ top_margin }}" />
 
         {% if project.description %}
         <p class="{{ description_class }}">{{ project.description }}</p>

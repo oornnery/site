@@ -35,5 +35,5 @@
         container_class="flex flex-wrap justify-center lg:justify-start gap-2 mb-3"
     />
 
-    <SectionLink href="/about" label="View full resume" data-telemetry-event="click" data-telemetry-id="section-link-view-full-resume" data-telemetry-label="View full resume" data-telemetry-target="/about" />
+    <SectionLink href={{ "/" ~ current_lang ~ "/about" }} label={{ t.cta.view_resume }} data-telemetry-event="click" data-telemetry-id="section-link-view-full-resume" data-telemetry-label={{ t.cta.view_resume }} data-telemetry-target={{ "/" ~ current_lang ~ "/about" }} />
 </div>

@@ -2,13 +2,13 @@
 {#def csrf_token, success="", errors={}, form_data={} #}
 
 <section id="contact-form-section">
-    <h2 class="text-lg font-medium text-foreground mb-4">Send a Message</h2>
+    <h2 class="text-lg font-medium text-foreground mb-4">{{ t.pages.contact.form_heading }}</h2>
     <ContactForm
         csrf_token={{ csrf_token }}
         success={{ success }}
         errors={{ errors }}
         form_data={{ form_data }}
-        hx-post="/contact"
+        hx-post={{ "/" ~ current_lang ~ "/contact" }}
         hx-target="#contact-form-section"
         hx-swap="outerHTML"
     />

@@ -20,16 +20,16 @@
     x-data="contactForm()"
     @submit.prevent="submit"
     method="post"
-    action="/contact"
+    action="/{{ current_lang }}/contact"
     novalidate
 >
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-    <input type="hidden" name="subject" value="{{ form_data.get('subject', 'Contact form submission') }}">
+    <input type="hidden" name="subject" value="{{ form_data.get('subject', t.form.contact.subject_default) }}">
 
     <Input
         name="name"
-        label="Name"
-        placeholder="Your Name"
+        label={{ t.form.contact.name_label }}
+        placeholder={{ t.form.contact.name_placeholder }}
         value={{ form_data.get('name', '') }}
         required={{ true }}
         error={{ errors.get('name', '') }}
@@ -44,8 +44,8 @@
     <Input
         name="email"
         type="email"
-        label="Email"
-        placeholder="your@email.com"
+        label={{ t.form.contact.email_label }}
+        placeholder={{ t.form.contact.email_placeholder }}
         value={{ form_data.get('email', '') }}
         required={{ true }}
         error={{ errors.get('email', '') }}
@@ -58,8 +58,8 @@
     <Input
         name="message"
         type="textarea"
-        label="Message"
-        placeholder="Your message..."
+        label={{ t.form.contact.message_label }}
+        placeholder={{ t.form.contact.message_placeholder }}
         value={{ form_data.get('message', '') }}
         rows={{ 4 }}
         required={{ true }}
@@ -76,6 +76,6 @@
         type="submit"
         variant="primary"
     >
-        Send Message
+        {{ t.form.contact.submit_label }}
     </Button>
 </form>

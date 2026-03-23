@@ -7,23 +7,23 @@
 
 <section class="flex flex-col min-h-0">
     <a
-        href="/blog"
+        href="/{{ current_lang }}/blog"
         class="group block mb-3"
         data-telemetry-event="click"
         data-telemetry-id="home-blog-heading"
         data-telemetry-label="blog"
-        data-telemetry-target="/blog"
+        data-telemetry-target="/{{ current_lang }}/blog"
     >
         <h2 class="text-lg font-semibold heading-hover flex items-center gap-2">
-            Blog
+            {{ t.pages.blog.title }}
         </h2>
     </a>
 
     <div class="space-y-3 flex-1 overflow-hidden">
         {% for post in latest_posts %}
-        <Card href={{ '/blog/posts/' ~ post.slug }} padding="sm">
+        <Card href={{ '/' ~ current_lang ~ '/blog/posts/' ~ post.slug }} padding="sm">
             <div class="flex flex-col gap-1">
-                <CardHeading title={{ post.title }} date={{ post.date }} featured={{ post.featured }} title_class="text-sm text-foreground font-medium group-hover:text-accent transition-colors" />
+                <CardHeading title={{ post.title }} date={{ post.date }} featured={{ post.featured }} featured_label={{ t.pages.blog.featured_label }} title_class="text-sm text-foreground font-medium group-hover:text-accent transition-colors" />
                 <p class="text-xs text-foreground/50 line-clamp-1">{{ post.description }}</p>
                 {% if post.tags %}
                 <div class="mt-1 flex flex-wrap gap-1.5">
@@ -35,18 +35,18 @@
             </div>
         </Card>
         {% else %}
-        <EmptyState message="No blog posts yet." />
+        <EmptyState message={{ t.empty_states.blog_posts }} />
         {% endfor %}
     </div>
 
     <div class="mt-3">
         <SectionLink
-            href="/blog/posts"
-            label="View all posts"
+            href={{ "/" ~ current_lang ~ "/blog/posts" }}
+            label={{ t.cta.view_all_posts }}
             data-telemetry-event="click"
             data-telemetry-id="section-link-view-all-posts"
-            data-telemetry-label="View all posts"
-            data-telemetry-target="/blog/posts"
+            data-telemetry-label={{ t.cta.view_all_posts }}
+            data-telemetry-target={{ "/" ~ current_lang ~ "/blog/posts" }}
         />
     </div>
 </section>

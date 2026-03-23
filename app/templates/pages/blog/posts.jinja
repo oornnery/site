@@ -7,9 +7,9 @@
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% set breadcrumb_items = (
-        {"label": "Home", "href": "/"},
-        {"label": "Blog", "href": "/blog"},
-        {"label": "Posts", "current": true},
+        {"label": t.common.home, "href": "/" ~ current_lang ~ "/"},
+        {"label": t.pages.blog.title, "href": "/" ~ current_lang ~ "/blog"},
+        {"label": t.pages.blog.posts_breadcrumb, "current": true},
     ) %}
 
     <Stack gap="6" class_name="sm:space-y-8">
@@ -17,8 +17,8 @@
             <Breadcrumb items={{ breadcrumb_items }} />
 
             <PageHeader
-                title="All Posts"
-                subtitle="Every published article."
+                title={{ t.pages.blog.all_posts_title }}
+                subtitle={{ t.pages.blog.all_posts_subtitle }}
             />
         </Stack>
 
@@ -27,10 +27,10 @@
                 type="search"
                 name="q"
                 value="{{ q }}"
-                placeholder="Search posts by title, description, or tag..."
+                placeholder="{{ t.pages.blog.search_placeholder }}"
                 class="w-full rounded-lg border border-border bg-surface px-4 py-2.5 pr-10 text-sm text-foreground placeholder-foreground/40 transition-colors focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 autocomplete="off"
-                hx-get="/blog/posts"
+                hx-get="/{{ current_lang }}/blog/posts"
                 hx-trigger="input changed delay:300ms, search"
                 hx-target="#posts-results"
                 hx-swap="outerHTML"

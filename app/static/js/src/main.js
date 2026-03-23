@@ -102,54 +102,178 @@ const initScrollSnap = () => {
 };
 
 /**
- * Spotlight effect: radial accent glow follows the cursor inside snap-sections.
- * Uses CSS custom properties (--spotlight-x/y/opacity) updated via mousemove.
- * Disabled when prefers-reduced-motion is set.
+ * Canvas cursor: spring-physics ribbon trails that follow the cursor inside
+ * the scroll-snap container. Uses the site's accent color. Disabled when
+ * prefers-reduced-motion is set or on touch-only devices.
  */
-const initSpotlight = () => {
+const initCanvasCursor = () => {
     const container = $(".scroll-snap-container");
     if (!container) return;
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (!matchMedia("(pointer: fine)").matches) return;
 
-    const sections = $$(".snap-section", container);
-    if (!sections.length) return;
+    const canvas = document.createElement("canvas");
+    canvas.className = "canvas-cursor";
+    container.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
 
-    let active = null;
-    let rafId = 0;
-    let mx = 0;
-    let my = 0;
-
-    const paint = () => {
-        rafId = 0;
-        if (!active) return;
-        active.style.setProperty("--spotlight-x", mx + "px");
-        active.style.setProperty("--spotlight-y", my + "px");
+    const cfg = {
+        trails: 15,
+        size: 40,
+        friction: 0.45,
+        dampening: 0.25,
+        tension: 0.98,
+        spring: 0.4,
     };
 
-    container.addEventListener("mousemove", (e) => {
-        const section = e.target.closest(".snap-section");
-        if (section !== active) {
-            if (active) active.style.setProperty("--spotlight-opacity", "0");
-            active = section;
-            if (active) active.style.setProperty("--spotlight-opacity", "1");
+    const pos = { x: -1000, y: -1000 };
+    let lines = [];
+    let running = false;
+
+    function Node() {
+        this.x = 0;
+        this.y = 0;
+        this.vx = 0;
+        this.vy = 0;
+    }
+
+    function Trail(i) {
+        this.spring = cfg.spring + (i / cfg.trails) * 0.025;
+        this.friction = cfg.friction + Math.random() * 0.01 - 0.005;
+        this.nodes = [];
+        for (let j = 0; j < cfg.size; j++) {
+            const n = new Node();
+            n.x = pos.x;
+            n.y = pos.y;
+            this.nodes.push(n);
         }
-        if (!active) return;
+    }
 
-        const rect = active.getBoundingClientRect();
-        mx = e.clientX - rect.left;
-        my = e.clientY - rect.top;
+    Trail.prototype.update = function () {
+        let sp = this.spring;
+        const first = this.nodes[0];
+        first.vx += (pos.x - first.x) * sp;
+        first.vy += (pos.y - first.y) * sp;
+        for (let i = 0; i < this.nodes.length; i++) {
+            const node = this.nodes[i];
+            if (i > 0) {
+                const prev = this.nodes[i - 1];
+                node.vx += (prev.x - node.x) * sp;
+                node.vy += (prev.y - node.y) * sp;
+                node.vx += prev.vx * cfg.dampening;
+                node.vy += prev.vy * cfg.dampening;
+            }
+            node.vx *= this.friction;
+            node.vy *= this.friction;
+            node.x += node.vx;
+            node.y += node.vy;
+            sp *= cfg.tension;
+        }
+    };
 
-        if (!rafId) rafId = requestAnimationFrame(paint);
+    Trail.prototype.draw = function () {
+        let x = this.nodes[0].x;
+        let y = this.nodes[0].y;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        for (let i = 1, len = this.nodes.length - 2; i < len; i++) {
+            const cur = this.nodes[i];
+            const nxt = this.nodes[i + 1];
+            x = 0.5 * (cur.x + nxt.x);
+            y = 0.5 * (cur.y + nxt.y);
+            ctx.quadraticCurveTo(cur.x, cur.y, x, y);
+        }
+        const a = this.nodes[this.nodes.length - 2];
+        const b = this.nodes[this.nodes.length - 1];
+        ctx.quadraticCurveTo(a.x, a.y, b.x, b.y);
+        ctx.stroke();
+        ctx.closePath();
+    };
+
+    let accentRgb = "124,124,255";
+    const readAccent = () => {
+        const v = getComputedStyle(document.documentElement)
+            .getPropertyValue("--accent-rgb")
+            .trim();
+        if (v) accentRgb = v;
+    };
+    readAccent();
+
+    const observer = new MutationObserver(readAccent);
+    observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme", "data-palette"],
     });
 
-    container.addEventListener("mouseleave", () => {
-        if (active) active.style.setProperty("--spotlight-opacity", "0");
-        active = null;
+    const resize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    };
+
+    const initLines = () => {
+        lines = [];
+        for (let i = 0; i < cfg.trails; i++) {
+            lines.push(new Trail(i));
+        }
+    };
+
+    const render = () => {
+        if (!running) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeStyle = "rgba(" + accentRgb + ", 0.25)";
+        ctx.lineWidth = 1;
+        for (let i = 0; i < lines.length; i++) {
+            lines[i].update();
+            lines[i].draw();
+        }
+        requestAnimationFrame(render);
+    };
+
+    const start = () => {
+        if (!running) {
+            running = true;
+            render();
+        }
+    };
+    const stop = () => {
+        running = false;
+    };
+
+    let idleTimer = 0;
+    let resizeRaf = 0;
+    let started = false;
+
+    const onMove = (e) => {
+        pos.x = e.clientX;
+        pos.y = e.clientY;
+        if (!started) {
+            started = true;
+            initLines();
+        }
+        start();
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(stop, 3000);
+    };
+
+    const debouncedResize = () => {
+        if (resizeRaf) return;
+        resizeRaf = requestAnimationFrame(() => {
+            resize();
+            resizeRaf = 0;
+        });
+    };
+
+    document.addEventListener("visibilitychange", () => {
+        if (document.hidden) stop();
     });
+
+    resize();
+    window.addEventListener("resize", debouncedResize);
+    document.addEventListener("mousemove", onMove);
 };
 
 onReady(() => {
     initCurrentYear();
     initScrollSnap();
-    initSpotlight();
+    initCanvasCursor();
 });

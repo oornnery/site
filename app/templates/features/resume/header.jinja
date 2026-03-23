@@ -12,9 +12,9 @@
 
 <header class="resume-hero relative">
     <div class="absolute top-0 right-0">
-        <Button href="/about/resume.md" variant="ghost" size="sm" download="fabio-souza-resume.md">
+        <Button href={{ "/" ~ current_lang ~ "/about/resume.md" }} variant="ghost" size="sm" download="fabio-souza-resume.md">
             <Icon name="download" size="sm" />
-            <span class="hidden sm:inline">Resume</span>
+            <span class="hidden sm:inline">{{ t.resume.title }}</span>
         </Button>
     </div>
     <div class="resume-hero__inner">
@@ -60,13 +60,13 @@
 
             <div class="resume-hero__actions-wrap">
                 <Row wrap={{ true }} gap="3" class_name="resume-hero__actions">
-                    <Button href="/contact" variant="primary" size="default">
+                    <Button href={{ "/" ~ current_lang ~ "/contact" }} variant="primary" size="default">
                         <Icon name="email" size="sm" />
-                        <span>Contact</span>
+                        <span>{{ t.resume.contact }}</span>
                     </Button>
-                    <Button href="/projects" variant="ghost" size="default">
+                    <Button href={{ "/" ~ current_lang ~ "/projects" }} variant="ghost" size="default">
                         <Icon name="folder" size="sm" />
-                        <span>View Projects</span>
+                        <span>{{ t.resume.view_projects }}</span>
                     </Button>
                 </Row>
             </div>

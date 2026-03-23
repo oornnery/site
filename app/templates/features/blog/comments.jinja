@@ -2,10 +2,10 @@
 {#def discussion_url="", post_title="", comments=(), comment_source_label="GitHub", show_cta=True #}
 
 <section id="comments" class="section-divider-spacing space-y-4 border-t border-border/50">
-    <h2 class="text-xl sm:text-2xl font-bold text-foreground">Comments</h2>
+    <h2 class="text-xl sm:text-2xl font-bold text-foreground">{{ t.comments.heading }}</h2>
     {% if discussion_url %}
     <p class="text-sm text-foreground/60">
-        Discussion for <span class="text-foreground/80">{{ post_title }}</span> lives on {{ comment_source_label }}.
+        {{ t.comments.discussion_on.replace("{title}", post_title).replace("{source}", comment_source_label) }}
     </p>
     {% endif %}
     {% if comments %}
@@ -25,7 +25,7 @@
                     {% endif %}
                 </div>
                 {% if comment.html_url %}
-                <a href="{{ comment.html_url }}" target="_blank" rel="noopener noreferrer" class="text-foreground/60 hover:text-accent transition-colors">View</a>
+                <a href="{{ comment.html_url }}" target="_blank" rel="noopener noreferrer" class="text-foreground/60 hover:text-accent transition-colors">{{ t.common.view }}</a>
                 {% endif %}
             </div>
             <p class="text-sm text-foreground/70 whitespace-pre-line">{{ comment.body }}</p>
@@ -34,14 +34,14 @@
     </div>
     {% elif discussion_url %}
     <p class="text-sm text-foreground/50">
-        No comments yet. Start the discussion on {{ comment_source_label }}.
+        {{ t.comments.no_comments.replace("{source}", comment_source_label) }}
     </p>
     {% elif comments|length == 0 %}
     <p class="text-sm text-foreground/50">
-        Comments are not available for this post yet.
+        {{ t.comments.not_available }}
     </p>
     {% else %}
-    <p class="text-sm text-foreground/50">Comments via gist are not configured for this post yet.</p>
+    <p class="text-sm text-foreground/50">{{ t.comments.not_configured }}</p>
     {% endif %}
     {% if discussion_url and show_cta %}
     <div class="pt-2">
@@ -56,7 +56,7 @@
             data-telemetry-label="Blog Comments GitHub"
             data-telemetry-target={{ discussion_url }}
         >
-            Comment on {{ comment_source_label }}
+            {{ t.comments.comment_on.replace("{source}", comment_source_label) }}
         </Button>
     </div>
     {% endif %}

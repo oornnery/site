@@ -1,0 +1,158 @@
+nav:
+  links:
+    - { href: "/", label: "Home" }
+    - { href: "/about", label: "About" }
+    - { href: "/projects", label: "Projects" }
+    - { href: "/blog", label: "Blog" }
+    - { href: "/contact", label: "Contact" }
+
+palettes:
+  - { id: "default", label: "Default" }
+  - { id: "ocean", label: "Ocean" }
+  - { id: "sunset", label: "Sunset" }
+  - { id: "rose", label: "Rose" }
+  - { id: "forest", label: "Forest" }
+  - { id: "mono", label: "Mono" }
+
+pages:
+  home:
+    seo_title: "Home"
+    seo_description: "Python developer site with projects, experience, and contact details."
+  about:
+    seo_title: "About"
+    seo_description_fallback: "About me"
+  projects:
+    title: "Projects"
+    subtitle: "A collection of projects I've worked on."
+    seo_title: "Projects"
+    seo_description: "My projects and selected work."
+    featured_label: "★ Featured"
+    live_demo: "Live Demo"
+    source_code: "Source Code"
+    no_projects_found: "No projects found."
+  blog:
+    title: "Blog"
+    subtitle: "Notes on backend engineering, architecture tradeoffs, and production operations."
+    seo_title: "Blog"
+    seo_description: "Engineering notes, architecture decisions, and backend lessons learned."
+    posts_seo_title: "Blog Posts"
+    posts_seo_description: "All published blog posts."
+    tags_title: "Blog Tags"
+    tags_description: "Browse posts by tag."
+    tag_title_template: "Tag: {tag}"
+    tag_description_template: "Posts tagged with {tag}."
+    rss_description: "Latest posts from the site blog."
+    featured_posts_heading: "Featured Posts"
+    latest_posts_heading: "Latest Posts"
+    tags_heading: "Tags"
+    all_posts_title: "All Posts"
+    all_posts_subtitle: "Every published article."
+    posts_breadcrumb: "Posts"
+    tags_breadcrumb: "Tags"
+    browse_by_topic: "Browse posts by topic."
+    search_placeholder: "Search posts by title, description, or tag..."
+    min_read: "min read"
+    featured_label: "Featured"
+    continue_reading: "Continue Reading"
+    view_all_posts_arrow: "View all posts →"
+    previous_post: "← Previous"
+    next_post: "Next →"
+    all_tags_label: "All"
+    no_posts_for_tag: "No posts found for this tag."
+    no_posts_for_query: "No posts found for \"{q}\"."
+    no_posts_yet: "No posts published yet."
+  contact:
+    title: "Contact"
+    subtitle: "Get in touch with me."
+    seo_title: "Contact"
+    seo_description: "Get in touch with me."
+    form_heading: "Send a Message"
+    connect_heading: "Connect"
+
+form:
+  contact:
+    name_label: "Name"
+    name_placeholder: "Your Name"
+    email_label: "Email"
+    email_placeholder: "your@email.com"
+    message_label: "Message"
+    message_placeholder: "Your message..."
+    submit_label: "Send Message"
+    subject_default: "Contact form submission"
+
+empty_states:
+  projects: "No projects yet."
+  blog_posts: "No blog posts yet."
+  featured_posts: "No featured posts yet."
+  recent_posts: "No recent posts yet."
+  tags: "No tags available."
+  search_results: "No results found."
+
+cta:
+  view_resume: "View full resume"
+  view_all_projects: "View all projects"
+  view_all_posts: "View all posts"
+  view_all_tags: "View all tags"
+
+errors:
+  csrf_invalid: "Invalid or expired security token. Please reload the page."
+  form_invalid: "Please check the form and try again."
+  content_type_unsupported: "Unsupported content type."
+  notification_failed: "Your message could not be delivered right now. Please try again in a few minutes."
+  unexpected_state: "Unexpected contact submission state."
+  not_found: "Page not found."
+  rate_limited: "Too many requests. Please try again later."
+
+messages:
+  contact_success: "Message sent successfully. Thank you for reaching out."
+
+common:
+  home: "Home"
+  rss: "RSS"
+  language_name: "English"
+  scroll: "Scroll"
+  on_this_page: "On this page"
+  view: "View"
+
+resume:
+  title: "Resume"
+  contact: "Contact"
+  view_projects: "View Projects"
+  work_experience: "Work Experience"
+  education: "Education"
+  certificates: "Certificates"
+  skills: "Skills"
+  about: "About"
+
+comments:
+  heading: "Comments"
+  discussion_on: "Discussion for {title} lives on {source}."
+  no_comments: "No comments yet. Start the discussion on {source}."
+  not_available: "Comments are not available for this post yet."
+  not_configured: "Comments via gist are not configured for this post yet."
+  comment_on: "Comment on {source}"
+  source_gist: "Gist"
+  source_github: "GitHub"
+
+pagination:
+  prev: "← Prev"
+  next: "Next →"
+
+aria:
+  open_main_menu: "Open main menu"
+  select_palette: "Select color palette"
+  select_language: "Select language"
+  prev_featured: "Previous featured post"
+  next_featured: "Next featured post"
+
+error_pages:
+  not_found:
+    label: "Error"
+    code: "404"
+    message: "The page you requested does not exist."
+    action: "Return Home"
+  maintenance:
+    label: "Service Status"
+    title: "Maintenance"
+    retry: "Try Again"
+    contact: "Contact"

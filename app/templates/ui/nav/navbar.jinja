@@ -7,7 +7,7 @@
     @keydown.escape.window="close()"
 >
     <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-between px-4 sm:px-6 py-3 sm:py-4">
-        <a href="/" class="text-base sm:text-lg font-medium text-foreground tracking-tight hover:text-accent transition-colors" data-telemetry-event="click" data-telemetry-id="nav-logo" data-telemetry-label="logo">
+        <a href="/{{ current_lang }}/" class="text-base sm:text-lg font-medium text-foreground tracking-tight hover:text-accent transition-colors" data-telemetry-event="click" data-telemetry-id="nav-logo" data-telemetry-label="logo">
             {{ site_name }}
         </a>
 
@@ -20,7 +20,7 @@
             data-telemetry-id="nav-menu-toggle"
             data-telemetry-label="menu toggle"
         >
-            <span class="sr-only">Open main menu</span>
+            <span class="sr-only">{{ t.aria.open_main_menu }}</span>
             {# hamburger icon — hidden when open #}
             <svg :class="{ 'hidden': open }" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14" aria-hidden="true">
                 <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
@@ -35,7 +35,8 @@
             <ul class="flex flex-col mt-4 md:mt-0 md:flex-row md:space-x-1 lg:space-x-2 font-medium text-sm rounded-lg md:border-0 border border-border bg-background/95 md:bg-transparent p-4 md:p-0 items-center">
                 {% for link in nav_links %}
                 <li>
-                    <a href="{{ link.href }}" class="block px-3 py-2 rounded-lg {{ 'text-foreground bg-surface-2/50' if current_path == link.href else 'text-foreground/60 hover:text-accent hover:bg-surface-2/30' }} transition-all" data-telemetry-event="click" data-telemetry-id="nav-{{ link.label | lower }}" data-telemetry-label="{{ link.label }}">
+                    {% set full_href = "/" ~ current_lang ~ link.href if link.href != "/" else "/" ~ current_lang ~ "/" %}
+                    <a href="{{ full_href }}" class="block px-3 py-2 rounded-lg {{ 'text-foreground bg-surface-2/50' if current_path == link.href else 'text-foreground/60 hover:text-accent hover:bg-surface-2/30' }} transition-all" data-telemetry-event="click" data-telemetry-id="nav-{{ link.label | lower }}" data-telemetry-label="{{ link.label }}">
                         {{ link.label }}
                     </a>
                 </li>
@@ -61,7 +62,7 @@
                             type="button"
                             class="inline-flex items-center justify-center p-2 rounded-lg text-foreground/60 hover:text-accent hover:bg-surface-2/30 transition-all"
                             :aria-expanded="menuAriaExpanded"
-                            aria-label="Select color palette"
+                            aria-label="{{ t.aria.select_palette }}"
                             @click="toggleMenu()"
                         >
                             <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.15"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.15"/></svg>
@@ -72,15 +73,9 @@
                             role="listbox"
                             aria-label="Color palettes"
                         >
-                            {% set palettes = [
-                                ("default", "Default"),
-                                ("ocean",   "Ocean"),
-                                ("sunset",  "Sunset"),
-                                ("rose",    "Rose"),
-                                ("forest",  "Forest"),
-                                ("mono",    "Mono"),
-                            ] %}
-                            {% for id, name in palettes %}
+                            {% for p in t.palettes %}
+                            {% set id = p.id %}
+                            {% set name = p.label %}
                             <button
                                 type="button"
                                 role="option"
@@ -100,6 +95,43 @@
                                     xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
                                 ><path d="M20 6 9 17l-5-5"/></svg>
                             </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </li>
+
+                {# Language selector #}
+                <li class="flex items-center" x-data="{ langMenuOpen: false }" @click.outside="langMenuOpen = false" @keydown.escape.window="langMenuOpen = false">
+                    <div class="relative">
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center p-2 rounded-lg text-foreground/60 hover:text-accent hover:bg-surface-2/30 transition-all"
+                            :aria-expanded="String(langMenuOpen)"
+                            aria-label="{{ t.aria.select_language }}"
+                            @click="langMenuOpen = !langMenuOpen"
+                        >
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                        </button>
+                        <div
+                            :class="{ 'hidden': !langMenuOpen }"
+                            class="hidden absolute right-0 top-full mt-2 w-36 rounded-lg border border-border bg-background/95 backdrop-blur-md shadow-lg py-1.5"
+                            role="listbox"
+                            aria-label="{{ t.aria.select_language }}"
+                        >
+                            {% for lang_code in supported_languages %}
+                            {% set lang_labels = {"en": "English", "pt-br": "Português"} %}
+                            {% set label = lang_labels.get(lang_code, lang_code) %}
+                            <a
+                                href="/{{ lang_code }}{{ current_path }}"
+                                role="option"
+                                class="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-surface-2/50 transition-colors {{ 'text-accent font-medium' if current_lang == lang_code else 'text-foreground/70' }}"
+                                aria-selected="{{ 'true' if current_lang == lang_code else 'false' }}"
+                            >
+                                <span class="flex-1 text-left">{{ label }}</span>
+                                {% if current_lang == lang_code %}
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                                {% endif %}
+                            </a>
                             {% endfor %}
                         </div>
                     </div>

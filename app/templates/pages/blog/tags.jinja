@@ -8,16 +8,16 @@
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% if selected_tag %}
     {% set breadcrumb_items = (
-        {"label": "Home", "href": "/"},
-        {"label": "Blog", "href": "/blog"},
-        {"label": "Tags", "href": "/blog/tags"},
+        {"label": t.common.home, "href": "/" ~ current_lang ~ "/"},
+        {"label": t.pages.blog.title, "href": "/" ~ current_lang ~ "/blog"},
+        {"label": t.pages.blog.tags_breadcrumb, "href": "/" ~ current_lang ~ "/blog/tags"},
         {"label": selected_tag, "current": true},
     ) %}
     {% else %}
     {% set breadcrumb_items = (
-        {"label": "Home", "href": "/"},
-        {"label": "Blog", "href": "/blog"},
-        {"label": "Tags", "current": true},
+        {"label": t.common.home, "href": "/" ~ current_lang ~ "/"},
+        {"label": t.pages.blog.title, "href": "/" ~ current_lang ~ "/blog"},
+        {"label": t.pages.blog.tags_breadcrumb, "current": true},
     ) %}
     {% endif %}
 
@@ -25,8 +25,8 @@
         <Stack gap="4" class_name="sm:space-y-6">
             <Breadcrumb items={{ breadcrumb_items }} />
             <PageHeader
-                title={{ ("Tag: " ~ selected_tag) if selected_tag else "Tags" }}
-                subtitle="Browse posts by topic."
+                title={{ (t.pages.blog.tag_title_template.replace("{tag}", selected_tag)) if selected_tag else t.pages.blog.tags_heading }}
+                subtitle={{ t.pages.blog.browse_by_topic }}
             />
         </Stack>
 

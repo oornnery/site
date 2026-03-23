@@ -10,8 +10,8 @@
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% set breadcrumb_items = (
-        {"label": "Home", "href": "/"},
-        {"label": "Blog", "current": true},
+        {"label": t.common.home, "href": "/" ~ current_lang ~ "/"},
+        {"label": t.pages.blog.title, "current": true},
     ) %}
 
     <Stack gap="6" class_name="sm:space-y-8">
@@ -20,8 +20,8 @@
 
             <div class="flex flex-col gap-4 sm:gap-5 lg:flex-row lg:items-start lg:justify-between">
                 <PageHeader
-                    title="Blog"
-                    subtitle="Notes on backend engineering, architecture tradeoffs, and production operations."
+                    title={{ t.pages.blog.title }}
+                    subtitle={{ t.pages.blog.subtitle }}
                     class="flex-1 lg:max-w-3xl"
                 />
             </div>
@@ -32,17 +32,17 @@
             {% set featured_total = featured_posts | length %}
             <div class="space-y-4" x-data="carousel()" @mouseenter="stopAutoplay()" @mouseleave="startAutoplay()" @focusin="stopAutoplay()" @focusout="startAutoplay()">
                 <div class="flex items-center justify-between gap-3">
-                    <h2 class="text-xl sm:text-2xl font-bold text-foreground">Featured Posts</h2>
+                    <h2 class="text-xl sm:text-2xl font-bold text-foreground">{{ t.pages.blog.featured_posts_heading }}</h2>
                     {% if featured_total > 1 %}
                     <div class="flex items-center gap-2">
                         <button
                             type="button"
                             class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-accent/15 text-foreground/70 hover:text-accent hover:border-accent/40 transition-colors"
-                            aria-label="Previous featured post"
+                            aria-label="{{ t.aria.prev_featured }}"
                             data-carousel-prev
                             data-telemetry-event="click"
                             data-telemetry-id="blog-home-featured-prev"
-                            data-telemetry-label="Previous featured post"
+                            data-telemetry-label="{{ t.aria.prev_featured }}"
                         >
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -51,11 +51,11 @@
                         <button
                             type="button"
                             class="inline-flex h-9 w-9 items-center justify-center rounded-full border border-accent/15 text-foreground/70 hover:text-accent hover:border-accent/40 transition-colors"
-                            aria-label="Next featured post"
+                            aria-label="{{ t.aria.next_featured }}"
                             data-carousel-next
                             data-telemetry-event="click"
                             data-telemetry-id="blog-home-featured-next"
-                            data-telemetry-label="Next featured post"
+                            data-telemetry-label="{{ t.aria.next_featured }}"
                         >
                             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                 <path d="M9 6L15 12L9 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -98,15 +98,15 @@
                 {% endif %}
             </div>
             {% else %}
-            <h2 class="text-xl sm:text-2xl font-bold text-foreground">Featured Posts</h2>
-            <EmptyState message="No featured posts yet." />
+            <h2 class="text-xl sm:text-2xl font-bold text-foreground">{{ t.pages.blog.featured_posts_heading }}</h2>
+            <EmptyState message={{ t.empty_states.featured_posts }} />
             {% endif %}
         </Stack>
 
         <Stack gap="4" class_name="sm:space-y-5">
             <div class="flex items-center justify-between gap-3">
-                <h2 class="text-xl sm:text-2xl font-bold text-foreground">Latest Posts</h2>
-                <SectionLink href="/blog/posts" label="View all posts" />
+                <h2 class="text-xl sm:text-2xl font-bold text-foreground">{{ t.pages.blog.latest_posts_heading }}</h2>
+                <SectionLink href={{ "/" ~ current_lang ~ "/blog/posts" }} label={{ t.cta.view_all_posts }} />
             </div>
             {% if recent_posts %}
             <Stack gap="3" class_name="sm:space-y-4">
@@ -115,27 +115,27 @@
                 {% endfor %}
             </Stack>
             {% else %}
-            <EmptyState message="No recent posts yet." />
+            <EmptyState message={{ t.empty_states.recent_posts }} />
             {% endif %}
         </Stack>
 
         <Stack gap="3">
             <div class="flex items-center justify-between gap-3">
-                <h2 class="text-xl sm:text-2xl font-bold text-foreground">Tags</h2>
-                <SectionLink href="/blog/tags" label="View all tags" />
+                <h2 class="text-xl sm:text-2xl font-bold text-foreground">{{ t.pages.blog.tags_heading }}</h2>
+                <SectionLink href={{ "/" ~ current_lang ~ "/blog/tags" }} label={{ t.cta.view_all_tags }} />
             </div>
             {% if tags %}
             <div class="flex flex-wrap gap-2">
                 {% for tag in tags %}
                 <Tag
-                    href={{ "/blog/tags/" ~ (tag.name | urlencode) }}
+                    href={{ "/" ~ current_lang ~ "/blog/tags/" ~ (tag.name | urlencode) }}
                     text={{ tag.name ~ " (" ~ tag.count ~ ")" }}
                     variant="outline"
                 />
                 {% endfor %}
             </div>
             {% else %}
-            <p class="text-sm text-foreground/50">No tags available.</p>
+            <p class="text-sm text-foreground/50">{{ t.empty_states.tags }}</p>
             {% endif %}
         </Stack>
     </Stack>

@@ -1,4 +1,4 @@
-{#def title, date=None, featured=False, title_class="", featured_class="", label="" #}
+{#def title, date=None, featured=False, title_class="", featured_class="", label="", featured_label="" #}
 
 <div class="card-heading-row" {{ attrs.render() }}>
     <div class="card-heading-main">
@@ -10,7 +10,7 @@
         {% endif %}
     </div>
     {% if featured %}
-    <span class="card-featured-label {{ featured_class }}">&#9733; Featured</span>
+    <span class="card-featured-label {{ featured_class }}">{{ featured_label }}</span>
     {% elif label %}
     <span class="resume-meta-label">{{ label }}</span>
     {% endif %}

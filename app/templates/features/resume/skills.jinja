@@ -12,7 +12,7 @@
     {% endfor %}
 {% endfor %}
 
-<Section title="Skills" heading_id="skills" visible={{ all_skills | length > 0 }} class_name="gap-y-6">
+<Section title={{ t.resume.skills }} heading_id="skills" visible={{ all_skills | length > 0 }} class_name="gap-y-6">
     <ul class="flex list-none flex-wrap gap-2 p-0" aria-label="Skills">
         {% for skill in all_skills %}
         <li>

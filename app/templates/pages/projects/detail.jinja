@@ -10,8 +10,8 @@
 
 <PublicLayout seo={{ seo }} current_path={{ current_path }}>
     {% set breadcrumb_items = (
-        {"label": "Home", "href": "/"},
-        {"label": "Projects", "href": "/projects"},
+        {"label": t.common.home, "href": "/" ~ current_lang ~ "/"},
+        {"label": t.pages.projects.title, "href": "/" ~ current_lang ~ "/projects"},
         {"label": project.title, "current": true},
     ) %}
 
@@ -27,7 +27,7 @@
                         {% endif %}
                         {% if project.featured %}
                         <span>&bull;</span>
-                        <span class="text-accent">★ Featured</span>
+                        <span class="text-accent">{{ t.pages.projects.featured_label }}</span>
                         {% endif %}
                     </MetaInfo>
 
@@ -50,13 +50,13 @@
                         {% if project.live_url and ('example.' not in project.live_url) %}
                         <Button href={{ project.live_url }} variant="primary" size="default" target="_blank" rel="noopener noreferrer" class="min-w-[146px]">
                             <Icon name="external-link" size="sm" />
-                            <span>Live Demo</span>
+                            <span>{{ t.pages.projects.live_demo }}</span>
                         </Button>
                         {% endif %}
                         {% if project.github_url %}
                         <Button href={{ project.github_url }} size="default" target="_blank" rel="noopener noreferrer" class="min-w-[146px]">
                             <Icon name="github" size="sm" />
-                            <span>Source Code</span>
+                            <span>{{ t.pages.projects.source_code }}</span>
                         </Button>
                         {% endif %}
                     </Row>

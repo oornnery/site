@@ -1,0 +1,158 @@
+nav:
+  links:
+    - { href: "/", label: "Início" }
+    - { href: "/about", label: "Sobre" }
+    - { href: "/projects", label: "Projetos" }
+    - { href: "/blog", label: "Blog" }
+    - { href: "/contact", label: "Contato" }
+
+palettes:
+  - { id: "default", label: "Padrão" }
+  - { id: "ocean", label: "Oceano" }
+  - { id: "sunset", label: "Pôr do Sol" }
+  - { id: "rose", label: "Rosa" }
+  - { id: "forest", label: "Floresta" }
+  - { id: "mono", label: "Mono" }
+
+pages:
+  home:
+    seo_title: "Início"
+    seo_description: "Site de desenvolvedor Python com projetos, experiência e detalhes de contato."
+  about:
+    seo_title: "Sobre"
+    seo_description_fallback: "Sobre mim"
+  projects:
+    title: "Projetos"
+    subtitle: "Uma coleção de projetos em que trabalhei."
+    seo_title: "Projetos"
+    seo_description: "Meus projetos e trabalhos selecionados."
+    featured_label: "★ Destaque"
+    live_demo: "Demo ao Vivo"
+    source_code: "Código Fonte"
+    no_projects_found: "Nenhum projeto encontrado."
+  blog:
+    title: "Blog"
+    subtitle: "Notas sobre engenharia backend, decisões de arquitetura e operações em produção."
+    seo_title: "Blog"
+    seo_description: "Notas de engenharia, decisões de arquitetura e lições aprendidas no backend."
+    posts_seo_title: "Posts do Blog"
+    posts_seo_description: "Todos os posts publicados."
+    tags_title: "Tags do Blog"
+    tags_description: "Navegue por posts por tag."
+    tag_title_template: "Tag: {tag}"
+    tag_description_template: "Posts com a tag {tag}."
+    rss_description: "Últimos posts do blog."
+    featured_posts_heading: "Posts em Destaque"
+    latest_posts_heading: "Últimos Posts"
+    tags_heading: "Tags"
+    all_posts_title: "Todos os Posts"
+    all_posts_subtitle: "Todos os artigos publicados."
+    posts_breadcrumb: "Posts"
+    tags_breadcrumb: "Tags"
+    browse_by_topic: "Navegue por posts por tópico."
+    search_placeholder: "Buscar posts por título, descrição ou tag..."
+    min_read: "min de leitura"
+    featured_label: "Destaque"
+    continue_reading: "Continue Lendo"
+    view_all_posts_arrow: "Ver todos os posts →"
+    previous_post: "← Anterior"
+    next_post: "Próximo →"
+    all_tags_label: "Todos"
+    no_posts_for_tag: "Nenhum post encontrado para esta tag."
+    no_posts_for_query: "Nenhum post encontrado para \"{q}\"."
+    no_posts_yet: "Nenhum post publicado ainda."
+  contact:
+    title: "Contato"
+    subtitle: "Entre em contato comigo."
+    seo_title: "Contato"
+    seo_description: "Entre em contato comigo."
+    form_heading: "Enviar Mensagem"
+    connect_heading: "Conectar"
+
+form:
+  contact:
+    name_label: "Nome"
+    name_placeholder: "Seu Nome"
+    email_label: "Email"
+    email_placeholder: "seu@email.com"
+    message_label: "Mensagem"
+    message_placeholder: "Sua mensagem..."
+    submit_label: "Enviar Mensagem"
+    subject_default: "Envio do formulário de contato"
+
+empty_states:
+  projects: "Nenhum projeto ainda."
+  blog_posts: "Nenhum post ainda."
+  featured_posts: "Nenhum post em destaque ainda."
+  recent_posts: "Nenhum post recente ainda."
+  tags: "Nenhuma tag disponível."
+  search_results: "Nenhum resultado encontrado."
+
+cta:
+  view_resume: "Ver currículo completo"
+  view_all_projects: "Ver todos os projetos"
+  view_all_posts: "Ver todos os posts"
+  view_all_tags: "Ver todas as tags"
+
+errors:
+  csrf_invalid: "Token de segurança inválido ou expirado. Por favor, recarregue a página."
+  form_invalid: "Por favor, verifique o formulário e tente novamente."
+  content_type_unsupported: "Tipo de conteúdo não suportado."
+  notification_failed: "Sua mensagem não pôde ser entregue agora. Por favor, tente novamente em alguns minutos."
+  unexpected_state: "Estado inesperado no envio do contato."
+  not_found: "Página não encontrada."
+  rate_limited: "Muitas solicitações. Por favor, tente novamente mais tarde."
+
+messages:
+  contact_success: "Mensagem enviada com sucesso. Obrigado por entrar em contato."
+
+common:
+  home: "Início"
+  rss: "RSS"
+  language_name: "Português"
+  scroll: "Rolar"
+  on_this_page: "Nesta página"
+  view: "Ver"
+
+resume:
+  title: "Currículo"
+  contact: "Contato"
+  view_projects: "Ver Projetos"
+  work_experience: "Experiência Profissional"
+  education: "Formação Acadêmica"
+  certificates: "Certificados"
+  skills: "Habilidades"
+  about: "Sobre"
+
+comments:
+  heading: "Comentários"
+  discussion_on: "A discussão sobre {title} está no {source}."
+  no_comments: "Nenhum comentário ainda. Inicie a discussão no {source}."
+  not_available: "Os comentários não estão disponíveis para este post ainda."
+  not_configured: "Comentários via gist não estão configurados para este post ainda."
+  comment_on: "Comentar no {source}"
+  source_gist: "Gist"
+  source_github: "GitHub"
+
+pagination:
+  prev: "← Anterior"
+  next: "Próximo →"
+
+aria:
+  open_main_menu: "Abrir menu principal"
+  select_palette: "Selecionar paleta de cores"
+  select_language: "Selecionar idioma"
+  prev_featured: "Post em destaque anterior"
+  next_featured: "Próximo post em destaque"
+
+error_pages:
+  not_found:
+    label: "Erro"
+    code: "404"
+    message: "A página solicitada não existe."
+    action: "Voltar ao Início"
+  maintenance:
+    label: "Status do Serviço"
+    title: "Manutenção"
+    retry: "Tentar Novamente"
+    contact: "Contato"

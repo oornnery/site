@@ -7,20 +7,20 @@
 <div id="tag-posts">
     <div class="flex flex-wrap gap-2 mb-6">
         <Tag
-            href="/blog/tags"
-            text="All"
+            href={{ "/" ~ current_lang ~ "/blog/tags" }}
+            text={{ t.pages.blog.all_tags_label }}
             variant={{ "accent" if selected_tag == "" else "outline" }}
-            hx-get="/blog/tags"
+            hx-get={{ "/" ~ current_lang ~ "/blog/tags" }}
             hx-target="#tag-posts"
             hx-swap="outerHTML"
             hx-push-url="true"
         />
         {% for tag in tags %}
         <Tag
-            href={{ "/blog/tags/" ~ (tag.name | urlencode) }}
+            href={{ "/" ~ current_lang ~ "/blog/tags/" ~ (tag.name | urlencode) }}
             text={{ tag.name ~ " (" ~ tag.count ~ ")" }}
             variant={{ "accent" if selected_tag and selected_tag | lower == tag.name | lower else "outline" }}
-            hx-get={{ "/blog/tags/" ~ (tag.name | urlencode) }}
+            hx-get={{ "/" ~ current_lang ~ "/blog/tags/" ~ (tag.name | urlencode) }}
             hx-target="#tag-posts"
             hx-swap="outerHTML"
             hx-push-url="true"
@@ -32,10 +32,10 @@
         {% for post in posts %}
         <PostCard post={{ post }} compact={{ true }} />
         {% else %}
-        <EmptyState message="No posts found for this tag." />
+        <EmptyState message={{ t.pages.blog.no_posts_for_tag }} />
         {% endfor %}
     </div>
 
-    {% set base = "/blog/tags/" ~ (selected_tag | urlencode) ~ "?" if selected_tag else "/blog/tags?" %}
+    {% set base = "/" ~ current_lang ~ "/blog/tags/" ~ (selected_tag | urlencode) ~ "?" if selected_tag else "/" ~ current_lang ~ "/blog/tags?" %}
     <Pagination page={{ page }} total_pages={{ total_pages }} base_url={{ base }} />
 </div>

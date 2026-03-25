@@ -25,6 +25,5 @@ htmlcov/
 # IDE and editor configs
 .vscode/
 .idea/
-.claude/
 
 node_modules/

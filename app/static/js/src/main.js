@@ -220,7 +220,7 @@ const initCanvasCursor = () => {
     const render = () => {
         if (!running) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.strokeStyle = "rgba(" + accentRgb + ", 0.25)";
+        ctx.strokeStyle = "rgb(" + accentRgb + " / 0.25)";
         ctx.lineWidth = 1;
         for (let i = 0; i < lines.length; i++) {
             lines[i].update();
